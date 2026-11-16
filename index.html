@@ -178,12 +178,12 @@ footer>*,#app>*,main>*{min-width:0}
 .form{padding:20px 24px;display:flex;flex-direction:column;gap:12px;max-width:440px}
 .mbox>.form,.mbox>#tBody{overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
 .mbox>.form{max-width:none}
-#chatPop{position:fixed;top:14px;right:14px;z-index:90;max-width:min(340px,calc(100vw - 28px));background:#1d1d1b;border:1px solid var(--tx);border-radius:10px;padding:10px 14px;box-shadow:0 8px 30px #000a;cursor:pointer;display:none}
+#chatPop{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;width:min(640px,calc(100vw - 28px));background:#1d1d1b;border:1px solid var(--tx);border-radius:14px;padding:18px 22px;font-size:20px;line-height:1.35;box-shadow:0 8px 30px #000a;cursor:pointer;display:none}
 #chatPop.on{display:block}
 #joinPop{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:91;background:#1d1d1b;border:1px solid var(--tx);border-radius:10px;padding:10px 16px;box-shadow:0 8px 30px #000a;display:none;font-size:14px;max-width:calc(100vw - 28px)}
 #joinPop.on{display:block}
-#chatPop b{display:block;font-size:12px;letter-spacing:.06em;margin-bottom:3px}
-#chatPop i{display:block;font-style:normal;font-size:12px;color:var(--mut);margin-top:4px}
+#chatPop b{display:block;font-size:14px;letter-spacing:.06em;margin-bottom:3px}
+#chatPop i{display:block;font-style:normal;font-size:13px;color:var(--mut);margin-top:4px}
 .form label{font-size:11px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;display:flex;flex-direction:column;gap:6px}
 .form input,.form select,.form textarea{background:#0e0e0d;border:1px solid var(--line);color:var(--tx);padding:10px;border-radius:6px;font:inherit;font-size:15px;letter-spacing:0;text-transform:none}
 .form .go{background:var(--tx);color:#000;padding:11px;border-radius:6px;font-weight:600}
@@ -405,11 +405,12 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <label>Texto<input id="fTxt" required placeholder="Ej: Entrada de luz"></label>
   <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fPend" style="width:auto;flex:none"> Pendiente de confirmar (aún no es definitivo)</label>
   <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fKey" style="width:auto;flex:none"> ★ Importante (destacado)</label>
-  <div class="row2" style="margin:0"><button type="button" class="btn" id="qNow">Añadir en tiempo actual</button><button type="button" class="btn" id="qSong">Añadir al inicio de la canción</button></div>
+  <div class="row2" id="fQuick" style="margin:0"><button type="button" class="btn" id="qNow">Añadir en tiempo actual</button><button type="button" class="btn" id="qSong">Añadir al inicio de la canción</button></div>
   <div class="seg" id="fMode"><button type="button" data-m="0" class="on">Tiempo total</button><button type="button" data-m="1" id="fModeSong">Tiempo de la canción</button></div>
   <label id="fSongL" style="display:none">Canción<select id="fSong"></select></label>
-  <label>Empieza en (mm:ss o h:mm:ss)<input id="fStart" class="mono" required></label>
-  <label>Acaba en (mm:ss o h:mm:ss)<input id="fEnd" class="mono"></label>
+  <label id="fStartL">Empieza en (mm:ss o h:mm:ss)<input id="fStart" class="mono" required></label>
+  <label id="fEndL">Acaba en (mm:ss o h:mm:ss)<input id="fEnd" class="mono"></label>
+  <label id="fDurL" style="display:none">Duración (mm:ss o segundos)<input id="fDurIn" class="mono" placeholder="Ej: 10"></label>
   <label>Encadenar tras otro cue (opcional)<select id="fCh"></select></label>
   <label id="fChOffL" style="display:none">Desfase tras ese cue (segundos)<input id="fChOff" type="number" step="0.5" value="0"></label>
   <input id="fWho" type="hidden"><datalist id="dlWho"></datalist>
@@ -534,7 +535,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.66'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.69'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -987,11 +988,11 @@ function openCue(c,m){
 $('add').onclick=()=>openCue(null);
 $('fAdd').onsubmit=e=>{e.preventDefault();
  let st=fGet('fStart');let en=$('fEnd').value.trim()?fGet('fEnd'):st;
- if(isNaN(st)||isNaN(en)){toast('Tiempo no válido (usa mm:ss)');return}
- if(en<st)en=st;
+ if(!$('fCh').value&&(isNaN(st)||isNaN(en))){toast('Tiempo no válido (usa mm:ss)');return}
+ if(!isNaN(en)&&!isNaN(st)&&en<st)en=st;
  if(ecue){const k=ecue.m.cues.indexOf(ecue.c);if(k>-1)ecue.m.cues.splice(k,1)}
  let chT=null;const chId=$('fCh').value;if(chId){for(const mo of S.moments){const f=mo.cues.find(x=>x.id===chId);if(f){chT={m:mo,c:f};break}}}
- const dd0=en-st;if(chT){st=Math.max(0,chT.m.start+chT.c.o+(chT.c.e||0)+(+$('fChOff').value||0));en=st+Math.max(0,dd0)}
+ let dd0=en-st;if(chT){{const dv=parseT($('fDurIn').value.trim());dd0=isNaN(dv)?(isNaN(dd0)?5:dd0):dv}st=Math.max(0,chT.m.start+chT.c.o+(chT.c.e||0)+(+$('fChOff').value||0));en=st+Math.max(0,dd0)}
  const mm=S.moments[blockIdxMom(st)];
  const old=ecue&&ecue.c,nc={o:Math.max(0,st-mm.start),e:en-st,d:$('fDep').value,t:$('fTxt').value.trim(),by:old?old.by:who(),at:old?old.at:Date.now()};
  {const ct=$('fCmT').value.trim();if(ct)ecCm.push({x:ct,by:who(),at:Date.now()})}
@@ -1662,6 +1663,9 @@ let beeped=new Set(),lastT=0;
 var CI={f:null,pre:new Set()};
 function isImgRef(r){return r&&r.f&&(/^image\//.test(r.type||'')||/\.(png|jpe?g|gif|webp|avif|bmp)$/i.test(r.name||r.f))}
 function showImg(u){if(!u)return;$('imgFull').querySelector('img').src=u;$('imgFull').classList.add('on')}
+document.addEventListener('click',e=>{const t=e.target;if(!t||t.closest('#imgFull'))return;
+ if(t.tagName==='IMG'&&t.dataset&&t.dataset.f&&t.src){e.preventDefault();e.stopPropagation();showImg(t.src);return}
+ const a=t.closest&&t.closest('a[data-open]');if(a&&/\.(png|jpe?g|gif|webp|avif|bmp)$/i.test(a.dataset.f||'')&&a.href&&!/#$/.test(a.href)){e.preventDefault();e.stopPropagation();showImg(a.href)}},true);
 $('cueImgX').onclick=()=>showImg($('cueImg').querySelector('img').src);
 $('imgFull').onclick=e=>{if(e.target.id==='imgFull'||e.target.id==='imgFullX')$('imgFull').classList.remove('on')};
 addEventListener('keydown',e=>{if(e.key==='Escape')$('imgFull').classList.remove('on')});
@@ -1710,8 +1714,12 @@ function chainsTo(c,target){let k=0,cur=target;while(cur&&cur.ch&&k++<20){if(cur
 function fillCh(c,m){const mi=c?S.moments.indexOf(m):curIdx(),opts=['<option value="">— Sin encadenar —</option>'];const seen=new Set();
  [mi-1,mi,mi+1].forEach(j=>{const mo=S.moments[j];if(!mo)return;mo.cues.forEach(x=>{if(x===c||!x.id||seen.has(x.id)||(c&&chainsTo(c,x)))return;seen.add(x.id);opts.push(`<option value="${x.id}">${fmt(mo.start+x.o)} · ${esc((D[x.d]||D.notas).n)} · ${esc(x.t.slice(0,40))}</option>`)})});
  if(c&&c.ch&&!seen.has(c.ch.id)){for(const mo of S.moments){const x=mo.cues.find(y=>y.id===c.ch.id);if(x)opts.push(`<option value="${x.id}">${fmt(mo.start+x.o)} · ${esc((D[x.d]||D.notas).n)} · ${esc(x.t.slice(0,40))}</option>`)}}
- $('fCh').innerHTML=opts.join('');$('fCh').value=c&&c.ch?c.ch.id:'';$('fChOff').value=c&&c.ch?c.ch.off||0:0;$('fChOffL').style.display=$('fCh').value?'':'none'}
-$('fCh').onchange=()=>{$('fChOffL').style.display=$('fCh').value?'':'none'};
+ $('fCh').innerHTML=opts.join('');$('fCh').value=c&&c.ch?c.ch.id:'';$('fChOff').value=c&&c.ch?c.ch.off||0:0;$('fDurIn').value='';updCh()}
+function updCh(){const on=!!$('fCh').value;$('fChOffL').style.display=on?'':'none';$('fDurL').style.display=on?'':'none';
+ ['fStartL','fEndL','fMode','fQuick'].forEach(i=>$(i).style.display=on?'none':'');if(on)$('fSongL').style.display='none';else if(typeof updMode==='function')try{updMode()}catch(e){}
+ $('fStart').required=!on;
+ if(on&&!$('fDurIn').value){const a=fGet('fStart'),b=$('fEnd').value.trim()?fGet('fEnd'):a;$('fDurIn').value=!isNaN(a)&&!isNaN(b)&&b>a?String(Math.round((b-a)*10)/10):'5'}}
+$('fCh').onchange=updCh;
 // adjuntos de cue
 function renderCF(){$('fFilesW').style.display=can('cues')?'':'none';$('fPickL').style.display=CLOUD?'inline-block':'none';
  $('fFiles').innerHTML=CLOUD?(ecRefs.length?ecRefs.map((r,k)=>`<span style="display:inline-flex;gap:6px;margin-right:12px"><a data-f="${esc(r.f)}" data-open="1" style="text-decoration:underline">${esc(r.name||'archivo')}</a><button type="button" data-cfd="${k}" title="Quitar">✕</button></span>`).join(''):'Sin archivos.'):'Los adjuntos necesitan la versión con nube (Supabase).';
@@ -1968,7 +1976,7 @@ function cloudExtras(){if(!SB||!ME||ME.guest)return;$('bOnline').style.display='
  chatLoad();try{SB.channel('chat-1').on('postgres_changes',{event:'INSERT',schema:'public',table:'chat'},p=>{CHAT.push(p.new);if(CHAT.length>300)CHAT.shift();
   if($('mChat').classList.contains('open')){chatRender()}else{updChatN();if(p.new.user_id!==ME.id)chatPop(p.new)}}).on('postgres_changes',{event:'DELETE',schema:'public',table:'chat'},p=>{const id=p.old&&p.old.id;if(id==null)return;CHAT=CHAT.filter(m=>m.id!==id);if($('mChat').classList.contains('open'))chatRender()}).subscribe()}catch(e){}}
 var chatPT=null,PRESOK=false,joinPT=null;
-document.addEventListener('pointerdown',()=>{const j=$('joinPop');if(j.classList.contains('on')){j.classList.remove('on');clearTimeout(joinPT)}},true);
+document.addEventListener('pointerdown',e=>{const c=$('chatPop');if(c.classList.contains('on')&&!c.contains(e.target)){c.classList.remove('on');clearTimeout(chatPT)}const j=$('joinPop');if(j.classList.contains('on')){j.classList.remove('on');clearTimeout(joinPT)}},true);
 function joinPop(n){const el=$('joinPop');el.innerHTML='🟢 <b>'+esc(n)+'</b> se ha conectado';el.classList.add('on');clearTimeout(joinPT);joinPT=setTimeout(()=>el.classList.remove('on'),10000)}
 function chatPop(m){const el=$('chatPop');el.innerHTML='<b>💬 '+esc(m.name)+'</b>'+esc(String(m.text).slice(0,180))+'<i>Toca para abrir el chat</i>';el.classList.add('on');clearTimeout(chatPT);chatPT=setTimeout(()=>el.classList.remove('on'),10000)}
 $('chatPop').onclick=()=>{$('chatPop').classList.remove('on');clearTimeout(chatPT);$('bChat').click()};
