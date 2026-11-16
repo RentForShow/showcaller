@@ -325,7 +325,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.3'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.5'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -551,12 +551,13 @@ setInterval(()=>{if(panelOpen)updPanel()},500);
 $('bLive').onclick=()=>toggleLive();
 
 /* ---- dropdowns ---- */
+function openDD(dd,btn){closeDD();dd.classList.add('open');const hr=document.querySelector('header').getBoundingClientRect(),br=btn.getBoundingClientRect(),w=dd.offsetWidth;let l=br.left-hr.left;const max=window.innerWidth-8-hr.left-w;if(l>max)l=max;if(l<8-hr.left)l=8-hr.left;dd.style.right='auto';dd.style.left=l+'px';dd.style.top=(br.bottom-hr.top+6)+'px'}
 function closeDD(){document.querySelectorAll('.dd').forEach(d=>d.classList.remove('open'))}
 document.addEventListener('click',e=>{if(!e.target.closest('.dd')&&!e.target.closest('#bDep')&&!e.target.closest('#bMenu')&&!e.target.closest('#bUser'))closeDD()});
 function buildDep(){$('ddDep').innerHTML=`<label class="all"><input type="checkbox" id="allDep" ${enabled.size===DEPTS.length?'checked':''}> Todos</label>`+DEPTS.map(d=>`<label><input type="checkbox" data-d="${d.id}" ${enabled.has(d.id)?'checked':''}><span class="dot" style="--c:${d.c}"></span>${d.n}</label>`).join('')}
 $('ddDep').addEventListener('change',e=>{if(e.target.id==='allDep'){enabled=e.target.checked?new Set(DEPTS.map(d=>d.id)):new Set()}else{e.target.checked?enabled.add(e.target.dataset.d):enabled.delete(e.target.dataset.d)}buildDep();updPanel(true)});
-$('bDep').onclick=()=>{const o=$('ddDep').classList.contains('open');closeDD();if(!o){buildDep();$('ddDep').classList.add('open')}};
-$('bMenu').onclick=()=>{const o=$('ddMenu').classList.contains('open');closeDD();if(!o)$('ddMenu').classList.add('open')};
+$('bDep').onclick=()=>{const o=$('ddDep').classList.contains('open');closeDD();if(!o){buildDep();openDD($('ddDep'),$('bDep'))}};
+$('bMenu').onclick=()=>{const o=$('ddMenu').classList.contains('open');closeDD();if(!o)openDD($('ddMenu'),$('bMenu'))};
 $('ddMenu').innerHTML=['Añadir momento aquí|moment','Temas y duraciones|times','Renombrar show y sala|name','Duración del show (sin audio)|dur','Exportar guion (copiar JSON)|exp','Importar guion (archivo JSON)|imp','Rellenar con eventos de prueba|fake','Borrar eventos de prueba|unfake','Restaurar setlist inicial|reset'].map(s=>{const[a,b]=s.split('|');return `<button class="it" data-a="${b}">${a}</button>`}).join('');
 $('ddMenu').addEventListener('click',e=>{const a=e.target.dataset.a;if(!a)return;closeDD();
  if(['name','dur','exp','imp','reset','fake','unfake'].includes(a)&&(!ME||ME.role!=='admin')){toast('Solo el administrador puede hacerlo');return}
@@ -655,6 +656,38 @@ function updLookChip(m){
  if(L){c.style.display='';c.innerHTML='LOOK · '+L.map(h=>`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${h};margin:0 4px 0 6px;vertical-align:middle"></span>${esc(lkName(h))}`).join('')}
  else if(ME&&ME.role==='admin'){c.style.display='';c.textContent='+ Look'}else c.style.display='none';
 }
+
+const fsize=b=>b>=1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+function fileKind(r){const t=(r.type||'').toLowerCase(),n=(r.name||'').toLowerCase();
+ if(t.startsWith('image/')||/\.(png|jpe?g|gif|webp|heic|avif)$/.test(n))return 'img';
+ if(t.startsWith('video/')||/\.(mp4|mov|m4v|webm)$/.test(n))return 'video';
+ if(t.startsWith('audio/')||/\.(mp3|wav|m4a|aac|ogg|flac|aiff?)$/.test(n))return 'audio';
+ return 'file'}
+const URLC={};
+async function fileUrl(path){const c=URLC[path];if(c&&c.t>Date.now())return c.u;
+ const {data,error}=await SB.storage.from('files').createSignedUrl(path,3600);if(error||!data)return null;
+ URLC[path]={u:data.signedUrl,t:Date.now()+3300000};return data.signedUrl}
+async function hydrateRefs(){
+ if(!CLOUD||!SB)return;
+ for(const el of $('mmBody').querySelectorAll('[data-f]')){const u=await fileUrl(el.dataset.f);if(!u){el.alt='No disponible';continue}
+  if(el.dataset.open){el.href=u;el.target='_blank';el.rel='noopener noreferrer'}else el.src=u}
+}
+async function uploadFiles(files){
+ const m=S.moments[mmI];if(!can('notes')||!CLOUD||!SB)return;m.refs=m.refs||[];let ok=0;
+ for(const f of files){
+  if(f.size>52428800){toast(f.name+' pesa más de 50 MB');continue}
+  toast('Subiendo '+f.name+'…');
+  const ext=((f.name.match(/\.[A-Za-z0-9]{1,8}$/)||[''])[0]).toLowerCase(),path='t'+mmI+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+ext;
+  const {error}=await SB.storage.from('files').upload(path,f,{contentType:f.type||undefined});
+  if(error){toast('No se pudo subir '+f.name+': '+error.message);continue}
+  m.refs.push({f:path,name:f.name,type:f.type,size:f.size,by:who(),at:Date.now()});ok++}
+ if(ok){dirty();buildMM();toast(ok+' archivo'+(ok>1?'s':'')+' subido'+(ok>1?'s':''))}
+}
+$('mmBody').addEventListener('change',e=>{if(e.target.id==='fPick'&&e.target.files.length){uploadFiles([...e.target.files]);e.target.value=''}});
+$('mmBody').addEventListener('dragover',e=>{if($('dz')){e.preventDefault();$('dz').style.borderColor='var(--tx)'}});
+$('mmBody').addEventListener('dragleave',()=>{if($('dz'))$('dz').style.borderColor=''});
+$('mmBody').addEventListener('drop',e=>{if(!$('dz'))return;e.preventDefault();$('dz').style.borderColor='';if(e.dataTransfer.files.length)uploadFiles([...e.dataTransfer.files])});
+$('mMoment').addEventListener('paste',e=>{if(!$('dz'))return;const fs=[...(e.clipboardData&&e.clipboardData.files||[])];if(fs.length){e.preventDefault();uploadFiles(fs)}});
 $('lookChip').onclick=()=>openMM(curIdx());
 $('mname').style.cursor='pointer';$('mname').onclick=()=>openMM(curIdx());
 function openMM(i){mmI=i;buildMM();$('mMoment').classList.add('open')}
@@ -668,17 +701,28 @@ function buildMM(){
  h+=`<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">${m.look.c.map((hx,k)=>`<span class="chip" style="color:var(--tx);display:inline-flex;gap:8px;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:${hx};border:1px solid #fff4"></span>${esc(lkName(hx))}${adm?` <button data-mm="lkdel" data-k="${k}" title="Quitar" style="padding:0 2px">✕</button>`:''}</span>`).join('')||(adm?'':'<span class="hint">Sin look definido todavía.</span>')}${adm?`<select class="ti" id="lkAdd"><option value="">+ Añadir color</option>${LOOKC.map(q=>`<option value="${q[1]}">${q[0]}</option>`).join('')}</select>`:''}</div>`;
  h+=`<textarea class="ti" id="lkNote" rows="2" ${ro} placeholder="${adm?'Nota de look (p. ej. cálido, ámbar y blanco)':''}" style="width:100%;margin-top:12px;resize:vertical">${esc(m.look.n||'')}</textarea>`;
  h+=sec('NOTAS')+`<textarea class="ti" id="mmNote" rows="3" ${cn?'':'readonly'} placeholder="${cn?'Notas del tema':''}" style="width:100%;resize:vertical">${esc(m.note||'')}</textarea>`;
- h+=sec('REFERENCIAS')+(m.refs.length?m.refs.map((r,k)=>`<div class="trow" style="padding:6px 0;border:0"><a href="${esc(r.u)}" target="_blank" rel="noopener noreferrer" style="color:var(--tx);flex:1;word-break:break-all">${esc(r.t||r.u)}</a>${cn?`<button class="btn sm" data-mm="rdel" data-k="${k}">✕</button>`:''}</div>`).join(''):'<div class="hint" style="margin:0 0 8px">Sin referencias.</div>');
- if(cn)h+=`<div style="display:flex;gap:8px;margin-top:8px"><input class="ti" id="rU" placeholder="Pega un enlace (https://…)" style="flex:1"><button class="btn sm" data-mm="radd">Añadir enlace</button></div>`;
+ h+=sec('REFERENCIAS')+(m.refs.length?m.refs.map((r,k)=>{
+  const kind=r.f?fileKind(r):'link',cap=`<div class="hint" style="margin:4px 0 0">${esc(r.name||r.t||r.u||'')}${r.size?' · '+fsize(r.size):''}${r.by?' · '+esc(r.by):''}${cn?` <button data-mm="rdel" data-k="${k}" style="margin-left:8px" title="Quitar">✕</button>`:''}</div>`;
+  let body;
+  if(!r.f)body=`<a href="${esc(r.u)}" target="_blank" rel="noopener noreferrer" style="color:var(--tx);word-break:break-all">${esc(r.t||r.u)}</a>`;
+  else if(kind==='img')body=`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" style="max-width:100%;border-radius:6px;background:#0e0e0d;min-height:60px">`;
+  else if(kind==='video')body=`<video data-f="${esc(r.f)}" controls preload="metadata" style="max-width:100%;border-radius:6px;background:#000"></video>`;
+  else if(kind==='audio')body=`<audio data-f="${esc(r.f)}" controls preload="none" style="width:100%"></audio>`;
+  else body=`<a data-f="${esc(r.f)}" data-open="1" href="#" style="color:var(--tx)">📄 ${esc(r.name||'Archivo')}</a>`;
+  return `<div style="padding:8px 0;border-top:1px solid var(--line)">${body}${r.f&&kind==='link'?'':cap}</div>`}).join(''):'<div class="hint" style="margin:0 0 8px">Sin referencias.</div>');
+ if(cn){
+  h+=CLOUD?`<div id="dz" style="border:1px dashed var(--line);border-radius:10px;padding:16px;margin-top:10px;display:flex;gap:12px;align-items:center;justify-content:space-between"><span class="hint" style="margin:0">Arrastra imágenes, PDF, vídeos o audios, o pega con Cmd+V. Máx. 50 MB por archivo.</span><button class="btn sm" data-mm="pick">Elegir…</button></div><input type="file" id="fPick" multiple style="display:none">`:`<div class="hint" style="margin-top:10px">Subir archivos solo funciona con la web conectada a Supabase.</div>`;
+  h+=`<div style="display:flex;gap:8px;margin-top:10px"><input class="ti" id="rU" placeholder="O pega un enlace (https://…)" style="flex:1"><button class="btn sm" data-mm="radd">Añadir enlace</button></div>`}
  h+=sec('COMENTARIOS')+(m.cm.length?m.cm.map((c,k)=>`<div style="padding:8px 0;border-top:1px solid var(--line)"><div class="hint" style="margin:0 0 3px">${esc(c.by||'')} · ${fdt(c.at)}${(adm||(ME&&c.by===ME.name))&&cn?` <button data-mm="cdel" data-k="${k}" style="margin-left:8px">✕</button>`:''}</div><div>${esc(c.x)}</div></div>`).join(''):'<div class="hint" style="margin:0 0 8px">Sin comentarios.</div>');
  if(cn)h+=`<div style="display:flex;gap:8px;margin-top:10px"><input class="ti" id="cmT" placeholder="Escribe un comentario…" style="flex:1"><button class="btn sm" data-mm="cadd">Enviar</button></div>`;
- $('mmBody').innerHTML=h;
+ $('mmBody').innerHTML=h;hydrateRefs();
 }
 $('mmBody').addEventListener('click',e=>{
  const b=e.target.closest('[data-mm]');if(!b)return;const m=S.moments[mmI],a=b.dataset.mm,k=+b.dataset.k,adm=ME&&ME.role==='admin';
  if(a==='go'){setT(m.start);$('mMoment').classList.remove('open');return}
  if(a==='lkdel'&&adm){m.look.c.splice(k,1);dirty();buildMM()}
- else if(a==='rdel'&&can('notes')){m.refs.splice(k,1);dirty();buildMM()}
+ else if(a==='rdel'&&can('notes')){const r=m.refs.splice(k,1)[0];if(r&&r.f&&SB)SB.storage.from('files').remove([r.f]);dirty();buildMM()}
+ else if(a==='pick'){$('fPick').click()}
  else if(a==='radd'&&can('notes')){let u=$('rU').value.trim();if(!u)return;if(!/^https?:\/\//i.test(u))u='https://'+u;m.refs.push({u,by:who(),at:Date.now()});dirty();buildMM()}
  else if(a==='cdel'&&can('notes')){m.cm.splice(k,1);dirty();buildMM()}
  else if(a==='cadd'&&can('notes')){const x=$('cmT').value.trim();if(!x)return;m.cm.push({x,by:who(),at:Date.now()});dirty();buildMM()}
@@ -1129,7 +1173,7 @@ $('fAuth').onsubmit=async e=>{
   }
  }catch(x){$('aErr').textContent='No se pudo: '+x.message+(window.crypto&&crypto.subtle?'':' (este navegador solo cifra contraseñas en páginas https).')}
 };
-$('bUser').onclick=()=>{const o=$('ddUser').classList.contains('open');closeDD();if(!o)$('ddUser').classList.add('open')};
+$('bUser').onclick=()=>{const o=$('ddUser').classList.contains('open');closeDD();if(!o)openDD($('ddUser'),$('bUser'))};
 $('ddUser').addEventListener('click',e=>{const a=e.target.dataset.u;if(!a)return;closeDD();
  if(a==='pw'&&CLOUD)editor('Mi cuenta','Nueva contraseña','',async v=>{if(v.length<6){toast('Mínimo 6 caracteres');return}const r=await SB.auth.updateUser({password:v});toast(r.error?'No se pudo: '+r.error.message:'Contraseña cambiada')});
  if(a==='out'){if(CLOUD&&SB)SB.auth.signOut();sess.clear();ME=null;pause();document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));showAuth()}
