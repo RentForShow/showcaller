@@ -541,7 +541,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.79'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.80'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -664,7 +664,7 @@ function frame(now){
   {const w0=t-10,l_=Math.max(0,(at-w0)/60*100),r2=Math.min(100,(en-w0)/60*100),gb=el.querySelector('.gb');gb.style.left=l_+'%';gb.style.width=Math.max(0,r2-l_)+'%';gb.style.visibility=(at-w0>60||en<w0)?'hidden':'visible'}
   el.querySelector('.pb i').style.width=(fin?100:act?(en>at?(t-at)/(en-at)*100:100):0)+'%'}
  {const box=$('cues'),arr=[];for(const el of box.children){if(!el.dataset.k)continue;const cm_=S.moments[+el.dataset.m],c=cm_.cues[+el.dataset.k],at=cm_.start+c.o,en=at+(c.e||0),act=c.e>0?(t>=at&&t<en):(at<=t&&t-at<3),fin=at<=t&&!act;arr.push({el,g:act||(fin&&el._fs&&Date.now()-el._fs<3200)?0:fin?2:1,at})}
-  arr.sort((x,y)=>x.g-y.g||(x.g===0?y.at-x.at:x.at-y.at));
+  arr.sort((x,y)=>x.at-y.at||x.el.dataset.k-y.el.dataset.k);
   const cur=[...box.children].filter(e=>e.dataset.k);if(arr.some((x,k)=>x.el!==cur[k])){const cd=$('cuesDone');arr.forEach(x=>box.insertBefore(x.el,cd||null))}}
  {const cd=$('cuesDone');if(cd)cd.style.display=(nCards&&!nAct)?'block':'none'}
  // next cue
