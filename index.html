@@ -541,7 +541,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.80'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.81'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1088,7 +1088,7 @@ function buildMM(){
  h+=sec('INVITADO')+`<input class="ti" id="mmGuest" ${cn?'':'readonly'} placeholder="${cn?'Nombre del invitado (si lo hay)':''}" value="${esc(m.guest||'')}" style="width:100%">`;
  m.imgs=m.imgs||[];const cmo=can('mood');
  h+=sec('MOODBOARD DEL TEMA')+(m.imgs.length?`<div class="mimgs">${m.imgs.map((r,k)=>{const x=fileKind(r)==='img'?`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}">`:`<a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">📄 ${esc(r.name||'Archivo')}</a>`;return `<div class="mi">${x}${cmo?`<button data-mm="tmdel" data-k="${k}" title="Quitar">✕</button>`:''}</div>`}).join('')}</div>`:'<div class="hint" style="margin:0 0 8px">Sin imágenes de moodboard en este tema.</div>')+(cmo?(CLOUD?'<button class="btn sm" data-mm="tmup">＋ Fotos</button>':'<div class="hint">Subir fotos requiere la web conectada a Supabase.</div>'):'');
- {const tr=TRK[m.id];if(adm||tr)h+=sec('PISTA DE AUDIO')+(tr?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>🎵 ${esc(tr.name)}${tr.dur?' · '+fmt(tr.dur):''}</span>${adm?'<button class="btn sm" data-mm="trup">Cambiar</button><button class="btn sm" data-mm="trdel">Quitar</button>':''}</div>`:`<button class="btn sm" data-mm="trup">＋ Cargar pista</button>`)+(adm?'<div class="hint" style="margin-top:6px">Suena sola al entrar en este tema y se precarga el anterior. Se sube a la nube y todo el equipo la recibe sola.</div>':'')}
+ {const tr=TRK[m.id];if(adm||tr)h+=sec('PISTA DE AUDIO')+(tr?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>🎵 ${esc(tr.name)}${tr.dur?' · '+fmt(tr.dur):''}</span>${adm?`${tr.dur&&Math.abs(tr.dur-lenOf(mmI))>=1?`<button class="btn sm" data-mm="trfit" title="El tema dura ${fmt(lenOf(mmI))}">Ajustar tema a ${fmt(tr.dur)}</button>`:''}<button class="btn sm" data-mm="trup">Cambiar</button><button class="btn sm" data-mm="trdel">Quitar</button>`:''}</div>`:`<button class="btn sm" data-mm="trup">＋ Cargar pista</button>`)+(adm?'<div class="hint" style="margin-top:6px">Suena sola al entrar en este tema y se precarga el anterior. Se sube a la nube y todo el equipo la recibe sola.</div>':'')}
  h+=sec('NOTAS')+`<textarea class="ti" id="mmNote" rows="3" ${cn?'':'readonly'} placeholder="${cn?'Notas del tema':''}" style="width:100%;resize:vertical">${esc(m.note||'')}</textarea>`;
  h+=sec('REFERENCIAS')+(m.refs.length?m.refs.map((r,k)=>{
   const kind=r.f?fileKind(r):'link',cap=`<div class="hint" style="margin:4px 0 0">${esc(r.name||r.t||r.u||'')}${r.size?' · '+fsize(r.size):''}${r.by?' · '+esc(r.by):''}${cn?` <button data-mm="rdel" data-k="${k}" style="margin-left:8px" title="Quitar">✕</button>`:''}</div>`;
@@ -1111,6 +1111,7 @@ $('mmBody').addEventListener('click',e=>{
  if(a==='go'){setT(m.start);$('mMoment').classList.remove('open');return}
  if(a==='tmup'){$('tmPick').click();return}
  if((a==='trup'||a==='trdel')&&!adm){toast('Solo el administrador puede cargar audio');return}
+ if(a==='trfit'){const tr=TRK[m.id];if(!tr||!tr.dur)return;if(!can('times')){toast('Sin permiso');return}const v=Math.max(1,Math.round(tr.dur)),delta=v-lenOf(mmI);for(let j=mmI+1;j<S.moments.length;j++)S.moments[j].start+=delta;if(!audio)S.duration=Math.max(30,Math.round(S.duration+delta));dirty();buildMM();toast('Tema ajustado a '+fmt(v));return}
  if(a==='trup'){$('trPick').click();return}
  if(a==='trdel'){delTrack(m.id);buildMM();return}
  if(a==='tmdel'&&can('mood')){const r=m.imgs.splice(k,1)[0];if(r&&r.f&&SB)SB.storage.from('files').remove([r.f]);dirty();buildMM();return}
