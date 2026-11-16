@@ -544,7 +544,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.88'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.89'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -615,7 +615,7 @@ function momEnd(i){return i+1<S.moments.length?S.moments[i+1].start:dur()}
 /* ---- stage ---- */
 let shownIdx=-1,shownKey='';
 const isTr=m=>m.kind==='transicion';
-const noPk=m=>!isTr(m)&&!(typeof TRK!=='undefined'&&TRK[m.id])&&!m.trk;
+const noPk=m=>!isTr(m)&&!(typeof TRK!=='undefined'&&TRK[m.id])&&!m.trk&&!(m.reh&&m.reh.b>m.reh.a);
 const mTitle=m=>isTr(m)?m.name:m.num!==undefined?`${m.num}${m.sub?' '+m.sub+')':''} ${m.name}`:m.name;
 const NT={peticion:'PETICIÓN',nota:'NOTA',postshow:'POST-SHOW'};
 const fdt=ms=>ms?new Date(ms).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
