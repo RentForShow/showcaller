@@ -541,7 +541,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.84'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.86'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1646,14 +1646,15 @@ $('uList').addEventListener('click',e=>{
 function applyDepts(){S.depts=DEPTS.map(d=>({...d}));setDepts(S.depts);dirty();buildDepts()}
 function buildDepts(){
  $('dColor').innerHTML=PAL.map(([n,v])=>`<option value="${v}">${n}</option>`).join('');
- $('dList').innerHTML=DEPTS.map((d,i)=>`<div class="trow" style="align-items:center;gap:8px;flex-wrap:wrap"><input type="color" data-dcc="${i}" value="${/^#[0-9a-f]{6}$/i.test(d.c)?d.c:'#9a9a9a'}" title="Elegir color" style="width:34px;height:34px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;flex:none"><input class="ti" style="flex:1;min-width:120px" data-dn="${i}" value="${esc(d.n)}"><span class="hint" style="margin:0;min-width:96px">${esc(nearName(d.c))}</span><button class="btn sm" data-dd="${i}">Quitar</button></div>`).join('');
+ $('dList').innerHTML=DEPTS.map((d,i)=>`<div class="trow" style="align-items:center;gap:8px;flex-wrap:wrap"><input type="color" data-dcc="${i}" value="${/^#[0-9a-f]{6}$/i.test(d.c)?d.c:'#9a9a9a'}" title="Elegir color" style="width:34px;height:34px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;flex:none"><input class="ti" style="flex:1;min-width:120px" data-dn="${i}" value="${esc(d.n)}"><input class="ti mono" style="width:64px" data-ds="${i}" maxlength="6" value="${esc(d.s||d.n.slice(0,4))}" title="Abreviatura que se ve en el timeline"><span class="hint" style="margin:0;min-width:96px">${esc(nearName(d.c))}</span><button class="btn sm" data-dd="${i}">Quitar</button></div>`).join('');
 }
 
 $('fDept').onsubmit=e=>{e.preventDefault();const n=$('dName').value.trim();if(!n)return;
  let id=n.toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g,'')||'dep';while(Dm[id])id+=Math.floor(Math.random()*10);
  DEPTS.push({id,n:n.toUpperCase(),c:$('dColor').value,s:n.slice(0,4).toUpperCase()});enabled.add(id);$('fDept').reset();applyDepts();toast('Departamento creado: '+n.toUpperCase())};
 $('dList').addEventListener('change',e=>{const d=e.target.dataset;
- if(d.dn!==undefined){const v=e.target.value.trim();if(v){DEPTS[+d.dn].n=v.toUpperCase();DEPTS[+d.dn].s=v.slice(0,4).toUpperCase();applyDepts()}}
+ if(d.dn!==undefined){const v=e.target.value.trim();if(v){DEPTS[+d.dn].n=v.toUpperCase();if(!DEPTS[+d.dn].sx)DEPTS[+d.dn].s=v.slice(0,4).toUpperCase();applyDepts()}}
+ else if(d.ds!==undefined){const v=e.target.value.trim().toUpperCase().slice(0,6),x=DEPTS[+d.ds];if(v){x.s=v;x.sx=1}else{delete x.sx;x.s=x.n.slice(0,4)}applyDepts()}
  else if(d.dcc!==undefined){DEPTS[+d.dcc].c=e.target.value;applyDepts()}});
 $('dList').addEventListener('click',e=>{const b=e.target.closest('[data-dd]');if(!b)return;const i=+b.dataset.dd,dp=DEPTS[i];
  if(DEPTS.length<=1){toast('Debe quedar al menos un departamento');return}
@@ -2129,6 +2130,14 @@ $('uList').addEventListener('click',e=>{if(!CLOUD)return;const b=e.target.closes
  cloudUpd(i,{status:'banned'});toast(x.name+' ya no tiene acceso')});
 
 loadDepts();applyExp();buildCues(0);updPanel(true);requestAnimationFrame(frame);
+
+/* recordar la última posición */
+(function(){let done=false,sv=0;const K='showcaller.pos.'+KEY;
+ const wr=()=>{if(done&&t!==sv){sv=t;try{localStorage.setItem(K,String(Math.round(t*10)/10))}catch(e){}}};
+ setInterval(()=>{if(!done){if(!ME||!S||!S.moments||!S.moments.length)return;done=true;let v=0;try{v=parseFloat(localStorage.getItem(K))||0}catch(e){}
+  if(v>0&&v<dur()&&!playing){t=v;sv=v;try{if(audio)audio.currentTime=t;if(ltcEl)ltcEl.currentTime=t}catch(e){}toast('Continúas en '+fmt(t))}return}wr()},1000);
+ addEventListener('pagehide',wr);document.addEventListener('visibilitychange',()=>{if(document.hidden)wr()});
+})();
 </script>
 </body>
 </html>
