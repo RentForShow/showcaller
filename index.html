@@ -31,7 +31,7 @@ main{display:grid;grid-template-columns:1fr;position:relative;overflow:hidden;mi
 main.withpanel{grid-template-columns:1fr minmax(300px,38%)}
 #stage{padding:22px 22px 20px;overflow:hidden;display:flex;flex-direction:column}
 #stage>*{flex:none}
-#stage>#cues{flex:1 1 auto;min-height:0;overflow-y:auto}
+#stage>#cues{flex:0 1 auto;min-height:0;overflow-y:auto}
 .eyebrow{font-size:11px;letter-spacing:.18em;color:var(--mut);text-transform:uppercase}
 h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:0;line-height:1.1}
 .shead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:6px 0 10px}
@@ -207,6 +207,7 @@ footer>*,#app>*,main>*{min-width:0}
 #cues.cl1 .cue>.dep,#cues.cl2 .cue>.dep{grid-column:1;grid-row:1;margin:0}
 #cues.cl1 .cue>.row,#cues.cl2 .cue>.row{grid-column:2;grid-row:1}
 #cues.cl1 .cue>.pb,#cues.cl2 .cue>.pb{grid-column:1/-1;margin-top:3px}
+#cues.cl1 .cue .cf,#cues.cl2 .cue .cf{display:none}
 #cues.cl1 .cue{padding:6px 0 8px 20px;margin-bottom:6px}
 #cues.cl1 .cue.act .txt{font-size:clamp(18px,1.9vw,22px)}
 #cues.cl1 .cue .cd{font-size:14px}
@@ -554,7 +555,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.76'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.77'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
