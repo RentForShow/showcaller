@@ -144,6 +144,7 @@ footer>*,#app>*,main>*{min-width:0}
 .sub{display:flex;gap:10px;font-size:12px;color:var(--mut);flex-wrap:wrap;align-items:center}
 .sub #zoomSeg button{padding:3px 8px!important}
 .sub button{display:flex;gap:6px;align-items:center}
+#expand{font-size:26px;line-height:1;padding:0 6px}
 .sub button:hover{color:var(--tx)}
 #tl{width:100%;display:block;touch-action:none;cursor:pointer}
 #mm{grid-column:1/-1;width:100%;display:block;touch-action:none;cursor:pointer}
@@ -366,7 +367,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
     <button class="pb3" id="addNote" title="Nota o petición">✎ Nota</button>
    </div>
    <div class="clock mono"><b id="ct">0:00</b> <span>/ <span id="dur">0:00</span></span></div>
-   <div class="sub"><button id="expand" title="Expandir el timeline">⤢</button><button id="rate" title="Velocidad">⏱ x1</button><span class="seg" id="zoomSeg" style="display:inline-flex;font-size:12px"><button type="button" data-z="2" style="padding:4px 10px">Tema</button><button type="button" data-z="1" style="padding:4px 10px">Bloque</button><button type="button" data-z="0" class="on" style="padding:4px 10px">Show</button></span><button id="bAudio">🎚 Audio y salidas</button><button id="bUndo" disabled style="opacity:.4" title="Deshacer">↶</button><button id="bSet" style="display:none">⚙</button><button id="bTrack" title="Cargar audio">🎵</button></div>
+   <div class="sub"><button id="expand" title="Ampliar el timeline">⤢</button><button id="rate" title="Velocidad">⏱ x1</button><span class="seg" id="zoomSeg" style="display:inline-flex;font-size:12px"><button type="button" data-z="2" style="padding:4px 10px">Tema</button><button type="button" data-z="1" style="padding:4px 10px">Bloque</button><button type="button" data-z="0" class="on" style="padding:4px 10px">Show</button></span><button id="bAudio">🎚 Audio y salidas</button><button id="bSet" style="display:none">⚙</button><button id="bTrack" title="Cargar audio">🎵</button></div>
   </div>
   <div style="min-width:0"><div id="selBar" class="mono"></div><div id="tlInfo" class="mono"></div><canvas id="tl"></canvas></div>
   <canvas id="mm"></canvas>
@@ -518,7 +519,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.59'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.60'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1194,7 +1195,7 @@ const RATES=[1,2,4,8];$('rate').onclick=()=>{rate=RATES[(RATES.indexOf(rate)+1)%
 addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();playing?pause():play()}if(e.code==='ArrowRight')$('nxt').click();if(e.code==='ArrowLeft')$('prev').click()});
 /* audio */
 $('bAudio').onclick=()=>{buildAudioUI();$('mAudio').classList.add('open')};
-$('bUndo').onclick=undo;
+
 addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){e.preventDefault();undo()}});
 $('bTrack').onclick=()=>{if(!ME||ME.role!=='admin'){toast('Solo el administrador puede cargar audio');return}if(audio&&confirm('Ya hay un audio cargado ('+audioName+'). ¿Cambiarlo por otro?')||!audio)$('fileAudio').click()};
 $('fileAudio').onchange=async e=>{const f=e.target.files[0];if(!f)return;pause();
