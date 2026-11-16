@@ -26,9 +26,12 @@ main{display:grid;grid-template-columns:1fr;position:relative;overflow:hidden;mi
 main.withpanel{grid-template-columns:1fr minmax(300px,38%)}
 #stage{padding:22px 22px 80px;overflow-y:auto}
 .eyebrow{font-size:11px;letter-spacing:.18em;color:var(--mut);text-transform:uppercase}
-h1{font-size:clamp(34px,6vw,54px);font-weight:500;letter-spacing:-1.5px;margin:6px 0 20px;line-height:1.05}
-.tc-label{display:flex;gap:8px;align-items:center;margin-bottom:6px}
-.tc{font-size:clamp(56px,13vw,84px);font-weight:300;letter-spacing:-3px;line-height:1}
+h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:0;line-height:1.1}
+.shead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:6px 0 10px}
+.stitle{display:flex;align-items:baseline;gap:4px 14px;flex-wrap:wrap;min-width:0;flex:1}
+.tcbox{flex:none;text-align:right}
+.tc-label{display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-bottom:2px;font-size:9px}
+.tc{font-size:clamp(34px,7vw,46px);font-weight:300;letter-spacing:-1.5px;line-height:1}
 .meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--mut);margin:10px 0 10px}
 .meta b{color:var(--tx);font-weight:500}
 .bar{height:2px;background:var(--line);position:relative;margin:6px 0 12px}
@@ -48,7 +51,12 @@ h1{font-size:clamp(34px,6vw,54px);font-weight:500;letter-spacing:-1.5px;margin:6
 .cue.act .txt{font-weight:700}
 .cue.act .cd{color:var(--tx);font-weight:700}
 .cue.act .pb{height:3px}
-.cue:not(.act):not(.done) .txt{color:#c9c6be}
+.cue:not(.act):not(.done){padding:3px 0 8px 22px;margin-bottom:6px}
+.cue:not(.act):not(.done) .dep{font-size:10px;margin-bottom:4px}
+.cue:not(.act):not(.done) .txt{font-size:clamp(15px,2.6vw,18px);color:#a8a59d}
+.cue:not(.act):not(.done) .cd{font-size:13px}
+.cue:not(.act):not(.done) .pb,.cue:not(.act):not(.done) .by{display:none}
+.cue.hot:not(.act) .txt{color:#d8d5cd}
 #cuesDone{display:none}
 .cue.hot .cd{color:var(--tx);font-weight:700}
 .empty{color:var(--dim);padding:24px 0}
@@ -199,9 +207,8 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <section id="stage">
    <div class="eyebrow" id="liveBanner" style="display:none;margin-bottom:10px;font-size:12px"></div>
    <div class="eyebrow" id="eyebrow"></div>
-   <div style="display:flex;align-items:baseline;gap:6px 18px;flex-wrap:wrap"><h1 id="mname"></h1><button class="chip" id="lookChip" style="display:none"></button></div>
-   <div class="tc-label eyebrow">■ Timecode</div>
-   <div class="tc mono" id="tc">00:00</div>
+   <div class="shead"><div class="stitle"><h1 id="mname"></h1><button class="chip" id="lookChip" style="display:none"></button></div>
+   <div class="tcbox"><div class="tc-label eyebrow">■ Timecode</div><div class="tc mono" id="tc">00:00</div></div></div>
    <div class="meta mono"><span><span id="mlab">MOMENTO</span> <b id="mrem">-0:00</b></span><span>show <b id="shw">0:00:00</b></span><span id="audioInfo"></span><span id="chap" style="color:var(--dim)"></span></div>
    <div class="bar"><i id="mbar" style="width:0"></i><div id="mticks"></div></div>
    <div class="next mono" id="next"></div>
@@ -334,7 +341,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.08'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.09'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -457,11 +464,11 @@ function modeView(){const D_=dur();if(!zmode)return{v0:0,v1:D_};const ci=curIdx(
  if(zmode===2)return{v0:m.start,v1:Math.max(m.start+1,momEnd(ci))};
  const bi=Math.max(0,blockOf(m.start)),b0=S.blocks[bi]?S.blocks[bi].start:0,b1=bi+1<S.blocks.length?S.blocks[bi+1].start:D_;return{v0:b0,v1:Math.max(b0+1,b1)}}
 function view(){if(!zcust)return modeView();const D_=dur(),sp=zcust.v1-zcust.v0;
- if(!drag&&!frozen&&(t<zcust.v0||t>zcust.v1)){zcust.v0=Math.max(0,Math.min(D_-sp,t-sp*.35));zcust.v1=zcust.v0+sp}
+ if(playing&&!drag&&!frozen&&Date.now()-(zcust.ts||0)>6000&&(t<zcust.v0||t>zcust.v1)){zcust.v0=Math.max(0,Math.min(D_-sp,t-sp*.35));zcust.v1=zcust.v0+sp}
  return{v0:zcust.v0,v1:zcust.v1}}
 function zoomAt(frac,factor){const D_=dur(),v=view(),sp=v.v1-v.v0,tc=v.v0+frac*sp,n=Math.max(4,Math.min(D_,sp*factor));
- if(n>=D_*0.995){zcust=null;zmode=0;setSeg();return}const v0=Math.max(0,Math.min(D_-n,tc-frac*n));zcust={v0,v1:v0+n};setSeg()}
-function panBy(dx){const v=view(),sp=v.v1-v.v0,D_=dur(),v0=Math.max(0,Math.min(D_-sp,v.v0+dx/W*sp));zcust={v0,v1:v0+sp};setSeg()}
+ if(n>=D_*0.995){zcust=null;zmode=0;setSeg();return}const v0=Math.max(0,Math.min(D_-n,tc-frac*n));zcust={v0,v1:v0+n,ts:Date.now()};setSeg()}
+function panBy(dx){const v=view(),sp=v.v1-v.v0,D_=dur(),v0=Math.max(0,Math.min(D_-sp,v.v0+dx/W*sp));zcust={v0,v1:v0+sp,ts:Date.now()};setSeg()}
 function setSeg(){document.querySelectorAll('#zoomSeg button').forEach(x=>x.classList.toggle('on',!zcust&&+x.dataset.z===zmode))}
 $('zoomSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;zmode=+b.dataset.z;zcust=null;setSeg()});
 cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect(),frac=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
