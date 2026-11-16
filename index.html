@@ -229,8 +229,15 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  header{padding:8px 10px;gap:8px}
  .logo{font-size:14px;padding:4px 8px}
  #ver{display:none!important}
- .nav button{padding:9px 10px;font-size:15px}
- .nav button.keep span{display:none}
+ .nav{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;gap:2px;min-width:0}
+ .nav::-webkit-scrollbar{display:none}
+ .nav>*{flex:none}
+ .nav button{padding:9px 9px;font-size:14px}
+ .nav button span{display:inline}
+ #bMood,#bLive,#bFs,#bNight{display:none!important}
+ #bMenu{position:sticky;right:0;background:var(--bg);box-shadow:-8px 0 8px var(--bg)}
+ header{flex-wrap:nowrap}
+ .logo{flex:none}
  #stage{padding:14px 14px 40px}
  .shead{gap:8px}
  .stitle h1{font-size:clamp(20px,6.4vw,30px)}
@@ -238,19 +245,19 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  .meta{font-size:12px;gap:12px;flex-wrap:wrap}
  .cue{padding:8px 0 12px 14px;margin-bottom:12px}
  .cue .row{flex-direction:column;gap:4px;align-items:flex-start}
- .cue .txt{font-size:clamp(20px,6vw,26px);line-height:1.2}
+ .cue .txt{font-size:clamp(18px,5.4vw,24px);line-height:1.2}
  .cue .cd{font-size:15px;white-space:normal}
  .cue .ed,.cue .cf{padding:8px 10px;font-size:15px}
  .cue .dep{flex-wrap:wrap;row-gap:4px}
  footer{padding:8px 10px calc(8px + env(safe-area-inset-bottom));gap:6px}
  .ctl{gap:6px}
- .btns{flex-wrap:nowrap;gap:6px}
+ .btns{flex-wrap:nowrap;gap:4px}
  .btns button{flex:none}
  .btns .clock{margin-left:auto;font-size:12px}
  .btns .clock span{display:none}
- .pb1{width:52px;height:52px}
- .pb2{min-width:38px;height:44px}
- .pb3{width:auto;height:40px;padding:0 12px}
+ .pb1{width:44px;height:44px}
+ .pb2{min-width:30px;width:30px;height:40px}
+ .pb3{width:auto;height:36px;padding:0 10px;font-size:13px}
  #go{height:44px;min-width:56px;border:1px solid var(--line);border-radius:10px}
  .sub{overflow-x:auto;white-space:nowrap;gap:12px;padding-bottom:2px;scrollbar-width:none}
  .sub::-webkit-scrollbar{display:none}
@@ -491,7 +498,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.50'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.51'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
