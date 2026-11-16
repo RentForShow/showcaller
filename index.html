@@ -132,7 +132,7 @@ footer>*,#app>*,main>*{min-width:0}
 #app{max-width:100vw}
 .pb1{width:46px;height:46px;border-radius:50%;background:var(--tx);color:#000;display:grid;place-items:center;font-size:18px}
 .pb2{width:34px;height:34px;color:var(--mut);display:grid;place-items:center;font-size:16px}
-.pb3{width:40px;height:40px;border-radius:50%;background:#2a2a28;display:grid;place-items:center;font-size:20px}
+.pb3{width:auto;min-width:0;height:36px;padding:0 14px;border-radius:18px;background:#2a2a28;display:grid;place-items:center;font-size:14px;font-weight:600;white-space:nowrap}
 .clock{font-size:17px;white-space:nowrap}
 .clock span{color:var(--dim)}
 .sub{display:flex;gap:10px;font-size:12px;color:var(--mut);flex-wrap:wrap;align-items:center}
@@ -251,7 +251,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  .btns .clock span{display:none}
  .pb1{width:52px;height:52px}
  .pb2{min-width:38px;height:44px}
- .pb3{width:44px;height:44px}
+ .pb3{width:auto;height:40px;padding:0 12px}
  #go{height:44px;min-width:56px;border:1px solid var(--line);border-radius:10px}
  .sub{overflow-x:auto;white-space:nowrap;gap:12px;padding-bottom:2px;scrollbar-width:none}
  .sub::-webkit-scrollbar{display:none}
@@ -272,7 +272,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== tablet (horizontal y vertical) ===== */
 @media(min-width:701px) and (max-width:1400px) and (pointer:coarse){
  .nav button{padding:10px 12px;font-size:14px}
- .pb1{width:44px;height:44px}.pb2,.pb3{min-width:36px;height:36px;width:36px}
+ .pb1{width:44px;height:44px}.pb2{min-width:36px;height:36px;width:36px}.pb3{height:38px;width:auto;padding:0 14px}
  #go{height:48px;min-width:60px;border:1px solid var(--line);border-radius:10px}
  .cue .txt{font-size:clamp(22px,2.6vw,32px);line-height:1.2}
  .cue .ed,.cue .cf{padding:10px 14px;font-size:15px}
@@ -337,8 +337,8 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
     <button class="pb1" id="play">▶</button>
     <button class="pb2" id="prev">⏮</button>
     <button class="pb2" id="nxt">⏭</button>
-        <button class="pb3" id="add" title="Nuevo cue">+</button>
-    <button class="pb3" id="addNote" title="Nota o petición" style="font-size:16px">✎</button>
+        <button class="pb3" id="add" title="Nuevo cue">+ Cue</button>
+    <button class="pb3" id="addNote" title="Nota o petición">✎ Nota</button>
     <div class="clock mono"><b id="ct">0:00</b> <span>/ <span id="dur">0:00</span></span></div>
    </div>
    <div class="sub"><button id="expand" title="Expandir el timeline">⤢</button><button id="rate" title="Velocidad">⏱ x1</button><span class="seg" id="zoomSeg" style="display:inline-flex;font-size:12px"><button type="button" data-z="2" style="padding:4px 10px">Tema</button><button type="button" data-z="1" style="padding:4px 10px">Bloque</button><button type="button" data-z="0" class="on" style="padding:4px 10px">Show</button></span><button id="bAudio">🎚 Audio y salidas</button><button id="bUndo" disabled style="opacity:.4" title="Deshacer">↶</button><button id="bSet" style="display:none">⚙</button><button id="bTrack" title="Cargar audio">🎵</button></div>
@@ -362,7 +362,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <label>Departamento<select id="fDep"></select></label>
   <label>Texto<input id="fTxt" required placeholder="Ej: Entrada de luz"></label>
   <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fPend" style="width:auto;flex:none"> Pendiente de confirmar (aún no es definitivo)</label>
-  <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fKey" style="width:auto;flex:none"> ★ Cue clave (destacado)</label>
+  <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fKey" style="width:auto;flex:none"> ★ Importante (destacado)</label>
   <div class="row2" style="margin:0"><button type="button" class="btn" id="qNow">Añadir en tiempo actual</button><button type="button" class="btn" id="qSong">Añadir al inicio de la canción</button></div>
   <div class="seg" id="fMode"><button type="button" data-m="0" class="on">Tiempo total</button><button type="button" data-m="1" id="fModeSong">Tiempo de la canción</button></div>
   <label id="fSongL" style="display:none">Canción<select id="fSong"></select></label>
@@ -488,7 +488,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.40'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.42'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -575,7 +575,7 @@ function buildCues(i){
  const enT=Math.max(1,momEnd(i)-m.start);
  $('mticks').innerHTML=m.cues.filter(c=>enabled.has(c.d)).map(c=>`<span style="left:${Math.min(100,c.o/enT*100)}%;background:${(D[c.d]||D.notas).c}"></span>`).join('')}
  const list=carryOf(i).concat(m.cues.map((c,k)=>({j:i,k,c})).filter(x=>enabled.has(x.c.d)));
- $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.key?'<span class="tag keytag">★ CLAVE</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${c.pd===1?'<span class="tag pdtag">PENDIENTE</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}<span class="rg mono">${fmt(a)}${c.e>0?' → '+fmt(a+c.e)+' · '+fdur(c.e):''}</span>${c.pd===1?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.cm&&c.cm.length?`<div class="cmts">${c.cm.slice(-3).map(q=>'💬 <b>'+esc(q.by||'')+'</b> '+esc(q.x)).join('<br>')}</div>`:''}${CLOUD&&c.refs&&c.refs.length?`<div class="atts">📎 ${c.refs.map(r=>`<a data-f="${esc(r.f)}" data-open="1">${esc(r.name||'archivo')}</a>`).join('')}</div>`:''}${c.by?`<div class="by">${esc(byTxt(c))}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
+ $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.key?'<span class="tag keytag">★ IMPORTANTE</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${c.pd===1?'<span class="tag pdtag">PENDIENTE</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}<span class="rg mono">${fmt(a)}${c.e>0?' → '+fmt(a+c.e)+' · '+fdur(c.e):''}</span>${c.pd===1?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.cm&&c.cm.length?`<div class="cmts">${c.cm.slice(-3).map(q=>'💬 <b>'+esc(q.by||'')+'</b> '+esc(q.x)).join('<br>')}</div>`:''}${CLOUD&&c.refs&&c.refs.length?`<div class="atts">📎 ${c.refs.map(r=>`<a data-f="${esc(r.f)}" data-open="1">${esc(r.name||'archivo')}</a>`).join('')}</div>`:''}${c.by?`<div class="by">${esc(byTxt(c))}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
  const end=momEnd(i),last=i===S.moments.length-1;
  const ns=S.notes.filter(n=>n.t>=m.start&&(n.t<end||(last&&n.t<=end))&&(!n.d||enabled.has(n.d)));
  $('nbox').innerHTML=ns.length?'<div class="eyebrow" style="margin:20px 0 6px">Notas y peticiones</div>'+ns.map(n=>`<div class="nt${n.done?' done':''}"><span class="tag">${NT[n.k]}</span>${n.d?`<span class="tag">${D[n.d].n}</span>`:''}<span class="tx">${esc(n.x)}</span><span class="mono rg2">${fmt(n.t)}</span>${n.by?`<span class="by" title="${esc(byTxt(n))}">${esc(n.by)}</span>`:''}<button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`).join(''):'';
