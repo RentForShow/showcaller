@@ -85,6 +85,8 @@ main.withpanel #panel{display:flex}
 .psearch input{flex:1;background:none;border:0;border-bottom:1px solid var(--line);color:var(--tx);padding:6px 2px;font:inherit;font-size:13px;outline:none}
 #glist{overflow-y:auto;flex:1;padding-bottom:80px}
 .mh{position:relative;display:flex;justify-content:space-between;align-items:baseline;padding:12px 32px;border-top:1px solid #ffffff12;cursor:pointer;font-size:15px;line-height:22px;color:#ebe8e1}
+.mh.nopk,.dd#ddJump button.it.nopk{color:#ff6b5e}
+.nopk em{font-style:normal;font-size:11px;margin-left:8px;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
 .mh small{color:#7f7b75;margin-left:8px;font-size:13px}
 .mh .at{color:#7f7b75;font-size:12px}
 .mh.cur::before{content:"";position:absolute;left:1px;top:6px;bottom:6px;width:3px;background:#ebe8e1;border-radius:2px}
@@ -542,7 +544,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.87'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.88'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -613,6 +615,7 @@ function momEnd(i){return i+1<S.moments.length?S.moments[i+1].start:dur()}
 /* ---- stage ---- */
 let shownIdx=-1,shownKey='';
 const isTr=m=>m.kind==='transicion';
+const noPk=m=>!isTr(m)&&!(typeof TRK!=='undefined'&&TRK[m.id])&&!m.trk;
 const mTitle=m=>isTr(m)?m.name:m.num!==undefined?`${m.num}${m.sub?' '+m.sub+')':''} ${m.name}`:m.name;
 const NT={peticion:'PETICIÓN',nota:'NOTA',postshow:'POST-SHOW'};
 const fdt=ms=>ms?new Date(ms).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
@@ -727,7 +730,7 @@ function drawMini(g,D_,v0,sp){const cx=mx,y0=0,h=g.mm,w=WM,x=s_=>s_/D_*w;FC=mx;c
  const r1=y0+1,rh=Math.floor((h-2)/2),ci=curIdx();
  cx.font=(h<30?'8':'9')+'px ui-monospace,monospace';
  S.moments.forEach((m,i)=>{const a=x(m.start),nx=i+1<S.moments.length?x(S.moments[i+1].start):w;if(isTr(m)){cx.fillStyle='#a59ad640';cx.fillRect(a,r1,Math.max(1,nx-a),rh)}
-  cx.fillStyle='#3a3936';cx.fillRect(a,r1,1,rh);const room=nx-a-4,ttl=String(mTitle(m)),nu=(ttl.match(/^\d+/)||[''])[0],nm=room>10?(cx.measureText(ttl).width<=room?ttl:(nu&&cx.measureText(nu).width<=room?nu:(room>40?fit(ttl,room):''))):'';if(nm){cx.fillStyle=ci===i?'#ece9e1':'#8b8984';cx.fillText(nm,a+3,r1+rh-3)}});
+  cx.fillStyle='#3a3936';cx.fillRect(a,r1,1,rh);const room=nx-a-4,ttl=String(mTitle(m)),nu=(ttl.match(/^\d+/)||[''])[0],nm=room>10?(cx.measureText(ttl).width<=room?ttl:(nu&&cx.measureText(nu).width<=room?nu:(room>40?fit(ttl,room):''))):'';if(nm){cx.fillStyle=noPk(m)?'#ff6b5e':(ci===i?'#ece9e1':'#8b8984');cx.fillText(nm,a+3,r1+rh-3)}});
  cx.font='bold '+(h<30?'8':'9')+'px ui-monospace,monospace';
  const r2=r1+rh;
  S.blocks.forEach((b,bi)=>{const a=x(b.start),nx=bi+1<S.blocks.length?x(S.blocks[bi+1].start):w;
@@ -854,7 +857,7 @@ function updPanel(force){
    ...S.notes.filter(n=>n.t>=m.start&&(n.t<end||(i===lastI&&n.t<=end))&&(!n.d||enabled.has(n.d))&&(!q||n.x.toLowerCase().includes(q)||NT[n.k].toLowerCase().includes(q))).map(n=>({r:n.t-m.start,n}))
   ].sort((a,b)=>a.r-b.r);
   if(q&&!items.length)return;
-  h+=`<div class="mh${i===ci?' cur':''}" data-m="${i}"><span>${esc(mTitle(m))}${m.kind!=='momento'?`<small>${m.kind==='transicion'?'transición':m.kind}</small>`:''}</span><span class="at mono">${fmt(m.start,true)}</span></div>`;
+  h+=`<div class="mh${i===ci?' cur':''}${noPk(m)?' nopk':''}" data-m="${i}"><span>${esc(mTitle(m))}${noPk(m)?'<em>sin pista</em>':''}${m.kind!=='momento'?`<small>${m.kind==='transicion'?'transición':m.kind}</small>`:''}</span><span class="at mono">${fmt(m.start,true)}</span></div>`;
   items.forEach(it=>{
    if(it.c){const c=it.c,d=D[c.d]||D.notas;h+=`<div class="gr${m.start+c.o<t?' past':''}" title="${esc(d.n)}${c.by?' · '+esc(byTxt(c)):''}" style="--c:${d.c}" data-s="${m.start+c.o}"><span class="rt mono">${fmtp(c.o)}</span><i class="dt"></i><span class="tx2">${c.pd===1?'[PENDIENTE] ':''}${esc(c.t)}</span><button class="ed" data-mi="${i}" data-ci="${m.cues.indexOf(c)}" title="Editar">✎</button></div>`}
    else{const n=it.n;h+=`<div class="gr${n.t<t?' past':''}" style="--c:#ece9e1;font-style:italic" data-s="${n.t}"><span class="rt mono">${fmtp(it.r)}</span><i class="dt"></i><span class="tx2">${esc(n.x)}${n.done?' ✓':''}</span><span class="du">${NT[n.k]}</span><button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`}
@@ -1712,7 +1715,7 @@ function goNext(){let best=null;S.moments.forEach(mo=>mo.cues.forEach(c=>{if(!en
  if(best===null){toast('No hay más cues');return}setT(best)}
 // ir a tema
 $('bJump').onclick=()=>{const o=$('ddJump').classList.contains('open');closeDD();if(o)return;const ci=curIdx();
- $('ddJump').innerHTML=S.moments.map((m,i)=>`<button class="it${i===ci?' cur':''}${isTr(m)?' tr':''}" data-j="${i}">${i===ci?'● ':''}${esc(mTitle(m))}<span class="mono">${fmt(m.start,true)}</span></button>`).join('');
+ $('ddJump').innerHTML=S.moments.map((m,i)=>`<button class="it${i===ci?' cur':''}${isTr(m)?' tr':''}${noPk(m)?' nopk':''}" data-j="${i}">${i===ci?'● ':''}${esc(mTitle(m))}${noPk(m)?'<em>sin pista</em>':''}<span class="mono">${fmt(m.start,true)}</span></button>`).join('');
  openDD($('ddJump'),$('bJump'));const cur=$('ddJump').querySelector('.cur');if(cur)cur.scrollIntoView({block:'center'})};
 $('ddJump').addEventListener('click',e=>{const b=e.target.closest('[data-j]');if(!b)return;closeDD();setT(S.moments[+b.dataset.j].start)});
 // pantalla completa de escena
