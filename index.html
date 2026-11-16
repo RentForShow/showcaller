@@ -352,7 +352,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.22'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.23'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -429,14 +429,14 @@ function buildCues(i){
  const enT=Math.max(1,momEnd(i)-m.start);
  $('mticks').innerHTML=m.cues.filter(c=>enabled.has(c.d)).map(c=>`<span style="left:${Math.min(100,c.o/enT*100)}%;background:${(D[c.d]||D.notas).c}"></span>`).join('')}
  const list=carryOf(i).concat(m.cues.map((c,k)=>({j:i,k,c})).filter(x=>enabled.has(x.c.d)));
- $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd?' pend':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.pd?'<span class="tag pdtag">PENDIENTE</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}<span class="rg mono">${fmt(a)}${c.e>0?' → '+fmt(a+c.e)+' · '+fdur(c.e):''}</span>${c.pd?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.by?`<div class="by">${esc(byTxt(c))}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
+ $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd===1?' pend':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.pd===1?'<span class="tag pdtag">PENDIENTE</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}<span class="rg mono">${fmt(a)}${c.e>0?' → '+fmt(a+c.e)+' · '+fdur(c.e):''}</span>${c.pd===1?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.by?`<div class="by">${esc(byTxt(c))}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
  const end=momEnd(i),last=i===S.moments.length-1;
  const ns=S.notes.filter(n=>n.t>=m.start&&(n.t<end||(last&&n.t<=end))&&(!n.d||enabled.has(n.d)));
  $('nbox').innerHTML=ns.length?'<div class="eyebrow" style="margin:20px 0 6px">Notas y peticiones</div>'+ns.map(n=>`<div class="nt${n.done?' done':''}"><span class="tag">${NT[n.k]}</span>${n.d?`<span class="tag">${D[n.d].n}</span>`:''}<span class="tx">${esc(n.x)}</span><span class="mono rg2">${fmt(n.t)}</span>${n.by?`<span class="by" title="${esc(byTxt(n))}">${esc(n.by)}</span>`:''}<button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`).join(''):'';
  shownIdx=i;shownKey=keyOf(i);
 }
 $('eyebrow').addEventListener('click',e=>{if(e.target.id==='chipMood'){buildMood();$('mMood').classList.add('open')}});
-$('stage').addEventListener('click',e=>{const cf=e.target.closest('.cf');if(cf){const el=cf.closest('.cue');if(!can('cues')){toast('No tienes permiso');return}const c=S.moments[+el.dataset.m].cues[+el.dataset.k];delete c.pd;c.ed=who();c.eat=Date.now();dirty();toast('Cue confirmado');return}const b=e.target.closest('.ed');if(!b)return;
+$('stage').addEventListener('click',e=>{const cf=e.target.closest('.cf');if(cf){const el=cf.closest('.cue');if(!can('cues')){toast('No tienes permiso');return}const c=S.moments[+el.dataset.m].cues[+el.dataset.k];c.pd=2;c.pdBy=who();c.ed=who();c.eat=Date.now();dirty();toast('Cue confirmado');return}const b=e.target.closest('.ed');if(!b)return;
  if(b.dataset.n!==undefined){openNote(S.notes[+b.dataset.n]);return}
  const el=b.closest('.cue');if(el){const m=S.moments[+el.dataset.m];openCue(m.cues[+el.dataset.k],m)}});
 function frame(now){
@@ -500,7 +500,7 @@ function applyExp(){cv.style.height=G().H+'px';document.querySelector('footer').
 $('expand').onclick=()=>{EXP=!EXP;applyExp()};
 function fit(txt,room){while(txt&&cx.measureText(txt).width>room)txt=txt.slice(0,-1);return txt}
 function drawEv(e,x0,x1,y,room){
- const d=e.d,pd=!!e.c.pd;cx.strokeStyle=d.c;cx.lineWidth=2;if(pd)cx.setLineDash([3,3]);cx.beginPath();cx.moveTo(x0,y);cx.lineTo(Math.max(x1,x0+3),y);cx.stroke();cx.setLineDash([]);
+ const d=e.d,pd=e.c.pd===1;cx.strokeStyle=d.c;cx.lineWidth=2;if(pd)cx.setLineDash([3,3]);cx.beginPath();cx.moveTo(x0,y);cx.lineTo(Math.max(x1,x0+3),y);cx.stroke();cx.setLineDash([]);
  cx.beginPath();cx.arc(x0,y,3.5,0,7);if(pd){cx.fillStyle='#0e0e0d';cx.fill();cx.lineWidth=1.5;cx.stroke()}else{cx.fillStyle=d.c;cx.fill()}
  cx.font='9px ui-monospace,monospace';const lab=room>16?fit((pd?'? ':'')+sh(e.c.d),room-4):'';let lw=0;
  if(lab){lw=cx.measureText(lab).width+6;cx.fillStyle='#0e0e0dd0';cx.fillRect(x0+6,y-6,lw,12);cx.fillStyle='#ece9e1';cx.fillText(lab,x0+9,y+3)}
@@ -583,7 +583,7 @@ function updPanel(force){
   if(q&&!items.length)return;
   h+=`<div class="mh${i===ci?' cur':''}" data-m="${i}"><span>${esc(mTitle(m))}${m.kind!=='momento'?`<small>${m.kind==='transicion'?'transición':m.kind}</small>`:''}</span><span class="at mono">${fmt(m.start,true)}</span></div>`;
   items.forEach(it=>{
-   if(it.c){const c=it.c,d=D[c.d]||D.notas;h+=`<div class="gr${m.start+c.o<t?' past':''}" title="${esc(d.n)}${c.by?' · '+esc(byTxt(c)):''}" style="--c:${d.c}" data-s="${m.start+c.o}"><span class="rt mono">${fmtp(c.o)}</span><i class="dt"></i><span class="tx2">${c.pd?'[PENDIENTE] ':''}${esc(c.t)}</span><button class="ed" data-mi="${i}" data-ci="${m.cues.indexOf(c)}" title="Editar">✎</button></div>`}
+   if(it.c){const c=it.c,d=D[c.d]||D.notas;h+=`<div class="gr${m.start+c.o<t?' past':''}" title="${esc(d.n)}${c.by?' · '+esc(byTxt(c)):''}" style="--c:${d.c}" data-s="${m.start+c.o}"><span class="rt mono">${fmtp(c.o)}</span><i class="dt"></i><span class="tx2">${c.pd===1?'[PENDIENTE] ':''}${esc(c.t)}</span><button class="ed" data-mi="${i}" data-ci="${m.cues.indexOf(c)}" title="Editar">✎</button></div>`}
    else{const n=it.n;h+=`<div class="gr${n.t<t?' past':''}" style="--c:#ece9e1;font-style:italic" data-s="${n.t}"><span class="rt mono">${fmtp(it.r)}</span><i class="dt"></i><span class="tx2">${esc(n.x)}${n.done?' ✓':''}</span><span class="du">${NT[n.k]}</span><button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`}
   })});
  lastNow=null;$('glist').innerHTML=h||'<div class="empty" style="padding:20px">Sin resultados</div>';
@@ -704,7 +704,7 @@ function openCue(c,m){
  const mi=c?S.moments.indexOf(m):curIdx();$('fSong').value=mi;
  $('addTitle').textContent=c?c.t:mTitle(S.moments[curIdx()]);
  const a=c?m.start+c.o:Math.floor(t),b=c?a+(c.e||0):a+5;
- $('fDep').value=c?c.d:(Dm.lx?'lx':DEPTS[0].id);$('fTxt').value=c?c.t:'';$('fPend').checked=!!(c&&c.pd);updMode();fSet(a,b);
+ $('fDep').value=c?c.d:(Dm.lx?'lx':DEPTS[0].id);$('fTxt').value=c?c.t:'';$('fPend').checked=!!(c&&c.pd===1);updMode();fSet(a,b);
  $('fBy').textContent=c?byTxt(c):'';$('fGo').textContent=c?'Guardar cambios':'Añadir cue';$('fDel').style.display=c?'block':'none';durInfo();
  $('mAdd').classList.add('open');setTimeout(()=>$('fTxt').focus(),50);
 }
@@ -716,7 +716,7 @@ $('fAdd').onsubmit=e=>{e.preventDefault();
  if(ecue){const k=ecue.m.cues.indexOf(ecue.c);if(k>-1)ecue.m.cues.splice(k,1)}
  const mm=S.moments[blockIdxMom(st)];
  const old=ecue&&ecue.c,nc={o:Math.max(0,st-mm.start),e:en-st,d:$('fDep').value,t:$('fTxt').value.trim(),by:old?old.by:who(),at:old?old.at:Date.now()};
- if($('fPend').checked)nc.pd=1;
+ if($('fPend').checked)nc.pd=1;else if(old&&old.pd===2){nc.pd=2;nc.pdBy=old.pdBy}
  if(old){nc.ed=who();nc.eat=Date.now()}
  mm.cues.push(nc);
  sortM();dirty();$('mAdd').classList.remove('open');toast(ecue?'Cue actualizado':'Cue añadido');
@@ -877,14 +877,14 @@ $('fNote').onsubmit=e=>{e.preventDefault();
 $('nDel').onclick=()=>{if(!enote)return;const k=S.notes.indexOf(enote);if(k>-1)S.notes.splice(k,1);dirty();$('mNote').classList.remove('open');toast('Nota borrada')};
 /* pendientes por decidir */
 let tTab='todo',nFil='all';
-function pendCues(){const r=[];S.moments.forEach((m,mi)=>m.cues.forEach((c,k)=>{if(c.pd)r.push({m,mi,c,k})}));return r}
-function updTodoN(){const n=S.todo.filter(x=>!x.done).length+pendCues().length;$('todoN').textContent=n?'('+n+')':''}
+function pendCues(){const r=[];S.moments.forEach((m,mi)=>m.cues.forEach((c,k)=>{if(c.pd)r.push({m,mi,c,k})}));return r.sort((a,b)=>(a.c.pd===2)-(b.c.pd===2))}
+function updTodoN(){const n=S.todo.filter(x=>!x.done).length+pendCues().filter(x=>x.c.pd===1).length;$('todoN').textContent=n?'('+n+')':''}
 function buildTodo(){
  document.querySelectorAll('#mTodo .tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tTab));
  if(tTab==='todo'){
   const rows=S.todo.map((x,i)=>({x,i})).sort((a,b)=>(a.x.done?1:0)-(b.x.done?1:0));
   $('tBody').innerHTML=`<form class="tform" id="tAdd"><input id="tNew" placeholder="Algo pendiente por decidir…" required><button class="btn" type="submit">Añadir</button></form>`+
-   pendCues().map(({m,mi,c,k})=>{const d=D[c.d]||D.notas;return `<div class="trow"><input type="checkbox" data-cp="${mi}:${k}" title="Confirmar cue"><span class="tx" data-cj="${mi}:${k}" style="cursor:pointer">${esc(c.t)}</span><span class="tag">CUE PENDIENTE</span><span class="tag">${esc(d.n)}</span><span class="mono" style="color:var(--dim);font-size:12px">${esc(mTitle(m))} · ${fmt(m.start+c.o)}</span></div>`}).join('')+
+   pendCues().map(({m,mi,c,k})=>{const d=D[c.d]||D.notas;return `<div class="trow${c.pd===2?' done':''}"><input type="checkbox" data-cp="${mi}:${k}" ${c.pd===2?'checked':''} title="Confirmar cue"><span class="tx" data-cj="${mi}:${k}" style="cursor:pointer">${esc(c.t)}</span><span class="tag">${c.pd===2?'CUE CONFIRMADO'+(c.pdBy?' · '+esc(c.pdBy):''):'CUE PENDIENTE'}</span><span class="tag">${esc(d.n)}</span><span class="mono" style="color:var(--dim);font-size:12px">${esc(mTitle(m))} · ${fmt(m.start+c.o)}</span></div>`}).join('')+
    (rows.length||pendCues().length?rows.map(({x,i})=>`<div class="trow${x.done?' done':''}"><input type="checkbox" data-td="${i}" ${x.done?'checked':''}><span class="tx" data-te="${i}" style="cursor:pointer">${esc(x.x)}</span><span class="tag">${x.done?'DECIDIDO'+(x.doneBy?' · '+esc(x.doneBy):''):'PENDIENTE'}</span>${x.by?`<span class="by" title="${esc(byTxt(x))}">${esc(x.by)}</span>`:''}<button class="ed" data-tx="${i}" title="Borrar">✕</button></div>`).join(''):'<div class="empty" style="padding:14px 24px">Nada pendiente. Añade lo que falte por decidir.</div>');
  }else{
   const list=S.notes.map((n,i)=>({n,i})).filter(({n})=>nFil==='all'||n.k===nFil);
@@ -896,7 +896,7 @@ $('bTodo').onclick=()=>{buildTodo();$('mTodo').classList.add('open')};
 document.querySelector('#mTodo .tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){tTab=b.dataset.tab;buildTodo()}});
 $('tBody').addEventListener('submit',e=>{if(e.target.id==='tAdd'){e.preventDefault();if(!can('notes')){toast('No tienes permiso');return}const v=$('tNew').value.trim();if(v){S.todo.push({x:v,done:false,by:who(),at:Date.now()});dirty()}}});
 $('tBody').addEventListener('change',e=>{
- if(e.target.dataset.cp!==undefined){if(!can('cues')){toast('No tienes permiso');buildTodo();return}const [mi,k]=e.target.dataset.cp.split(':'),c=S.moments[+mi].cues[+k];delete c.pd;c.ed=who();c.eat=Date.now();dirty();toast('Cue confirmado');return}
+ if(e.target.dataset.cp!==undefined){if(!can('cues')){toast('No tienes permiso');buildTodo();return}const [mi,k]=e.target.dataset.cp.split(':'),c=S.moments[+mi].cues[+k],ok=e.target.checked;c.pd=ok?2:1;c.pdBy=ok?who():'';c.ed=who();c.eat=Date.now();dirty();toast(ok?'Cue confirmado':'Cue otra vez pendiente');return}
  if((e.target.dataset.td!==undefined||e.target.dataset.nd!==undefined)&&!can('notes')){toast('No tienes permiso');buildTodo();return}
  if(e.target.dataset.td!==undefined){const x=S.todo[+e.target.dataset.td];x.done=e.target.checked;x.doneBy=e.target.checked?who():'';dirty()}
  else if(e.target.dataset.nd!==undefined){const x=S.notes[+e.target.dataset.nd];x.done=e.target.checked;x.doneBy=e.target.checked?who():'';dirty()}
