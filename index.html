@@ -46,17 +46,19 @@ h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:
 .cue .cd{font-size:15px;color:var(--mut);white-space:nowrap}
 .cue .pb{height:2px;background:var(--line);margin-top:10px;position:relative}
 .cue .pb i{position:absolute;left:0;top:0;bottom:0;background:var(--c);opacity:.9}
-.cue.done{display:none}
+.cue.fading{transition:opacity 1s ease,height 1s ease,margin 1s ease,padding 1s ease;overflow:hidden}
+.cue.done{opacity:0;height:0!important;margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;pointer-events:none;overflow:hidden}
 .cue.act{background:color-mix(in srgb,var(--c) 16%,transparent);border-left-width:5px;border-radius:0 8px 8px 0;padding-right:14px}
 .cue.act .txt{font-weight:700}
 .cue.act .cd{color:var(--tx);font-weight:700}
 .cue.act .pb{height:3px}
-.cue:not(.act):not(.done){padding:3px 0 8px 22px;margin-bottom:6px}
-.cue:not(.act):not(.done) .dep{font-size:10px;margin-bottom:4px}
-.cue:not(.act):not(.done) .txt{font-size:clamp(15px,2.6vw,18px);color:#a8a59d}
-.cue:not(.act):not(.done) .cd{font-size:13px}
+.cue:not(.act):not(.done){padding:2px 0 6px 20px;margin-bottom:4px}
+.cue:not(.act):not(.done) .dep{font-size:9px;margin-bottom:2px;letter-spacing:.16em}
+.cue:not(.act):not(.done) .dep .dot{width:6px;height:6px}
+.cue:not(.act):not(.done) .txt{font-size:clamp(13px,2.1vw,15px);color:#9a978f}
+.cue:not(.act):not(.done) .cd{font-size:12px}
 .cue:not(.act):not(.done) .pb,.cue:not(.act):not(.done) .by{display:none}
-.cue.hot:not(.act) .txt{color:#d8d5cd}
+.cue.hot:not(.act) .txt{color:#d0cdc5}
 #cuesDone{display:none}
 .cue.hot .cd{color:var(--tx);font-weight:700}
 .empty{color:var(--dim);padding:24px 0}
@@ -79,7 +81,12 @@ main.withpanel #panel{display:flex}
 .gr .th{flex:none;width:56px;height:34px;border-radius:3px;margin-left:12px;object-fit:cover;background:#222}
 .gr .ed{flex:none;margin-left:8px;opacity:0}
 .gr:hover .ed,.gr.now .ed{opacity:.7}
+#bLive,#bAudio,#liveBanner{display:none!important}
 .gr.past{opacity:.6}
+.mimgs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:10px 0}
+.mi{position:relative}
+.mi img{width:100%;height:96px;object-fit:cover;border-radius:6px;background:#0e0e0d;cursor:zoom-in;display:block}
+.mi button{position:absolute;top:4px;right:4px;background:#000b;border-radius:50%;width:22px;height:22px;line-height:1;font-size:11px}
 .gr.now::before{content:"";position:absolute;left:1px;top:5px;bottom:5px;width:3px;background:#ebe8e1;border-radius:2px}
 #gNow{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);background:#151514;border:1px solid #3c3c3a;border-radius:999px;height:32px;padding:0 17px;font-size:12.5px;color:#cfccc4;display:none;z-index:6;text-transform:none;letter-spacing:0}
 #panel{position:relative}
@@ -232,7 +239,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
     <button class="pb3" id="addNote" title="Nota o petición" style="font-size:16px">✎</button>
     <div class="clock mono"><b id="ct">0:00</b> <span>/ <span id="dur">0:00</span></span></div>
    </div>
-   <div class="sub"><button id="expand">⤢ Expandir</button><button id="rate">⏱ x1</button><span class="seg" id="zoomSeg" style="display:inline-flex;font-size:12px"><button type="button" data-z="2" style="padding:4px 10px">Tema</button><button type="button" data-z="1" style="padding:4px 10px">Bloque</button><button type="button" data-z="0" class="on" style="padding:4px 10px">Show</button></span><button id="bAudio">🎚 Audio y salidas</button></div>
+   <div class="sub"><button id="expand">⤢ Expandir</button><button id="rate">⏱ x1</button><span class="seg" id="zoomSeg" style="display:inline-flex;font-size:12px"><button type="button" data-z="2" style="padding:4px 10px">Tema</button><button type="button" data-z="1" style="padding:4px 10px">Bloque</button><button type="button" data-z="0" class="on" style="padding:4px 10px">Show</button></span><button id="bAudio">🎚 Audio y salidas</button><button id="bTrack">🎵 Cargar audio</button></div>
   </div>
   <div style="min-width:0"><div id="tlInfo" class="mono"></div><canvas id="tl"></canvas></div>
  </footer>
@@ -341,7 +348,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.09'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.13'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -432,14 +439,16 @@ function frame(now){
  last=now;
  const i=curIdx(),m=S.moments[i];
  const key=keyOf(i);
- if(key!==shownKey){buildCues(i);if(panelOpen)updPanel(true)}
+ let fresh=false;if(key!==shownKey){buildCues(i);fresh=true;if(panelOpen)updPanel(true)}
  const rel=t-m.start,end=momEnd(i);
  $('tc').textContent=fmtp(rel);$('mrem').textContent='-'+fmt(end-t);$('shw').textContent=fmt(t,true);
  $('mbar').style.width=Math.min(100,rel/Math.max(1,end-m.start)*100)+'%';
  const cards=$('cues').children;
  let nAct=0,nCards=0;
  for(const el of cards){if(!el.dataset.k)continue;nCards++;const c=m.cues[+el.dataset.k],at=m.start+c.o,en=at+(c.e||0),df=at-t,act=c.e>0?(t>=at&&t<en):(df<=0&&t-at<3),fin=df<=0&&!act;
-  el.classList.toggle('done',fin);el.classList.toggle('hot',df>0&&df<=10);el.classList.toggle('act',act);if(!fin)nAct++;
+  if(fin){if(!el.classList.contains('done')){if(fresh||!playing){el.classList.add('done')}else{el.style.height=el.offsetHeight+'px';el.classList.add('fading');requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('done')))}}}
+  else if(el.classList.contains('done')||el.classList.contains('fading')){el.classList.remove('done','fading');el.style.height=''}
+  el.classList.toggle('hot',df>0&&df<=10);el.classList.toggle('act',act);if(!fin)nAct++;
   el.querySelector('.cd').textContent=df>0?'-'+fmt(df):act?(c.e>0?'EN CURSO · quedan '+fmt(en-t):'● AHORA'):'✓ '+(c.e>0?'HECHO':'YA');
   el.querySelector('.pb i').style.width=(fin?100:act?(t-at)/(en-at)*100:Math.min(100,Math.max(0,(t-m.start)/Math.max(1,at-m.start)*100)))+'%'}
  {const cd=$('cuesDone');if(cd)cd.style.display=(nCards&&!nAct)?'block':'none'}
@@ -621,9 +630,31 @@ head();
 /* ---- modals ---- */
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
 document.querySelectorAll('.modal').forEach(m=>{let dn=false;m.addEventListener('pointerdown',e=>{dn=e.target===m});m.addEventListener('click',e=>{if(e.target===m&&dn)m.classList.remove('open');dn=false})});
-function buildMood(){$('mcols').innerHTML=S.blocks.map((b,i)=>{const end=i+1<S.blocks.length?S.blocks[i+1].start:dur();return `<div class="mcol"><h3>${esc(b.name)}</h3><div class="rg mono">${fmt(b.start,true)} – ${fmt(end,true)}</div><p class="${b.mood?'':'none'}">${b.mood?esc(b.mood):'Sin moodboard'}</p><div class="acts"><button data-e="${i}">Editar</button><button data-g="${i}">Ir al bloque</button></div></div>`}).join('')}
+function buildMood(){$('mcols').innerHTML=S.blocks.map((b,i)=>{const end=i+1<S.blocks.length?S.blocks[i+1].start:dur(),cm=can('mood');b.imgs=b.imgs||[];
+ const th=b.imgs.map((r,k)=>{const x=fileKind(r)==='img'?`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}">`:`<a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">${fileKind(r)==='video'?'🎞':fileKind(r)==='audio'?'🎵':'📄'} ${esc(r.name||'Archivo')}</a>`;return `<div class="mi">${x}${cm?`<button data-mdel="${i}:${k}" title="Quitar">✕</button>`:''}</div>`}).join('');
+ return `<div class="mcol" data-b="${i}"><h3>${esc(b.name)}</h3><div class="rg mono">${fmt(b.start,true)} – ${fmt(end,true)}</div><p class="${b.mood?'':'none'}">${b.mood?esc(b.mood):'Sin moodboard'}</p>${th?`<div class="mimgs">${th}</div>`:''}<div class="acts"><button data-e="${i}">Editar</button>${cm?`<button data-mup="${i}">＋ Fotos</button>`:''}<button data-g="${i}">Ir al bloque</button></div></div>`}).join('');hydrateRefs($('mcols'))}
 $('bMood').onclick=()=>{buildMood();$('mMood').classList.add('open')};
-$('mcols').addEventListener('click',e=>{const g=e.target.dataset.g,ed=e.target.dataset.e;
+async function uploadMood(files,bi){
+ const b=S.blocks[bi];if(!b||!can('mood'))return;if(!CLOUD||!SB){toast('Subir fotos requiere la web conectada a Supabase');return}b.imgs=b.imgs||[];let ok=0;
+ for(const f of files){
+  if(f.size>52428800){toast(f.name+' pesa más de 50 MB');continue}
+  toast('Subiendo '+f.name+'…');
+  const ext=((f.name.match(/\.[A-Za-z0-9]{1,8}$/)||[''])[0]).toLowerCase(),path='b'+bi+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+ext;
+  const {error}=await SB.storage.from('files').upload(path,f,{contentType:f.type||undefined});
+  if(error){toast('No se pudo subir '+f.name+': '+error.message);continue}
+  b.imgs.push({f:path,name:f.name,type:f.type,size:f.size,by:who(),at:Date.now()});ok++}
+ if(ok){save();buildMood();toast(ok+' archivo'+(ok>1?'s':'')+' subido'+(ok>1?'s':''))}
+}
+(()=>{const i=document.createElement('input');i.type='file';i.id='mPick';i.multiple=true;i.accept='image/*,video/*,application/pdf,audio/*';i.style.display='none';document.body.appendChild(i);
+ i.addEventListener('change',()=>{if(i.files.length)uploadMood([...i.files],+i.dataset.b);i.value=''})})();
+$('mcols').addEventListener('dragover',e=>{if(e.target.closest('.mcol')&&can('mood'))e.preventDefault()});
+$('mcols').addEventListener('drop',e=>{const c=e.target.closest('.mcol');if(!c||!can('mood'))return;e.preventDefault();if(e.dataTransfer.files.length)uploadMood([...e.dataTransfer.files],+c.dataset.b)});
+$('mcols').addEventListener('click',e=>{
+ if(e.target.tagName==='IMG'&&e.target.src){window.open(e.target.src,'_blank','noopener');return}
+ const up=e.target.dataset.mup,md=e.target.dataset.mdel;
+ if(up!==undefined){if(!CLOUD){toast('Subir fotos requiere la web conectada a Supabase');return}$('mPick').dataset.b=up;$('mPick').click();return}
+ if(md!==undefined&&can('mood')){const [bi,k]=md.split(':').map(Number),r=S.blocks[bi].imgs.splice(k,1)[0];if(r&&SB)SB.storage.from('files').remove([r.f]);save();buildMood();return}
+ const g=e.target.dataset.g,ed=e.target.dataset.e;
  if(g!==undefined){setT(S.blocks[+g].start);$('mMood').classList.remove('open')}
  if(ed!==undefined){if(!can('mood')){toast('No tienes permiso para editar el moodboard');return}const b=S.blocks[+ed];editor('Moodboard · '+b.name,'Descripción',b.mood,v=>{b.mood=v;save();buildMood()},null,true)}});
 function editor(kind,lbl,val,cb,next,multi){
@@ -710,9 +741,9 @@ const URLC={};
 async function fileUrl(path){const c=URLC[path];if(c&&c.t>Date.now())return c.u;
  const {data,error}=await SB.storage.from('files').createSignedUrl(path,3600);if(error||!data)return null;
  URLC[path]={u:data.signedUrl,t:Date.now()+3300000};return data.signedUrl}
-async function hydrateRefs(){
+async function hydrateRefs(root){
  if(!CLOUD||!SB)return;
- for(const el of $('mmBody').querySelectorAll('[data-f]')){const u=await fileUrl(el.dataset.f);if(!u){el.alt='No disponible';continue}
+ for(const el of (root||$('mmBody')).querySelectorAll('[data-f]')){const u=await fileUrl(el.dataset.f);if(!u){el.alt='No disponible';continue}
   if(el.dataset.open){el.href=u;el.target='_blank';el.rel='noopener noreferrer'}else el.src=u}
 }
 async function uploadFiles(files){
@@ -872,10 +903,11 @@ const RATES=[1,2,4,8];$('rate').onclick=()=>{rate=RATES[(RATES.indexOf(rate)+1)%
 addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();playing?pause():play()}if(e.code==='ArrowRight')$('nxt').click();if(e.code==='ArrowLeft')$('prev').click()});
 /* audio */
 $('bAudio').onclick=()=>{buildAudioUI();$('mAudio').classList.add('open')};
+$('bTrack').onclick=()=>{if(audio&&confirm('Ya hay un audio cargado ('+audioName+'). ¿Cambiarlo por otro?')||!audio)$('fileAudio').click()};
 $('fileAudio').onchange=async e=>{const f=e.target.files[0];if(!f)return;pause();
  if(audio){URL.revokeObjectURL(audio.src)}
  audio=new Audio(URL.createObjectURL(f));audio.preload='auto';audioName=f.name;try{ensureCtx();attachEl('audio')}catch(x){}
- audio.onloadedmetadata=()=>{S.duration=Math.round(audio.duration);save();$('audioInfo').textContent='audio '+f.name.slice(0,22);toast('Audio cargado: '+fmt(audio.duration,true));if($('mAudio').classList.contains('open'))buildAudioUI()};
+ audio.onloadedmetadata=()=>{S.duration=Math.round(audio.duration);save();$('audioInfo').textContent='audio '+f.name.slice(0,22);$('bTrack').textContent='🎵 '+f.name.slice(0,18);toast('Audio cargado: '+fmt(audio.duration,true));if($('mAudio').classList.contains('open'))buildAudioUI()};
  try{const buf=await f.arrayBuffer(),ac=new (window.AudioContext||window.webkitAudioContext)(),dec=await ac.decodeAudioData(buf),ch=dec.getChannelData(0),N=4000,step=Math.floor(ch.length/N);peaks=new Float32Array(N);let mx=0;for(let i=0;i<N;i++){let s=0;for(let j=0;j<step;j+=Math.max(1,step>>6))s=Math.max(s,Math.abs(ch[i*step+j]||0));peaks[i]=s;mx=Math.max(mx,s)}for(let i=0;i<N;i++)peaks[i]=Math.pow(peaks[i]/(mx||1),.7);ac.close()}catch(x){toast('Audio cargado (sin forma de onda)')}
  e.target.value=''};
 
@@ -884,6 +916,7 @@ let ctx=null,merger=null,audioBus=null,ltcBus=null,nOut=2,devLabel='';
 const SRC={},SPL={};
 let R={audio:'1+2',ltc:'3',aGain:1,lGain:1,fps:25,tc:'01:00:00:00',lms:0,ltcOn:true,audOn:true};
 try{const r=JSON.parse(localStorage.getItem('carolina.route'));if(r)R={...R,...r}}catch(e){}
+R.ltcOn=false; // sin timecode en este show
 const saveR=()=>{try{localStorage.setItem('carolina.route',JSON.stringify(R))}catch(e){}};
 function parseTC(str,fps){const p=String(str).split(/[:;.]/).map(x=>parseInt(x)||0);while(p.length<4)p.unshift(0);return p[0]*3600+p[1]*60+p[2]+p[3]/fps}
 const offS=()=>parseTC(R.tc,R.fps);
