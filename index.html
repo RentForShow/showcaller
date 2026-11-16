@@ -510,7 +510,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <label>Nombre visible (aparece en lo que añada)<input id="uName" required></label>
   <label>Usuario<input id="uUser" required autocapitalize="none" autocomplete="off"></label>
   <label>Contraseña (mínimo 4 caracteres)<input id="uPass" required autocomplete="off"></label>
-  <label>Rol<select id="uRole"><option value="editor">EDITOR (añade y edita)</option><option value="viewer">SOLO LECTURA (solo mira)</option><option value="admin">ADMIN (además gestiona todo)</option></select></label>
+  <label>Rol<select id="uRole"><option value="editor">EDITOR (añade y edita)</option><option value="viewer">SOLO LECTURA (solo mira)</option><option value="reader">LECTOR (ve todo, sin escuchar)</option><option value="admin">ADMIN (además gestiona todo)</option></select></label>
   <button class="go" type="submit">Crear usuario</button>
  </form>
  <div id="uList" style="overflow-y:auto"></div>
@@ -546,7 +546,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.73'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.75'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1533,7 +1533,9 @@ const saveUsers=()=>store.set('carolina.users',JSON.stringify(USERS));
 const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
 const newSalt=()=>hex(crypto.getRandomValues(new Uint8Array(16)));
 async function hashPw(pw,salt){const enc=new TextEncoder(),k=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveBits']);return hex(await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode(salt),iterations:100000,hash:'SHA-256'},k,256))}
-const presetP=r=>r==='viewer'?{cues:0,notes:0,times:0,mood:0}:{cues:1,notes:1,times:1,mood:1};
+const NOHEAR=()=>!!ME&&ME.role==='reader';
+const isRO=r=>r==='viewer'||r==='reader';
+const presetP=r=>isRO(r)?{cues:0,notes:0,times:0,mood:0}:{cues:1,notes:1,times:1,mood:1};
 async function mkUser(name,u,pw,role){const salt=newSalt();return{u:u.trim().toLowerCase(),name:name.trim(),role,p:presetP(role),status:'active',salt,hash:await hashPw(pw,salt)}}
 let authMode='login';
 const can=k=>!!ME&&(ME.role==='admin'||!!(ME.p&&ME.p[k]));
@@ -1554,11 +1556,11 @@ $('aSwitch').onclick=()=>showAuth(authMode==='register'?'login':'register');
 function applyRole(){
  const np=ME.role==='admin'?nPending():0;
  $('bUser').innerHTML='<b style="font-weight:500">'+esc(ME.name)+(np?' ('+np+')':'')+'</b>';
- $('ddUser').innerHTML=`<div class="hint" style="margin:0 0 6px">Sesión: <b>${esc(ME.name)}</b> · ${ME.role==='admin'?'ADMIN':ME.role==='viewer'?'SOLO LECTURA':'EDITOR'}</div>`+(CLOUD?'<button class="it" data-u="pw">Cambiar mi contraseña</button>':'')+(ME.role==='admin'?`<button class="it" data-u="settings">Ajustes${np?' ('+np+' solicitud'+(np>1?'es':'')+')':''}</button>`:'')+'<button class="it" data-u="out">Cerrar sesión</button>';
+ $('ddUser').innerHTML=`<div class="hint" style="margin:0 0 6px">Sesión: <b>${esc(ME.name)}</b> · ${ME.role==='admin'?'ADMIN':ME.role==='viewer'?'SOLO LECTURA':ME.role==='reader'?'LECTOR':'EDITOR'}</div>`+(CLOUD?'<button class="it" data-u="pw">Cambiar mi contraseña</button>':'')+(ME.role==='admin'?`<button class="it" data-u="settings">Ajustes${np?' ('+np+' solicitud'+(np>1?'es':'')+')':''}</button>`:'')+'<button class="it" data-u="out">Cerrar sesión</button>';
  document.querySelectorAll('#ddMenu .it').forEach(b=>{const a=b.dataset.a;if(['name','dur','exp','imp','reset','fake','unfake','share','reh'].includes(a))b.style.display=ME.role==='admin'?'':'none';if(a==='moment'||a==='times')b.style.display=can('times')?'':'none';if(a==='copy')b.style.display=can('cues')?'':'none'});
  restoreEnabled();
  try{updLookChip(S.moments[curIdx()])}catch(e){}
- $('bTrack').style.visibility=ME.role==='admin'?'':'hidden';$('ver').textContent=VERSION;$('ver').style.display=ME.role==='admin'?'':'none';
+ $('bTrack').style.visibility=ME.role==='admin'?'':'hidden';try{$('bAudio')&&($('bAudio').style.display=NOHEAR()?'none':'')}catch(e){}$('ver').textContent=VERSION;$('ver').style.display=ME.role==='admin'?'':'none';
  $('add').style.display=can('cues')?'':'none';$('addNote').style.display=can('notes')?'':'none';
 }
 function login(us){ME={u:us.u,name:us.name,role:us.role,p:us.p||presetP(us.role)};sess.set(us.u,$('aRem').checked);$('auth').style.display='none';$('aPass').value='';applyRole();toast('Hola, '+us.name)}
@@ -1604,7 +1606,7 @@ function buildUsers(){
  const pend=USERS.map((x,i)=>({x,i})).filter(({x})=>x.status==='pending'),act=USERS.map((x,i)=>({x,i})).filter(({x})=>x.status!=='pending');
  $('uPend').innerHTML=pend.length?`<div class="eyebrow" style="padding:14px 24px 4px">Solicitudes pendientes (${pend.length})</div>`+pend.map(({x,i})=>`<div class="trow"><span class="tx"><b>${esc(x.name)}</b> <span class="mono" style="color:var(--mut)">@${esc(x.u)}</span></span><button class="btn sm" data-ua="${i}" data-r="editor">Aprobar como editor</button><button class="btn sm" data-ua="${i}" data-r="viewer">Aprobar solo lectura</button><button class="btn sm" data-uz="${i}">Rechazar</button></div>`).join(''):'';
  $('uList').innerHTML='<div class="eyebrow" style="padding:14px 24px 4px">Usuarios</div>'+act.map(({x,i})=>{const adm=x.role==='admin',p=x.p||presetP(x.role);
-  return `<div class="trow" style="flex-direction:column;align-items:stretch;gap:8px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tx"><b>${esc(x.name)}</b> <span class="mono" style="color:var(--mut)">@${esc(x.u)}</span></span><select class="ti" data-urole="${i}"><option value="admin" ${x.role==='admin'?'selected':''}>ADMIN</option><option value="editor" ${x.role==='editor'?'selected':''}>EDITOR</option><option value="viewer" ${x.role==='viewer'?'selected':''}>SOLO LECTURA</option></select><button class="btn sm" data-up="${i}">Contraseña</button><button class="btn sm" data-ud="${i}">Echar</button></div><div class="perms">${PERMS.map(([k,l])=>`<label><input type="checkbox" data-uperm="${i}:${k}" ${adm||p[k]?'checked':''} ${adm?'disabled':''}> ${l}</label>`).join('')}</div></div>`}).join('');
+  return `<div class="trow" style="flex-direction:column;align-items:stretch;gap:8px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tx"><b>${esc(x.name)}</b> <span class="mono" style="color:var(--mut)">@${esc(x.u)}</span></span><select class="ti" data-urole="${i}"><option value="admin" ${x.role==='admin'?'selected':''}>ADMIN</option><option value="editor" ${x.role==='editor'?'selected':''}>EDITOR</option><option value="viewer" ${x.role==='viewer'?'selected':''}>SOLO LECTURA</option><option value="reader" ${x.role==='reader'?'selected':''}>LECTOR (ve todo, sin audio)</option></select><button class="btn sm" data-up="${i}">Contraseña</button><button class="btn sm" data-ud="${i}">Echar</button></div><div class="perms">${PERMS.map(([k,l])=>`<label><input type="checkbox" data-uperm="${i}:${k}" ${adm||p[k]?'checked':''} ${adm?'disabled':''}> ${l}</label>`).join('')}</div></div>`}).join('');
  if(ME)applyRole();
 }
 $('fUser').onsubmit=async e=>{
@@ -1815,7 +1817,7 @@ function delTrack(id,quiet){const tr=TRK[id];if(!tr)return;try{URL.revokeObjectU
  rebuildPeaks();if(!quiet)toast('Pista quitada')}
 var SRTRK=new Set();
 async function syncRemoteTracks(){
- if(!CLOUD||!SB||!ME||ME.guest)return;let n=0;
+ if(!CLOUD||!SB||!ME||ME.guest||NOHEAR())return;let n=0;
  for(const m of S.moments){const tr=TRK[m.id];
   if(!m.trk){if(tr&&tr.f)delTrack(m.id,true);continue}
   if(tr&&tr.f===m.trk.f)continue;if(SRTRK.has(m.id+m.trk.f))continue;SRTRK.add(m.id+m.trk.f);
@@ -1825,7 +1827,7 @@ async function syncRemoteTracks(){
   catch(e){SRTRK.delete(m.id+m.trk.f)}}
  if(n){rebuildPeaks();toast('Pistas listas')}}
 function syncTracks(ci,m){
- if(audio)return;
+ if(audio||NOHEAR()){if(typeof tAud!=='undefined'&&tAud){try{tAud.pause()}catch(e){}}return}
  let nxt=null;for(let k=ci+1;k<Math.min(S.moments.length,ci+3);k++){const q=S.moments[k];if(TRK[q.id]){nxt=q;break}}
  if(nxt&&nAudId!==nxt.id){nAud=new Audio(TRK[nxt.id].url);nAud.preload='auto';try{nAud.load()}catch(e){}nAudId=nxt.id}
  const tr=TRK[m.id];
@@ -1903,10 +1905,12 @@ async function rehAdd(file){
 function rehRows(){const sel=RP.rowSel;
  return S.moments.map((m,mi)=>{if(isTr(m))return '';const r=m.reh,ok=r&&r.b>r.a;
   return `<div class="trow" style="flex-wrap:wrap;gap:6px"><span class="tx" style="flex:1;min-width:150px">${esc(mTitle(m))}${ok?'':' <span class="tag">SIN MARCAR</span>'}</span><input class="ti mono" data-ra="${mi}" value="${r?rt(r.a):''}" placeholder="inicio" style="width:96px"><input class="ti mono" data-rb="${mi}" value="${r?rt(r.b):''}" placeholder="fin" style="width:96px"><button class="btn sm" data-rm="${mi}:a">⤓ Inicio aquí</button><button class="btn sm" data-rm="${mi}:b">⤒ Fin aquí</button>${ok?`<button class="btn sm" data-rt="${mi}">▶ Probar</button><button class="btn sm" data-rc="${mi}">✕</button>`:''}</div>`}).join('')}
+var REHOPEN=false;
 function buildReh(){const P=rehParts(),off=rehOff();
- let h='<div class="hint" style="margin:0 0 10px">Sube el audio del ensayo en partes (hasta 50 MB cada una). Se escucha por streaming, nadie tiene que descargarlo. Después marca dónde empieza y acaba cada tema.</div>';
+ let h=`<details id="rehFiles" ${(REHOPEN||!P.length)?'open':''} style="margin:0 0 10px"><summary style="cursor:pointer;padding:6px 0;font-size:14px">Archivos de audio (${P.length} ${P.length===1?'parte':'partes'}${P.length?' · '+fmt(off.total,true):''})</summary>`;
+ h+='<div class="hint" style="margin:6px 0 10px">Sube el audio del ensayo en partes (hasta 50 MB cada una). Se escucha por streaming, nadie tiene que descargarlo. Después marca dónde empieza y acaba cada tema.</div>';
  h+=P.map((p,i)=>`<div class="trow"><span class="tx">Parte ${i+1} · ${esc(p.name)} · ${fmt(p.dur,true)} · ${(p.size/1048576).toFixed(1)} MB</span><button class="btn sm" data-rx="${i}">Quitar</button></div>`).join('');
- h+='<div style="margin:10px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="btn" style="cursor:pointer">＋ Subir partes<input type="file" id="rehPick" accept="audio/*" multiple hidden></label><span id="rehMsg" class="hint"></span></div>';
+ h+='<div style="margin:10px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="btn" style="cursor:pointer">＋ Subir partes<input type="file" id="rehPick" accept="audio/*" multiple hidden></label><span id="rehMsg" class="hint"></span></div></details>';
  if(P.length){h+='<div style="display:flex;gap:8px;align-items:center;margin:14px 0 6px;flex-wrap:wrap"><button class="btn" id="rpPlay" style="min-width:48px">▶</button><button class="btn sm" data-rs="-10">−10 s</button><button class="btn sm" data-rs="-1">−1 s</button><button class="btn sm" data-rs="1">+1 s</button><button class="btn sm" data-rs="10">+10 s</button><b class="mono" id="rpT">0:00:00.0</b><span class="hint" style="margin:0">/ '+fmt(off.total,true)+'</span><select id="rpZ" class="ti"><option value="30">Zoom 30 s</option><option value="120" selected>Zoom 2 min</option><option value="600">Zoom 10 min</option></select></div>'
   +'<canvas id="rehWin" style="width:100%;height:120px;background:#0e0e0d;border:1px solid var(--line);cursor:crosshair;display:block"></canvas><canvas id="rehOv" style="width:100%;height:44px;background:#0e0e0d;border:1px solid var(--line);margin-top:6px;cursor:pointer;display:block"></canvas>'
   +'<div class="hint" style="margin:8px 0">Toca la onda para colocarte, dale a ▶ y pulsa «Inicio aquí» / «Fin aquí» en cada tema cuando suene. También puedes escribir el tiempo a mano.</div><div id="rehRows">'+rehRows()+'</div>'}
@@ -1937,8 +1941,9 @@ function rehMark(mi,k){const m=S.moments[mi],g=Math.round(RP.g*10)/10;m.reh=m.re
  dirty();$('rehRows').innerHTML=rehRows()}
 function openReh(){if(!CLOUD||!SB){toast('Requiere la versión con Supabase');return}buildReh();$('mReh').classList.add('open');if(!RP.raf)RP.raf=requestAnimationFrame(rehDraw)}
 (()=>{const bd=$('rehBody');
+ bd.addEventListener('toggle',e=>{if(e.target.id==='rehFiles')REHOPEN=e.target.open},true);
  bd.addEventListener('change',e=>{const t_=e.target;
-  if(t_.id==='rehPick'&&t_.files[0]){const fs=[...t_.files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));t_.value='';(async()=>{for(const f of fs)await rehAdd(f)})();return}
+  if(t_.id==='rehPick'&&t_.files[0]){REHOPEN=true;const fs=[...t_.files].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));t_.value='';(async()=>{for(const f of fs)await rehAdd(f)})();return}
   const ia=t_.dataset.ra,ib=t_.dataset.rb;if(ia===undefined&&ib===undefined)return;
   const mi=+(ia!==undefined?ia:ib),m=S.moments[mi],v=parseT(t_.value);if(isNaN(v)){$('rehRows').innerHTML=rehRows();return}
   m.reh=m.reh||{a:0,b:0};if(ia!==undefined)m.reh.a=v;else m.reh.b=v;dirty();$('rehRows').innerHTML=rehRows()});
@@ -1958,7 +1963,7 @@ function rehLoad(pi){RA.part=pi;RA.loading=1;if(RA.el){try{RA.el.pause()}catch(e
  if(RA.nxEl&&RA.nxPart===pi){RA.el=RA.nxEl;RA.nxEl=null;RA.nxPart=-1;RA.loading=0;return}
  const P=rehParts()[pi];fileUrl(P.f).then(u=>{if(RA.part!==pi||!u){RA.loading=0;return}const el=new Audio(u);el.preload='metadata';el.onerror=()=>{delete URLC[P.f];if(RA.el===el){RA.el=null;RA.part=-1}};RA.el=el;RA.loading=0}).catch(()=>{RA.loading=0;RA.part=-1})}
 function rehSync(m){
- if(!S.rehearsal||!rehParts().length||!CLOUD||!SB||!ME||ME.guest||!m.reh||!(m.reh.b>m.reh.a)||TRK[m.id]||audio||$('mReh').classList.contains('open')){rehStop();return}
+ if(NOHEAR()||!S.rehearsal||!rehParts().length||!CLOUD||!SB||!ME||ME.guest||!m.reh||!(m.reh.b>m.reh.a)||TRK[m.id]||audio||$('mReh').classList.contains('open')){rehStop();return}
  const g=m.reh.a+(t-m.start);if(t<m.start||g>=m.reh.b){rehStop();return}
  const off=rehOff(),pi=rehPartAt(g,off),loc=g-off[pi],P=rehParts();
  if(RA.part!==pi){if(!RA.loading)rehLoad(pi);return}
@@ -1992,7 +1997,7 @@ function joinPop(n){const el=$('joinPop');el.innerHTML='🟢 <b>'+esc(n)+'</b> s
 function chatPop(m){const el=$('chatPop');el.innerHTML='<b>💬 '+esc(m.name)+'</b>'+esc(String(m.text).slice(0,180))+'<i>Toca para abrir el chat</i>';el.classList.add('on');clearTimeout(chatPT);chatPT=setTimeout(()=>el.classList.remove('on'),10000)}
 $('chatPop').onclick=()=>{$('chatPop').classList.remove('on');clearTimeout(chatPT);$('bChat').click()};
 function updOnline(){const n=ONLINE.length;$('bOnline').textContent='● '+n+' conectado'+(n===1?'':'s');
- $('ddOnline').innerHTML='<div class="hint" style="margin:0 0 6px">Conectados ahora</div>'+ONLINE.map(o=>`<div style="padding:4px 0">${esc(o.name||'?')} <span class="mono" style="color:var(--mut);font-size:11px">${o.role==='admin'?'ADMIN':o.role==='viewer'?'SOLO LECTURA':'EDITOR'}</span></div>`).join('')}
+ $('ddOnline').innerHTML='<div class="hint" style="margin:0 0 6px">Conectados ahora</div>'+ONLINE.map(o=>`<div style="padding:4px 0">${esc(o.name||'?')} <span class="mono" style="color:var(--mut);font-size:11px">${o.role==='admin'?'ADMIN':o.role==='viewer'?'SOLO LECTURA':o.role==='reader'?'LECTOR':'EDITOR'}</span></div>`).join('')}
 $('bOnline').onclick=()=>{const o=$('ddOnline').classList.contains('open');closeDD();if(!o)openDD($('ddOnline'),$('bOnline'))};
 async function chatLoad(){try{const {data,error}=await SB.from('chat').select('*').order('created_at',{ascending:false}).limit(100);if(!error&&data){CHAT=data.reverse();updChatN()}}catch(e){}}
 function updChatN(){const n=CHAT.filter(m=>new Date(m.created_at).getTime()>chatRead&&m.user_id!==(ME&&ME.id)).length;$('chatN').textContent=n?'('+n+')':''}
@@ -2076,9 +2081,9 @@ function useShow(d,keep){
 async function cloudLoad(){
  const {data,error}=await SB.from('shows').select('*').eq('id',1).maybeSingle();
  if(error){toast('No se pudo leer el show: '+error.message);return}
- if(data)useShow(data.data);else if(ME.role!=='viewer')await cloudPush();
+ if(data)useShow(data.data);else if(!isRO(ME.role))await cloudPush();
 }
-function cloudQueue(){if(!ME||applying||ME.role==='viewer')return;if(!SB){try{localStorage.setItem('showcaller.unsynced','1')}catch(e){}return}clearTimeout(pushTimer);pushTimer=setTimeout(cloudPush,700)}
+function cloudQueue(){if(!ME||applying||isRO(ME.role))return;if(!SB){try{localStorage.setItem('showcaller.unsynced','1')}catch(e){}return}clearTimeout(pushTimer);pushTimer=setTimeout(cloudPush,700)}
 async function cloudPush(){
  pushTimer=null;if(!SB||!ME)return;
  const {error}=await SB.from('shows').upsert({id:1,data:S,updated_at:new Date().toISOString(),updated_by:ME.id,updated_name:ME.name});
@@ -2105,7 +2110,7 @@ async function cloudBuildUsers(){
  if(error){$('uList').innerHTML='<div class="hint" style="padding:14px 24px">No se pudo leer: '+esc(error.message)+'</div>';return}
  PROF=data;
  $('uList').innerHTML='<div class="hint" style="padding:12px 24px 0">Para <b>crear un usuario</b> o cambiar una contraseña: Supabase → Authentication → Users → Add user. Aparecerá aquí al momento.</div><div class="eyebrow" style="padding:14px 24px 4px">Usuarios</div>'+PROF.map((x,i)=>{const adm=x.role==='admin',p=x.p||presetP(x.role),ban=x.status==='banned',me=x.id===ME.id;
-  return `<div class="trow" style="flex-direction:column;align-items:stretch;gap:8px${ban?';opacity:.6':''}"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tx"><input class="ti" data-cname="${i}" value="${esc(x.name||'')}" placeholder="Nombre" style="width:150px" title="Nombre visible: cámbialo y pulsa fuera para guardar"> <span class="mono" style="color:var(--mut)">${esc(x.email||'')}</span>${ban?' <b>· SIN ACCESO</b>':''}</span><select class="ti" data-crole="${i}" ${ban?'disabled':''}><option value="admin" ${x.role==='admin'?'selected':''}>ADMIN</option><option value="editor" ${x.role==='editor'?'selected':''}>EDITOR</option><option value="viewer" ${x.role==='viewer'?'selected':''}>SOLO LECTURA</option></select>${me?'':`<button class="btn sm" data-cban="${i}">${ban?'Readmitir':'Echar'}</button>`}</div><div class="perms">${PERMS.map(([k,l])=>`<label><input type="checkbox" data-cperm="${i}:${k}" ${adm||p[k]?'checked':''} ${adm||ban?'disabled':''}> ${l}</label>`).join('')}</div></div>`}).join('');
+  return `<div class="trow" style="flex-direction:column;align-items:stretch;gap:8px${ban?';opacity:.6':''}"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tx"><input class="ti" data-cname="${i}" value="${esc(x.name||'')}" placeholder="Nombre" style="width:150px" title="Nombre visible: cámbialo y pulsa fuera para guardar"> <span class="mono" style="color:var(--mut)">${esc(x.email||'')}</span>${ban?' <b>· SIN ACCESO</b>':''}</span><select class="ti" data-crole="${i}" ${ban?'disabled':''}><option value="admin" ${x.role==='admin'?'selected':''}>ADMIN</option><option value="editor" ${x.role==='editor'?'selected':''}>EDITOR</option><option value="viewer" ${x.role==='viewer'?'selected':''}>SOLO LECTURA</option><option value="reader" ${x.role==='reader'?'selected':''}>LECTOR (ve todo, sin audio)</option></select>${me?'':`<button class="btn sm" data-cban="${i}">${ban?'Readmitir':'Echar'}</button>`}</div><div class="perms">${PERMS.map(([k,l])=>`<label><input type="checkbox" data-cperm="${i}:${k}" ${adm||p[k]?'checked':''} ${adm||ban?'disabled':''}> ${l}</label>`).join('')}</div></div>`}).join('');
 }
 async function cloudUpd(i,patch){const x=PROF[i];const {error}=await SB.from('profiles').update(patch).eq('id',x.id);if(error)toast('No se pudo: '+error.message);cloudBuildUsers()}
 $('uList').addEventListener('change',e=>{if(!CLOUD)return;if(e.target.dataset.cname!==undefined){const i=+e.target.dataset.cname,x=PROF[i],nn=e.target.value.trim();if(!nn){e.target.value=x.name||'';return}if(nn===x.name)return;const old=x.name;cloudUpd(i,{name:nn}).then(()=>{if(x.id===ME.id){ME.name=nn;try{localStorage.setItem('showcaller.profile',JSON.stringify(ME))}catch(z){}}try{renameStored([old],nn)}catch(z){}toast('Nombre cambiado a «'+nn+'»')});return}const d=e.target.dataset;
