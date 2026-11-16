@@ -56,9 +56,11 @@ h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:
 .cue.pend{border-left-style:dashed}
 #cueImg{position:absolute;right:3%;top:34%;width:min(38vw,600px);max-height:52%;display:none;align-items:center;justify-content:center;background:#000;border-radius:8px;overflow:hidden;pointer-events:none;z-index:4;opacity:0;transition:opacity .25s}
 #cueImgX{position:absolute;top:6px;right:6px;width:40px;height:40px;border-radius:10px;border:1px solid #ffffff55;background:#000000b0;color:#fff;font-size:24px;line-height:1;pointer-events:auto;cursor:pointer;z-index:2}
-#imgFull{position:fixed;inset:0;background:#000;z-index:60;display:none;align-items:center;justify-content:center;cursor:zoom-out}
+#imgFull{position:fixed;inset:0;background:#000c;z-index:60;display:none;align-items:center;justify-content:center;padding:3vh 3vw;cursor:zoom-out}
+#imgFull .win{position:relative;background:#000;border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 80px #000;max-width:100%;max-height:100%;display:flex;overflow:hidden;cursor:default}
+#imgFullX{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:10px;background:#000b;border:1px solid #ffffff55;color:#fff;font-size:20px;z-index:2}
 #imgFull.on{display:flex}
-#imgFull img{max-width:100%;max-height:100%;object-fit:contain}
+#imgFull img{max-width:94vw;max-height:94vh;object-fit:contain;display:block}
 #cueImg.on{display:flex;opacity:1}
 #cueImg img{width:100%;height:100%;max-height:100%;object-fit:contain;display:block}
 #stage.hasimg .cue{margin-right:calc(min(38vw,600px) + 5%)}
@@ -158,6 +160,14 @@ footer>*,#app>*,main>*{min-width:0}
 .mtop{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px;border-bottom:1px solid var(--line)}
 .mtop h2{font-size:26px;font-weight:500;margin-top:4px}
 .mcols{display:flex;gap:0;overflow:auto;padding:24px 8px 24px 24px}
+.mone{display:flex;flex-direction:column;gap:14px;padding:20px 24px 28px;overflow:auto}
+.mone .bar2{display:flex;gap:18px;align-items:center;justify-content:flex-end;flex-wrap:wrap;font-size:14px;color:var(--mut)}
+.mone .bar2 button{padding:6px 4px}.mone .bar2 button:hover{color:var(--tx)}
+.mone .rg{font-size:14px;color:var(--mut)}
+.mone .desc{font-size:22px;line-height:1.45;color:#e6e3db;white-space:pre-wrap;max-width:1000px}
+.mone .desc.none{color:var(--dim);font-size:16px}
+.mone .mimgs{grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
+.mone .mi img{height:auto;max-height:70vh;object-fit:contain;background:#000}
 .mcol{min-width:280px;flex:1;border-left:1px solid var(--line);padding:0 24px 0 20px;display:flex;flex-direction:column;gap:8px}
 .mcol h3{font-size:20px;font-weight:500}
 .mcol .rg{font-size:12px;color:var(--mut)}
@@ -360,7 +370,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
    <button id="gNow">Volver al ahora</button>
   </aside>
  <div id="cueImg"><img alt=""><button id="cueImgX" title="Ver a tamaño completo">⤢</button></div>
-<div id="imgFull"><img alt=""></div>
+<div id="imgFull"><div class="win"><button id="imgFullX" title="Cerrar">✕</button><img alt=""></div></div>
  </main>
  <footer>
   <div class="ctl">
@@ -524,7 +534,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.62'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.64'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -619,7 +629,7 @@ function buildCues(i){
  shownIdx=i;shownKey=keyOf(i);
  try{hydrateRefs($('cues'))}catch(e){}
 }
-$('eyebrow').addEventListener('click',e=>{if(e.target.id==='chipMood'){buildMood();$('mMood').classList.add('open')}});
+$('eyebrow').addEventListener('click',e=>{if(e.target.id==='chipMood'){MB=null;buildMood();$('mMood').classList.add('open')}});
 $('stage').addEventListener('click',e=>{const cf=e.target.closest('.cf');if(cf){const el=cf.closest('.cue');if(!can('cues')){toast('No tienes permiso');return}const c=S.moments[+el.dataset.m].cues[+el.dataset.k];c.pd=2;c.pdBy=who();c.ed=who();c.eat=Date.now();dirty();toast('Cue confirmado');return}const b=e.target.closest('.ed');if(!b)return;
  if(b.dataset.n!==undefined){openNote(S.notes[+b.dataset.n]);return}
  const el=b.closest('.cue');if(el){const m=S.moments[+el.dataset.m];openCue(m.cues[+el.dataset.k],m)}});
@@ -891,10 +901,20 @@ head();
 /* ---- modals ---- */
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
 document.querySelectorAll('.modal').forEach(m=>{let dn=false;m.addEventListener('pointerdown',e=>{dn=e.target===m});m.addEventListener('click',e=>{if(e.target===m&&dn)m.classList.remove('open');dn=false})});
-function buildMood(){$('mcols').innerHTML=S.blocks.map((b,i)=>{const end=i+1<S.blocks.length?S.blocks[i+1].start:dur(),cm=can('mood');b.imgs=b.imgs||[];
+var MB=null;
+function buildMood(){if(MB!==null&&!S.blocks[MB])MB=null;
+ const cm0=can('mood');$('mcols').className=MB===null?'mcols':'mone';
+ document.querySelector('#mMood .mtop h2').textContent=MB===null?'Bloques':S.blocks[MB].name;
+ document.querySelector('#mMood .mtop .eyebrow').textContent=MB===null?'Moodboard del show':'Moodboard · '+(MB+1)+' / '+S.blocks.length;
+ if(MB!==null){const i=MB,b=S.blocks[i];b.imgs=b.imgs||[];const end=i+1<S.blocks.length?S.blocks[i+1].start:dur();
+  const imgs=b.imgs.concat(...S.moments.filter(mo=>blockOf(mo.start)===i&&mo.imgs&&mo.imgs.length).map(mo=>mo.imgs));
+  const th=imgs.map(r=>fileKind(r)==='img'?`<div class="mi"><img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}"></div>`:`<div class="mi"><a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">${fileKind(r)==='video'?'🎞':fileKind(r)==='audio'?'🎵':'📄'} ${esc(r.name||'Archivo')}</a></div>`).join('');
+  $('mcols').innerHTML=`<div class="bar2"><div class="rg mono" style="margin-right:auto">${fmt(b.start,true)} – ${fmt(end,true)}</div><button data-mall="1">▦ Todos los bloques</button><button data-go="${i}">▷ Ir al bloque</button><button data-e="${i}">✎ Editar</button>${cm0?`<button data-mup="${i}">＋ Fotos</button>`:''}<button data-mnav="-1"${i<=0?' disabled style="opacity:.3"':''}>‹</button><button data-mnav="1"${i>=S.blocks.length-1?' disabled style="opacity:.3"':''}>›</button></div><div class="desc${b.mood?'':' none'}">${b.mood?esc(b.mood):'Sin moodboard'}</div>${th?`<div class="mimgs">${th}</div>`:''}`;
+  hydrateRefs($('mcols'));return}
+ $('mcols').innerHTML=S.blocks.map((b,i)=>{const end=i+1<S.blocks.length?S.blocks[i+1].start:dur(),cm=can('mood');b.imgs=b.imgs||[];
  const th=b.imgs.map((r,k)=>{const x=fileKind(r)==='img'?`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}">`:`<a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">${fileKind(r)==='video'?'🎞':fileKind(r)==='audio'?'🎵':'📄'} ${esc(r.name||'Archivo')}</a>`;return `<div class="mi">${x}${cm?`<button data-mdel="${i}:${k}" title="Quitar">✕</button>`:''}</div>`}).join('');
- return `<div class="mcol" data-b="${i}"><h3>${esc(b.name)}</h3><div class="rg mono">${fmt(b.start,true)} – ${fmt(end,true)}</div><p class="${b.mood?'':'none'}">${b.mood?esc(b.mood):'Sin moodboard'}</p>${th?`<div class="mimgs">${th}</div>`:''}${S.moments.filter(mo=>blockOf(mo.start)===i&&mo.imgs&&mo.imgs.length).map(mo=>`<div class="eyebrow" style="margin:12px 0 4px">${esc(mTitle(mo))}</div><div class="mimgs">${mo.imgs.map(r=>fileKind(r)==='img'?`<div class="mi"><img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}"></div>`:'').join('')}</div>`).join('')}<div class="acts"><button data-e="${i}">Editar</button>${cm?`<button data-mup="${i}">＋ Fotos</button>`:''}<button data-g="${i}">Ir al bloque</button></div></div>`}).join('');hydrateRefs($('mcols'))}
-$('bMood').onclick=()=>{buildMood();$('mMood').classList.add('open')};
+ return `<div class="mcol" data-b="${i}"><h3>${esc(b.name)}</h3><div class="rg mono">${fmt(b.start,true)} – ${fmt(end,true)}</div><p class="${b.mood?'':'none'}">${b.mood?esc(b.mood):'Sin moodboard'}</p>${th?`<div class="mimgs">${th}</div>`:''}${S.moments.filter(mo=>blockOf(mo.start)===i&&mo.imgs&&mo.imgs.length).map(mo=>`<div class="eyebrow" style="margin:12px 0 4px">${esc(mTitle(mo))}</div><div class="mimgs">${mo.imgs.map(r=>fileKind(r)==='img'?`<div class="mi"><img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}"></div>`:'').join('')}</div>`).join('')}<div class="acts"><button data-e="${i}">Editar</button>${cm?`<button data-mup="${i}">＋ Fotos</button>`:''}<button data-g="${i}">Abrir en grande</button></div></div>`}).join('');hydrateRefs($('mcols'))}
+$('bMood').onclick=()=>{MB=null;buildMood();$('mMood').classList.add('open')};
 async function uploadMood(files,bi){
  const b=S.blocks[bi];if(!b||!can('mood'))return;if(!CLOUD||!SB){toast('Subir fotos requiere la web conectada a Supabase');return}b.imgs=b.imgs||[];let ok=0;
  for(const f of files){
@@ -911,12 +931,15 @@ async function uploadMood(files,bi){
 $('mcols').addEventListener('dragover',e=>{if(e.target.closest('.mcol')&&can('mood'))e.preventDefault()});
 $('mcols').addEventListener('drop',e=>{const c=e.target.closest('.mcol');if(!c||!can('mood'))return;e.preventDefault();if(e.dataTransfer.files.length)uploadMood([...e.dataTransfer.files],+c.dataset.b)});
 $('mcols').addEventListener('click',e=>{
- if(e.target.tagName==='IMG'&&e.target.src){window.open(e.target.src,'_blank','noopener');return}
+ if(e.target.tagName==='IMG'&&e.target.src){showImg(e.target.src);return}
  const up=e.target.dataset.mup,md=e.target.dataset.mdel;
  if(up!==undefined){if(!CLOUD){toast('Subir fotos requiere la web conectada a Supabase');return}$('mPick').dataset.b=up;$('mPick').click();return}
  if(md!==undefined&&can('mood')){const [bi,k]=md.split(':').map(Number),r=S.blocks[bi].imgs.splice(k,1)[0];if(r&&SB)SB.storage.from('files').remove([r.f]);save();buildMood();return}
- const g=e.target.dataset.g,ed=e.target.dataset.e;
- if(g!==undefined){setT(S.blocks[+g].start);$('mMood').classList.remove('open')}
+ const g=e.target.dataset.g,ed=e.target.dataset.e,go=e.target.dataset.go;
+ if(g!==undefined){MB=+g;buildMood();$('mcols').scrollTop=0;return}
+ if(e.target.dataset.mall){MB=null;buildMood();return}
+ if(e.target.dataset.mnav){const n=MB+ +e.target.dataset.mnav;if(S.blocks[n]){MB=n;buildMood()}return}
+ if(go!==undefined){setT(S.blocks[+go].start);$('mMood').classList.remove('open');return}
  if(ed!==undefined){if(!can('mood')){toast('No tienes permiso para editar el moodboard');return}const b=S.blocks[+ed];editor('Moodboard · '+b.name,'Descripción',b.mood,v=>{b.mood=v;save();buildMood()},null,true)}});
 function editor(kind,lbl,val,cb,next,multi){
  $('eKind').textContent=kind;$('eTitle').textContent=lbl;$('eLbl').firstChild.textContent=lbl;$('eTxt').value=val;$('eTxt').rows=multi?6:1;
@@ -1638,8 +1661,9 @@ let beeped=new Set(),lastT=0;
 
 var CI={f:null,pre:new Set()};
 function isImgRef(r){return r&&r.f&&(/^image\//.test(r.type||'')||/\.(png|jpe?g|gif|webp|avif|bmp)$/i.test(r.name||r.f))}
-$('cueImgX').onclick=()=>{const u=$('cueImg').querySelector('img').src;if(!u)return;$('imgFull').querySelector('img').src=u;$('imgFull').classList.add('on')};
-$('imgFull').onclick=()=>$('imgFull').classList.remove('on');
+function showImg(u){if(!u)return;$('imgFull').querySelector('img').src=u;$('imgFull').classList.add('on')}
+$('cueImgX').onclick=()=>showImg($('cueImg').querySelector('img').src);
+$('imgFull').onclick=e=>{if(e.target.id==='imgFull'||e.target.id==='imgFullX')$('imgFull').classList.remove('on')};
 addEventListener('keydown',e=>{if(e.key==='Escape')$('imgFull').classList.remove('on')});
 function cueImgTick(){
  const box=$('cueImg');if(!box)return;let cur=null,curA=-1;
