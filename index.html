@@ -55,6 +55,10 @@ h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:
 .cue .pb i{position:absolute;left:0;top:0;bottom:0;background:var(--c);opacity:.9}
 .cue.pend{border-left-style:dashed}
 #cueImg{position:absolute;right:3%;top:34%;width:min(38vw,600px);max-height:52%;display:none;align-items:center;justify-content:center;background:#000;border-radius:8px;overflow:hidden;pointer-events:none;z-index:4;opacity:0;transition:opacity .25s}
+#cueImgX{position:absolute;top:6px;right:6px;width:40px;height:40px;border-radius:10px;border:1px solid #ffffff55;background:#000000b0;color:#fff;font-size:24px;line-height:1;pointer-events:auto;cursor:pointer;z-index:2}
+#imgFull{position:fixed;inset:0;background:#000;z-index:60;display:none;align-items:center;justify-content:center;cursor:zoom-out}
+#imgFull.on{display:flex}
+#imgFull img{max-width:100%;max-height:100%;object-fit:contain}
 #cueImg.on{display:flex;opacity:1}
 #cueImg img{width:100%;height:100%;max-height:100%;object-fit:contain;display:block}
 #stage.hasimg .cue{margin-right:calc(min(38vw,600px) + 5%)}
@@ -355,7 +359,8 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
    <div id="glist"></div>
    <button id="gNow">Volver al ahora</button>
   </aside>
- <div id="cueImg"><img alt=""></div>
+ <div id="cueImg"><img alt=""><button id="cueImgX" title="Ver a tamaño completo">⤢</button></div>
+<div id="imgFull"><img alt=""></div>
  </main>
  <footer>
   <div class="ctl">
@@ -519,7 +524,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.60'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.62'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1633,6 +1638,9 @@ let beeped=new Set(),lastT=0;
 
 var CI={f:null,pre:new Set()};
 function isImgRef(r){return r&&r.f&&(/^image\//.test(r.type||'')||/\.(png|jpe?g|gif|webp|avif|bmp)$/i.test(r.name||r.f))}
+$('cueImgX').onclick=()=>{const u=$('cueImg').querySelector('img').src;if(!u)return;$('imgFull').querySelector('img').src=u;$('imgFull').classList.add('on')};
+$('imgFull').onclick=()=>$('imgFull').classList.remove('on');
+addEventListener('keydown',e=>{if(e.key==='Escape')$('imgFull').classList.remove('on')});
 function cueImgTick(){
  const box=$('cueImg');if(!box)return;let cur=null,curA=-1;
  if(CLOUD&&SB&&ME&&!ME.guest){for(const mo of S.moments)for(const c of mo.cues){if(!c.refs||!c.refs.length||!enabled.has(c.d))continue;const r=c.refs.find(isImgRef);if(!r)continue;
@@ -1934,7 +1942,7 @@ function cloudExtras(){if(!SB||!ME||ME.guest)return;$('bOnline').style.display='
  try{synStart()}catch(e){}
  try{loadPeople().then(()=>{if($('mTodo').classList.contains('open'))buildTodo()})}catch(e){}
  chatLoad();try{SB.channel('chat-1').on('postgres_changes',{event:'INSERT',schema:'public',table:'chat'},p=>{CHAT.push(p.new);if(CHAT.length>300)CHAT.shift();
-  if($('mChat').classList.contains('open')){chatRender()}else{updChatN();if(p.new.user_id!==ME.id)chatPop(p.new)}}).subscribe()}catch(e){}}
+  if($('mChat').classList.contains('open')){chatRender()}else{updChatN();if(p.new.user_id!==ME.id)chatPop(p.new)}}).on('postgres_changes',{event:'DELETE',schema:'public',table:'chat'},p=>{const id=p.old&&p.old.id;if(id==null)return;CHAT=CHAT.filter(m=>m.id!==id);if($('mChat').classList.contains('open'))chatRender()}).subscribe()}catch(e){}}
 var chatPT=null,PRESOK=false,joinPT=null;
 document.addEventListener('pointerdown',()=>{const j=$('joinPop');if(j.classList.contains('on')){j.classList.remove('on');clearTimeout(joinPT)}},true);
 function joinPop(n){const el=$('joinPop');el.innerHTML='🟢 <b>'+esc(n)+'</b> se ha conectado';el.classList.add('on');clearTimeout(joinPT);joinPT=setTimeout(()=>el.classList.remove('on'),10000)}
@@ -1945,7 +1953,8 @@ function updOnline(){const n=ONLINE.length;$('bOnline').textContent='● '+n+' c
 $('bOnline').onclick=()=>{const o=$('ddOnline').classList.contains('open');closeDD();if(!o)openDD($('ddOnline'),$('bOnline'))};
 async function chatLoad(){try{const {data,error}=await SB.from('chat').select('*').order('created_at',{ascending:false}).limit(100);if(!error&&data){CHAT=data.reverse();updChatN()}}catch(e){}}
 function updChatN(){const n=CHAT.filter(m=>new Date(m.created_at).getTime()>chatRead&&m.user_id!==(ME&&ME.id)).length;$('chatN').textContent=n?'('+n+')':''}
-function chatRender(){const l=$('chatList');l.innerHTML=CHAT.length?CHAT.map(m=>`<div style="padding:7px 0;border-top:1px solid var(--line)"><div class="hint" style="margin:0 0 2px"><b>${esc(m.name)}</b> · ${new Date(m.created_at).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div><div>${esc(m.text)}</div></div>`).join(''):'<div class="hint" style="padding:14px 0">Sin mensajes todavía.</div>';l.scrollTop=l.scrollHeight;chatRead=Date.now();try{localStorage.setItem('showcaller.chatread',String(chatRead))}catch(e){}updChatN()}
+function chatRender(){const l=$('chatList');l.innerHTML=CHAT.length?CHAT.map(m=>`<div style="padding:7px 0;border-top:1px solid var(--line)"><div class="hint" style="margin:0 0 2px"><b>${esc(m.name)}</b> · ${new Date(m.created_at).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div><div style="display:flex;gap:8px;align-items:flex-start"><span style="flex:1">${esc(m.text)}</span>${ME&&ME.role==='admin'?`<button class="ed" data-cdel="${m.id}" title="Borrar mensaje">🗑</button>`:''}</div></div>`).join(''):'<div class="hint" style="padding:14px 0">Sin mensajes todavía.</div>';l.scrollTop=l.scrollHeight;chatRead=Date.now();try{localStorage.setItem('showcaller.chatread',String(chatRead))}catch(e){}updChatN()}
+$('chatList').addEventListener('click',async e=>{const b=e.target.closest('[data-cdel]');if(!b)return;const id=+b.dataset.cdel;if(!SB||!confirm('¿Borrar este mensaje para todos?'))return;const {error}=await SB.from('chat').delete().eq('id',id);if(error){toast('No se pudo borrar: '+error.message);return}CHAT=CHAT.filter(m=>m.id!==id);chatRender()});
 $('bChat').onclick=()=>{chatRender();$('mChat').classList.add('open');setTimeout(()=>$('chatT').focus(),50)};
 $('fChat').onsubmit=async e=>{e.preventDefault();const v=$('chatT').value.trim();if(!v||!SB)return;$('chatT').value='';const {error}=await SB.from('chat').insert({name:ME.name,text:v});if(error){toast('No se pudo enviar: '+error.message+' (¿has ejecutado supabase_chat.sql?)');$('chatT').value=v}};
 // enlace de solo lectura
