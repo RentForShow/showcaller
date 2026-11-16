@@ -216,7 +216,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
     <button class="pb3" id="addNote" title="Nota o petición" style="font-size:16px">✎</button>
     <div class="clock mono"><b id="ct">0:00</b> <span>/ <span id="dur">0:00</span></span></div>
    </div>
-   <div class="sub"><button id="expand">⤢ Expandir</button><button id="rate">⏱ x1</button><button id="zoom">🔍 Todo</button><button id="bAudio">🎚 Audio y salidas</button></div>
+   <div class="sub"><button id="expand">⤢ Expandir</button><button id="rate">⏱ x1</button><span class="seg" id="zoomSeg" style="display:inline-flex;font-size:12px"><button type="button" data-z="2" style="padding:4px 10px">Tema</button><button type="button" data-z="1" style="padding:4px 10px">Bloque</button><button type="button" data-z="0" class="on" style="padding:4px 10px">Show</button></span><button id="bAudio">🎚 Audio y salidas</button></div>
   </div>
   <div style="min-width:0"><div id="tlInfo" class="mono"></div><canvas id="tl"></canvas></div>
  </footer>
@@ -325,7 +325,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.5'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.06'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -440,10 +440,11 @@ function sizeTL(){const r=cv.getBoundingClientRect(),dp=devicePixelRatio||1;W=r.
 addEventListener('resize',sizeTL);
 function genPeaks(){let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;peaks=new Float32Array(600);for(let i=0;i<600;i++){const e=.35+.4*Math.abs(Math.sin(i/37))+.2*rnd();peaks[i]=Math.min(1,e)}}
 genPeaks();
-let zi=0,VW={v0:0,v1:1},frozen=null,tlTimer=null;
-const ZS=[0,600,120,30],ZN=['Todo','10 min','2 min','30 s'];
-function view(){const D_=dur(),sp=ZS[zi];if(!sp||sp>=D_)return{v0:0,v1:D_};const v0=Math.max(0,Math.min(D_-sp,t-sp*.35));return{v0,v1:v0+sp}}
-$('zoom').onclick=()=>{zi=(zi+1)%ZS.length;$('zoom').textContent='🔍 '+ZN[zi]};
+let zmode=0,VW={v0:0,v1:1},frozen=null,tlTimer=null;
+function view(){const D_=dur();if(!zmode)return{v0:0,v1:D_};const ci=curIdx(),m=S.moments[ci];
+ if(zmode===2)return{v0:m.start,v1:Math.max(m.start+1,momEnd(ci))};
+ const bi=Math.max(0,blockOf(m.start)),b0=S.blocks[bi]?S.blocks[bi].start:0,b1=bi+1<S.blocks.length?S.blocks[bi+1].start:D_;return{v0:b0,v1:Math.max(b0+1,b1)}}
+$('zoomSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;zmode=+b.dataset.z;document.querySelectorAll('#zoomSeg button').forEach(x=>x.classList.toggle('on',x===b))});
 let EXP=false,HITS=[];
 const SH={show:'SHOW',orq:'ORQ',lx:'LX',rea:'REA',pan:'PANT',fx:'FX',aud:'AUD',back:'BACK',cam:'CAM',notas:'NOTAS'};
 const sh=id=>D[id].s||SH[id]||D[id].n.slice(0,4);
