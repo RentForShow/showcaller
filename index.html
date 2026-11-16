@@ -486,7 +486,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.37'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.38'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1829,8 +1829,11 @@ async function cloudEnter(user){
  ME={u:pr.email,id:pr.id,name:pr.name||pr.email,role:pr.role,p:pr.p||presetP(pr.role)};
  try{localStorage.setItem('showcaller.profile',JSON.stringify(ME))}catch(e){}
  $('auth').style.display='none';$('aPass').value='';applyRole();
- await cloudLoad();cloudListen();cloudExtras();toast('Hola, '+ME.name);
+ await cloudLoad();try{renameStored([pr.email,String(pr.email||'').split('@')[0]],ME.name)}catch(e){}cloudListen();cloudExtras();toast('Hola, '+ME.name);
 }
+function renameStored(olds,nn){if(!ME||ME.role!=='admin'||!nn)return;let j=JSON.stringify(S),ch=false;
+ olds.forEach(o=>{if(o&&o!==nn){const a='"'+o+'"';if(j.includes(a)){j=j.split(a).join('"'+nn+'"');ch=true}}});
+ if(ch){useShow(JSON.parse(j),true);save()}}
 function useShow(d,keep){
  if(!keep)UH=[];SEL.clear();try{updSel()}catch(e){}
  applying=true;try{S=d;S.notes=S.notes||[];S.todo=S.todo||[];loadDepts();sortM();migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
