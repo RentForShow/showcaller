@@ -45,13 +45,13 @@ h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:
 .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--tx)}
 .next{font-size:11px;letter-spacing:.1em;color:var(--mut);text-align:right;margin-bottom:18px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 .next span.t{color:var(--tx);letter-spacing:0}
-.cue{border-left:2px solid var(--c);padding:3px 0 7px 20px;margin-bottom:5px;position:relative}
-.cue .dep{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.16em;font-weight:600;color:var(--c);text-transform:uppercase;margin-bottom:3px}
+.cue{border-left:2px solid var(--c);padding:6px 0 14px 28px;margin-bottom:10px;position:relative}
+.cue .dep{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.18em;font-weight:600;color:var(--c);text-transform:uppercase;margin-bottom:8px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--c);display:inline-block;flex:none}
 .cue .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
-.cue .txt{font-size:clamp(15px,1.5vw,18px);font-weight:400;line-height:1.2}
-.cue .cd{font-size:13px;color:var(--mut);white-space:nowrap}
-.cue .pb{height:2px;background:var(--line);margin-top:5px;position:relative}
+.cue .txt{font-size:clamp(20px,3.6vw,26px);font-weight:400;line-height:1.2}
+.cue .cd{font-size:15px;color:var(--mut);white-space:nowrap}
+.cue .pb{height:2px;background:var(--line);margin-top:10px;position:relative}
 .cue .pb i{position:absolute;left:0;top:0;bottom:0;background:var(--c);opacity:.9}
 .cue.pend{border-left-style:dashed}
 #cueImg{position:absolute;right:3%;top:34%;width:min(38vw,600px);max-height:52%;display:none;align-items:center;justify-content:center;background:#000;border-radius:8px;overflow:hidden;pointer-events:none;z-index:4;opacity:0;transition:opacity .25s}
@@ -202,11 +202,19 @@ footer>*,#app>*,main>*{min-width:0}
 #tlInfo{font-size:11px;color:var(--mut);height:16px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cue .rg{margin-left:auto;color:var(--mut);letter-spacing:0;font-weight:400;font-size:11px;text-transform:none}
 .ed{color:var(--mut);padding:0 6px;font-size:13px}.ed:hover{color:var(--tx)}
-.cue.act,.cue:not(.act):not(.done){display:grid;grid-template-columns:minmax(120px,max-content) 1fr;column-gap:14px;align-items:center}
-.cue.act>*,.cue:not(.act):not(.done)>*{grid-column:2}
-.cue.act>.dep,.cue:not(.act):not(.done)>.dep{grid-column:1;grid-row:1;margin:0}
-.cue.act>.row,.cue:not(.act):not(.done)>.row{grid-column:2;grid-row:1}
-.cue.act>.pb{grid-column:1/-1;margin-top:3px}
+#cues.cl1 .cue.act,#cues.cl1 .cue:not(.act):not(.done),#cues.cl2 .cue.act,#cues.cl2 .cue:not(.act):not(.done){display:grid;grid-template-columns:minmax(90px,max-content) 1fr;column-gap:14px;align-items:center}
+#cues.cl1 .cue>*,#cues.cl2 .cue>*{grid-column:2}
+#cues.cl1 .cue>.dep,#cues.cl2 .cue>.dep{grid-column:1;grid-row:1;margin:0}
+#cues.cl1 .cue>.row,#cues.cl2 .cue>.row{grid-column:2;grid-row:1}
+#cues.cl1 .cue>.pb,#cues.cl2 .cue>.pb{grid-column:1/-1;margin-top:3px}
+#cues.cl1 .cue{padding:6px 0 8px 20px;margin-bottom:6px}
+#cues.cl1 .cue.act .txt{font-size:clamp(18px,1.9vw,22px)}
+#cues.cl1 .cue .cd{font-size:14px}
+#cues.cl2 .cue{padding:3px 0 7px 20px;margin-bottom:5px}
+#cues.cl2 .cue .dep{font-size:11px;letter-spacing:.16em}
+#cues.cl2 .cue .txt{font-size:clamp(15px,1.5vw,18px)}
+#cues.cl2 .cue .cd{font-size:13px}
+#cues.cl2 .cue .pb{margin-top:3px}
 .cue.act{background:#ffffff08}.cue.act .cd{color:var(--tx);font-weight:700}
 .nt{display:flex;gap:6px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-size:12px;flex-wrap:wrap}
 .nt .tag{font-size:9px;padding:0 5px}
@@ -324,7 +332,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  .nav button{padding:10px 12px;font-size:14px}
  .pb1{width:44px;height:44px}.pb2{min-width:36px;height:36px;width:36px}.pb3{height:38px;width:auto;padding:0 14px}
  #go{height:48px;min-width:60px;border:1px solid var(--line);border-radius:10px}
- .cue .txt{font-size:clamp(16px,2vw,20px);line-height:1.2}
+ .cue .txt{font-size:clamp(22px,2.6vw,32px);line-height:1.2}
  .cue .ed,.cue .cf{padding:10px 14px;font-size:15px}
  .sub button{padding:4px 5px;font-size:13px}
  footer{padding:8px 14px calc(8px + env(safe-area-inset-bottom));gap:10px}
@@ -546,7 +554,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.75'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.76'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -626,6 +634,10 @@ const who=()=>ME?ME.name:'';
 const fdur=e=>e<60?(Math.round(e*10)/10)+' s':fmt(e);
 function carryOf(i){const m=S.moments[i],r=[];for(let j=0;j<i;j++){const pm=S.moments[j];pm.cues.forEach((c,k)=>{if(c.e>0&&enabled.has(c.d)&&pm.start+c.o+c.e>m.start)r.push({j,k,c})})}return r.sort((a,b)=>S.moments[a.j].start+a.c.o-(S.moments[b.j].start+b.c.o))}
 function keyOf(i){return i+'|'+carryOf(i).map(x=>x.j+'.'+x.k+'.'+x.c.e+'.'+x.c.o).join()+'|'+S.moments[i].cues.length+'|'+S.notes.length+'|'+[...enabled].join()}
+var CLV=0;
+function fitCues(){const el=$('cues');if(!el||document.documentElement.classList.contains('mob')||innerWidth<=700)return;
+ let lv=0;for(;lv<=2;lv++){el.className=lv?'cl'+lv:'';if(el.scrollHeight<=el.clientHeight+1)break}if(lv>2){lv=2;el.className='cl2'}CLV=lv}
+addEventListener('resize',()=>{try{fitCues()}catch(e){}});setInterval(()=>{try{fitCues()}catch(e){}},700);
 function buildCues(i){
  const m=S.moments[i];$('mname').textContent=mTitle(m);updLookChip(m);
  {const bk=S.blocks[blockOf(m.start)]||{name:'BLOQUE',mood:''};
@@ -634,11 +646,11 @@ function buildCues(i){
  const enT=Math.max(1,momEnd(i)-m.start);
  $('mticks').innerHTML=m.cues.filter(c=>enabled.has(c.d)).map(c=>`<span style="left:${Math.min(100,c.o/enT*100)}%;background:${(D[c.d]||D.notas).c}"></span>`).join('')}
  const list=carryOf(i).concat(m.cues.map((c,k)=>({j:i,k,c})).filter(x=>enabled.has(x.c.d)));
- $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.key?'<span class="tag keytag">★ IMPORTANTE</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${c.pd===1?'<span class="tag pdtag">? PENDIENTE</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}${c.pd===1?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.cm&&c.cm.length?`<div class="cmts">${c.cm.slice(-3).map(q=>'💬 <b>'+esc(dn(q.by)||'')+'</b> '+esc(q.x)).join('<br>')}</div>`:''}${CLOUD&&c.refs&&c.refs.length?`<div class="atts">📎 ${c.refs.map(r=>`<a data-f="${esc(r.f)}" data-open="1">${esc(r.name||'archivo')}</a>`).join('')}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
+ $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.key?'<span class="tag keytag" title="Importante">★</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${c.pd===1?'<span class="tag pdtag" title="Pendiente de confirmar">?</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}${c.pd===1?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.cm&&c.cm.length?`<div class="cmts">${c.cm.slice(-3).map(q=>'💬 <b>'+esc(dn(q.by)||'')+'</b> '+esc(q.x)).join('<br>')}</div>`:''}${CLOUD&&c.refs&&c.refs.length?`<div class="atts">📎 ${c.refs.map(r=>`<a data-f="${esc(r.f)}" data-open="1">${esc(r.name||'archivo')}</a>`).join('')}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
  const end=momEnd(i),last=i===S.moments.length-1;
  const ns=S.notes.filter(n=>n.t>=m.start&&(n.t<end||(last&&n.t<=end))&&(!n.d||enabled.has(n.d)));
  $('nbox').innerHTML=ns.length?`<div class="nbt">Notas y peticiones (${ns.length})</div>`+(ns.map(n=>`<div class="nt${n.done?' done':''}"><span class="tag">${NT[n.k]}</span>${n.d&&D[n.d]?`<span class="tag" style="background:${D[n.d].c};border-color:${D[n.d].c};color:#0e0e0d;font-weight:700">${D[n.d].n}</span>`:''}<span class="tx">${esc(n.x)}</span><button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`).join('')):'';
- shownIdx=i;shownKey=keyOf(i);
+ shownIdx=i;shownKey=keyOf(i);try{fitCues()}catch(e){}
  try{hydrateRefs($('cues'))}catch(e){}
 }
 $('eyebrow').addEventListener('click',e=>{if(e.target.id==='chipMood'){MB=null;buildMood();$('mMood').classList.add('open')}});
