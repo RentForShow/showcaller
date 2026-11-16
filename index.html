@@ -158,6 +158,8 @@ footer>*,#app>*,main>*{min-width:0}
 .mbox>.form{max-width:none}
 #chatPop{position:fixed;top:14px;right:14px;z-index:90;max-width:min(340px,calc(100vw - 28px));background:#1d1d1b;border:1px solid var(--tx);border-radius:10px;padding:10px 14px;box-shadow:0 8px 30px #000a;cursor:pointer;display:none}
 #chatPop.on{display:block}
+#joinPop{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:91;background:#1d1d1b;border:1px solid var(--tx);border-radius:10px;padding:10px 16px;box-shadow:0 8px 30px #000a;display:none;font-size:14px;max-width:calc(100vw - 28px)}
+#joinPop.on{display:block}
 #chatPop b{display:block;font-size:12px;letter-spacing:.06em;margin-bottom:3px}
 #chatPop i{display:block;font-style:normal;font-size:12px;color:var(--mut);margin-top:4px}
 .form label{font-size:11px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;display:flex;flex-direction:column;gap:6px}
@@ -382,7 +384,11 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <button class="btn" type="button" id="fDel" style="display:none">Borrar cue</button>
  </form>
 </div></div>
-<div id="chatPop"></div>
+<div class="modal" id="mReh"><div class="mbox" style="width:min(1100px,100%)">
+ <div class="mtop"><div><div class="eyebrow">Audio del ensayo</div><h2>Partes y marcas de cada tema</h2></div><button data-close>✕</button></div>
+ <div id="rehBody" style="overflow-y:auto;min-height:0;padding:16px 24px"></div>
+</div></div>
+<div id="chatPop"></div><div id="joinPop"></div>
 <div id="fsBar"><button id="fsPrev">⏮</button><button id="fsPlay">▶</button><button id="fsNight">🌑</button><button id="fsExit">✕ Salir</button></div>
 <div class="modal" id="mSet"><div class="mbox" style="width:min(440px,100%)">
  <div class="mtop"><div><div class="eyebrow">Preferencias</div><h2>Ajustes</h2></div><button data-close>✕</button></div>
@@ -488,7 +494,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.43'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.46'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -801,11 +807,12 @@ function buildDep(){$('ddDep').innerHTML=`<label class="all"><input type="checkb
 $('ddDep').addEventListener('change',e=>{if(e.target.id==='allDep'){enabled=e.target.checked?new Set(DEPTS.map(d=>d.id)):new Set()}else{e.target.checked?enabled.add(e.target.dataset.d):enabled.delete(e.target.dataset.d)}buildDep();updPanel(true);saveEnabled()});
 $('bDep').onclick=()=>{const o=$('ddDep').classList.contains('open');closeDD();if(!o){buildDep();openDD($('ddDep'),$('bDep'))}};
 $('bMenu').onclick=()=>{const o=$('ddMenu').classList.contains('open');closeDD();if(!o)openDD($('ddMenu'),$('bMenu'))};
-$('ddMenu').innerHTML=['Añadir momento aquí|moment','Temas y duraciones|times','Renombrar show y sala|name','Duración del show (sin audio)|dur','Exportar guion (copiar JSON)|exp','Importar guion (archivo JSON)|imp','Rellenar con eventos de prueba|fake','Borrar eventos de prueba|unfake','Restaurar setlist inicial|reset','Deshacer último cambio|undo','Preferencias (modo noche)|prefs','Enlace de solo lectura|share'].map(s=>{const[a,b]=s.split('|');return `<button class="it" data-a="${b}">${a}</button>`}).join('');
+$('ddMenu').innerHTML=['Añadir momento aquí|moment','Temas y duraciones|times','Renombrar show y sala|name','Duración del show (sin audio)|dur','Exportar guion (copiar JSON)|exp','Importar guion (archivo JSON)|imp','Rellenar con eventos de prueba|fake','Borrar eventos de prueba|unfake','Restaurar setlist inicial|reset','Deshacer último cambio|undo','Preferencias (modo noche)|prefs','Audio del ensayo (partes y marcas)|reh','Enlace de solo lectura|share'].map(s=>{const[a,b]=s.split('|');return `<button class="it" data-a="${b}">${a}</button>`}).join('');
 $('ddMenu').addEventListener('click',e=>{const a=e.target.dataset.a;if(!a)return;closeDD();
- if(['name','dur','exp','imp','reset','fake','unfake','share'].includes(a)&&(!ME||ME.role!=='admin')){toast('Solo el administrador puede hacerlo');return}
+ if(['name','dur','exp','imp','reset','fake','unfake','share','reh'].includes(a)&&(!ME||ME.role!=='admin')){toast('Solo el administrador puede hacerlo');return}
  if((a==='moment'||a==='times')&&!can('times')){toast('No tienes permiso para cambiar los temas');return}
  if(a==='prefs'){$('bSet').click();return}
+ if(a==='reh'){openReh();return}
  if(a==='times'){buildTimes();$('mTimes').classList.add('open')}
  if(a==='moment')editor('Nuevo momento','Nombre del momento','',v=>{if(!v)return;S.moments.push({name:v,start:Math.floor(t),kind:'momento',cues:[]});sortM();save();lastPanelIdx=-1});
  if(a==='name')editor('Show','Nombre del show',S.name,v=>{if(v){S.name=v;head();save()}},()=>editor('Sala','Sala / venue',S.venue,v=>{S.venue=v;head();save()}));
@@ -863,7 +870,7 @@ let UH=[],lastSnap=JSON.stringify(S),lastH=0;
 function updUndo(){const b=$('bUndo');if(b){b.disabled=!UH.length;b.style.opacity=UH.length?1:.4}}
 function hist(){const j=JSON.stringify(S);if(lastSnap===null||j===lastSnap){lastSnap=j;return}const n=Date.now();if(n-lastH>800){UH.push(lastSnap);if(UH.length>60)UH.shift()}lastH=n;lastSnap=j;updUndo()}
 function undo(){if(!UH.length){toast('Nada que deshacer');return}const j=UH.pop();useShow(JSON.parse(j),true);save();lastSnap=j;lastH=0;updUndo();toast('Cambio deshecho')}
-function dirty(){hist();try{if(Object.keys(TRK).length)rebuildPeaks()}catch(e){}shownKey='';lastPanelIdx=-1;save();updTodoN();if($('mTodo').classList.contains('open'))buildTodo()}
+function dirty(){hist();try{if(Object.keys(TRK).length||S.rehearsal)rebuildPeaks()}catch(e){}shownKey='';lastPanelIdx=-1;save();updTodoN();if($('mTodo').classList.contains('open'))buildTodo()}
 let fmode=0;
 const fSongM=()=>S.moments[+$('fSong').value]||S.moments[0];
 const fBase=()=>fmode?fSongM().start:0;
@@ -986,7 +993,7 @@ function buildMM(){
  h+=sec('INVITADO')+`<input class="ti" id="mmGuest" ${cn?'':'readonly'} placeholder="${cn?'Nombre del invitado (si lo hay)':''}" value="${esc(m.guest||'')}" style="width:100%">`;
  m.imgs=m.imgs||[];const cmo=can('mood');
  h+=sec('MOODBOARD DEL TEMA')+(m.imgs.length?`<div class="mimgs">${m.imgs.map((r,k)=>{const x=fileKind(r)==='img'?`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}">`:`<a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">📄 ${esc(r.name||'Archivo')}</a>`;return `<div class="mi">${x}${cmo?`<button data-mm="tmdel" data-k="${k}" title="Quitar">✕</button>`:''}</div>`}).join('')}</div>`:'<div class="hint" style="margin:0 0 8px">Sin imágenes de moodboard en este tema.</div>')+(cmo?(CLOUD?'<button class="btn sm" data-mm="tmup">＋ Fotos</button>':'<div class="hint">Subir fotos requiere la web conectada a Supabase.</div>'):'');
- {const tr=TRK[m.id];h+=sec('PISTA DE AUDIO')+(tr?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>🎵 ${esc(tr.name)}${tr.dur?' · '+fmt(tr.dur):''}</span><button class="btn sm" data-mm="trup">Cambiar</button><button class="btn sm" data-mm="trdel">Quitar</button></div>`:`<button class="btn sm" data-mm="trup">＋ Cargar pista</button>`)+'<div class="hint" style="margin-top:6px">Suena sola al entrar en este tema y se precarga el anterior. Se sube a la nube y todo el equipo la recibe sola.</div>'}
+ {const tr=TRK[m.id];if(adm||tr)h+=sec('PISTA DE AUDIO')+(tr?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>🎵 ${esc(tr.name)}${tr.dur?' · '+fmt(tr.dur):''}</span>${adm?'<button class="btn sm" data-mm="trup">Cambiar</button><button class="btn sm" data-mm="trdel">Quitar</button>':''}</div>`:`<button class="btn sm" data-mm="trup">＋ Cargar pista</button>`)+(adm?'<div class="hint" style="margin-top:6px">Suena sola al entrar en este tema y se precarga el anterior. Se sube a la nube y todo el equipo la recibe sola.</div>':'')}
  h+=sec('NOTAS')+`<textarea class="ti" id="mmNote" rows="3" ${cn?'':'readonly'} placeholder="${cn?'Notas del tema':''}" style="width:100%;resize:vertical">${esc(m.note||'')}</textarea>`;
  h+=sec('REFERENCIAS')+(m.refs.length?m.refs.map((r,k)=>{
   const kind=r.f?fileKind(r):'link',cap=`<div class="hint" style="margin:4px 0 0">${esc(r.name||r.t||r.u||'')}${r.size?' · '+fsize(r.size):''}${r.by?' · '+esc(r.by):''}${cn?` <button data-mm="rdel" data-k="${k}" style="margin-left:8px" title="Quitar">✕</button>`:''}</div>`;
@@ -1008,6 +1015,7 @@ $('mmBody').addEventListener('click',e=>{
  const b=e.target.closest('[data-mm]');if(!b)return;const m=S.moments[mmI],a=b.dataset.mm,k=+b.dataset.k,adm=ME&&ME.role==='admin';
  if(a==='go'){setT(m.start);$('mMoment').classList.remove('open');return}
  if(a==='tmup'){$('tmPick').click();return}
+ if((a==='trup'||a==='trdel')&&!adm){toast('Solo el administrador puede cargar audio');return}
  if(a==='trup'){$('trPick').click();return}
  if(a==='trdel'){delTrack(m.id);buildMM();return}
  if(a==='tmdel'&&can('mood')){const r=m.imgs.splice(k,1)[0];if(r&&r.f&&SB)SB.storage.from('files').remove([r.f]);dirty();buildMM();return}
@@ -1135,7 +1143,7 @@ addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)
 $('bAudio').onclick=()=>{buildAudioUI();$('mAudio').classList.add('open')};
 $('bUndo').onclick=undo;
 addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){e.preventDefault();undo()}});
-$('bTrack').onclick=()=>{if(audio&&confirm('Ya hay un audio cargado ('+audioName+'). ¿Cambiarlo por otro?')||!audio)$('fileAudio').click()};
+$('bTrack').onclick=()=>{if(!ME||ME.role!=='admin'){toast('Solo el administrador puede cargar audio');return}if(audio&&confirm('Ya hay un audio cargado ('+audioName+'). ¿Cambiarlo por otro?')||!audio)$('fileAudio').click()};
 $('fileAudio').onchange=async e=>{const f=e.target.files[0];if(!f)return;pause();
  if(audio){URL.revokeObjectURL(audio.src)}
  audio=new Audio(URL.createObjectURL(f));audio.preload='auto';audioName=f.name;try{ensureCtx();attachEl('audio')}catch(x){}
@@ -1388,8 +1396,7 @@ $('aBody').addEventListener('click',e=>{
  if(b.id==='aDev')chooseDevice();else if(b.id==='aList')listDevices();
  else if(b.dataset.test)testTone(+b.dataset.test);
  else if(b.dataset.dev){setSink(b.dataset.dev,b.dataset.lab).then(()=>{buildAudioUI();$('aMsg').textContent='Salida activa: '+b.dataset.lab+' ('+nOut+' canales).'}).catch(x=>{$('aMsg').innerHTML='<span class="warn">'+esc(x.message)+'</span>'})}
- else if(b.id==='aLoad')$('fileAudio').click();
- else if(b.id==='lLoad')$('fileLtc').click();
+ else if(b.id==='aLoad'||b.id==='lLoad'){if(!ME||ME.role!=='admin'){toast('Solo el administrador puede cargar audio');return}$(b.id==='aLoad'?'fileAudio':'fileLtc').click()}
  else if(b.id==='lClear'){if(ltcEl){ltcEl.pause();try{SRC.ltc&&SRC.ltc.disconnect()}catch(x){}URL.revokeObjectURL(ltcEl.src)}ltcEl=null;ltcFile='';if(playing)ltcStart();buildAudioUI()}
 });
 function aChange(e){
@@ -1454,10 +1461,10 @@ function applyRole(){
  const np=ME.role==='admin'?nPending():0;
  $('bUser').innerHTML='<b style="font-weight:500">'+esc(ME.name)+(np?' ('+np+')':'')+'</b>';
  $('ddUser').innerHTML=`<div class="hint" style="margin:0 0 6px">Sesión: <b>${esc(ME.name)}</b> · ${ME.role==='admin'?'ADMIN':ME.role==='viewer'?'SOLO LECTURA':'EDITOR'}</div>`+(CLOUD?'<button class="it" data-u="pw">Cambiar mi contraseña</button>':'')+(ME.role==='admin'?`<button class="it" data-u="settings">Ajustes${np?' ('+np+' solicitud'+(np>1?'es':'')+')':''}</button>`:'')+'<button class="it" data-u="out">Cerrar sesión</button>';
- document.querySelectorAll('#ddMenu .it').forEach(b=>{const a=b.dataset.a;if(['name','dur','exp','imp','reset','fake','unfake','share'].includes(a))b.style.display=ME.role==='admin'?'':'none';if(a==='moment'||a==='times')b.style.display=can('times')?'':'none';if(a==='copy')b.style.display=can('cues')?'':'none'});
+ document.querySelectorAll('#ddMenu .it').forEach(b=>{const a=b.dataset.a;if(['name','dur','exp','imp','reset','fake','unfake','share','reh'].includes(a))b.style.display=ME.role==='admin'?'':'none';if(a==='moment'||a==='times')b.style.display=can('times')?'':'none';if(a==='copy')b.style.display=can('cues')?'':'none'});
  restoreEnabled();
  try{updLookChip(S.moments[curIdx()])}catch(e){}
- $('ver').textContent=VERSION;$('ver').style.display=ME.role==='admin'?'':'none';
+ $('bTrack').style.visibility=ME.role==='admin'?'':'hidden';$('ver').textContent=VERSION;$('ver').style.display=ME.role==='admin'?'':'none';
  $('add').style.display=can('cues')?'':'none';$('addNote').style.display=can('notes')?'':'none';
 }
 function login(us){ME={u:us.u,name:us.name,role:us.role,p:us.p||presetP(us.role)};sess.set(us.u,$('aRem').checked);$('auth').style.display='none';$('aPass').value='';applyRole();toast('Hola, '+us.name)}
@@ -1571,6 +1578,7 @@ $('bNight').onclick=toggleNight;$('fsNight').onclick=toggleNight;
 let beeped=new Set(),lastT=0;
 function frameExtra(i,m){
  try{syncTracks(i,m)}catch(e){}
+ try{rehSync(m)}catch(e){}
  const nm=S.moments[i+1];$('nextTema').innerHTML=nm?'SIGUIENTE '+(isTr(nm)?'':'TEMA ')+'· '+esc(mTitle(nm))+' · en '+fmt(nm.start-t):'';
  if(t<lastT-1)beeped.clear();lastT=t;
 }
@@ -1668,9 +1676,12 @@ async function idbDel(id){try{const d=await idb();await new Promise((ok,ko)=>{co
 async function idbAll(){try{const d=await idb();return await new Promise((ok,ko)=>{const q=d.transaction('tracks').objectStore('tracks').getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)})}catch(e){return []}}
 async function decodeTrack(tr){try{pctx=pctx||new (window.AudioContext||window.webkitAudioContext)();const buf=await Promise.race([pctx.decodeAudioData(await tr.blob.arrayBuffer()),new Promise((_,ko)=>setTimeout(()=>ko(new Error('timeout')),20000))]),ch=buf.getChannelData(0),n=Math.max(1,Math.ceil(buf.duration*10)),w=Math.max(1,Math.floor(ch.length/n)),pk=new Float32Array(n);let mx=0;
  for(let i=0;i<n;i++){let m=0;for(let j=0;j<w;j+=Math.max(1,w>>5))m=Math.max(m,Math.abs(ch[i*w+j]||0));pk[i]=m;mx=Math.max(mx,m)}for(let i=0;i<n;i++)pk[i]=Math.pow(pk[i]/(mx||1),.7);tr.pk=pk;tr.dur=buf.duration}catch(e){}}
-function rebuildPeaks(){if(audio)return;const ids=Object.keys(TRK);if(!ids.length){genPeaks();return}
+function rebuildPeaks(){if(audio)return;const ids=Object.keys(TRK),hasR=!!(S.rehearsal&&S.rehearsal.parts&&S.rehearsal.parts.length);if(!ids.length&&!hasR){genPeaks();return}
+ const ROFF=hasR?rehOff():null;
  const D_=dur(),N=Math.min(8000,Math.max(600,Math.ceil(D_/.5))),pk=new Float32Array(N);let sd=7;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;for(let i=0;i<N;i++)pk[i]=.2+.15*Math.abs(Math.sin(i/37))+.05*rnd();
- S.moments.forEach(m=>{const tr=TRK[m.id];if(!tr||!tr.pk)return;const a=Math.floor(m.start/D_*N),b=Math.min(N,Math.ceil((m.start+tr.dur)/D_*N));for(let k=a;k<b;k++){const sec=k/N*D_-m.start,q=Math.floor(sec*10);if(q>=0&&q<tr.pk.length)pk[k]=tr.pk[q]}});peaks=pk}
+ S.moments.forEach(m=>{const tr=TRK[m.id];
+  if((!tr||!tr.pk)&&hasR&&m.reh&&m.reh.b>m.reh.a){const L=m.reh.b-m.reh.a,a=Math.floor(m.start/D_*N),b=Math.min(N,Math.ceil((m.start+L)/D_*N));for(let k=a;k<b;k++){const sec=k/N*D_-m.start;if(sec>=0&&sec<L)pk[k]=rehPk(m.reh.a+sec,ROFF)}return}
+  if(!tr||!tr.pk)return;const a=Math.floor(m.start/D_*N),b=Math.min(N,Math.ceil((m.start+tr.dur)/D_*N));for(let k=a;k<b;k++){const sec=k/N*D_-m.start,q=Math.floor(sec*10);if(q>=0&&q<tr.pk.length)pk[k]=tr.pk[q]}});peaks=pk}
 async function setTrack(id,file){const tr={id,name:file.name,blob:file,f:null,url:URL.createObjectURL(file),dur:0,pk:null};if(TRK[id])try{URL.revokeObjectURL(TRK[id].url)}catch(e){}
  TRK[id]=tr;tAudId=null;nAudId=null;await decodeTrack(tr);
  const m=S.moments.find(x=>x.id===id);
@@ -1744,6 +1755,101 @@ $('bSync').onclick=()=>{if(!ME||ME.guest)return;
  else{FOLLOW=!FOLLOW;try{localStorage.setItem('showcaller.follow',FOLLOW?'1':'0')}catch(e){}try{ensureCtx()}catch(e){}if(FOLLOW){synPing();synApply()}else toast('Modo libre: controlas tú')}
  synUI()};
 
+/* ===== audio del ensayo: partes en la nube + marcas por tema ===== */
+var RLOC={},PKC={},RA={el:null,part:-1,loading:0,nxEl:null,nxPart:-1},RP={el:null,part:-1,g:0,stopAt:null,raf:0,arm:-1};
+function b64u8(b){try{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}catch(e){return new Uint8Array(0)}}
+function u8b64(u){let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)}
+function rehParts(){return (S.rehearsal&&S.rehearsal.parts)||[]}
+function rehOff(){const o=[];let a=0;rehParts().forEach(p=>{o.push(a);a+=p.dur||0});o.total=a;return o}
+function rehPartAt(g,off){for(let i=off.length-1;i>=0;i--)if(g>=off[i])return i;return 0}
+function rehPk(g,off){const P=rehParts();if(!P.length)return 0;off=off||rehOff();const i=rehPartAt(g,off),p=P[i];if(!PKC[p.f])PKC[p.f]=b64u8(p.pk||'');const u=PKC[p.f],q=Math.floor((g-off[i])*5);return q>=0&&q<u.length?u[q]/255:0}
+const rt=g=>fmt(g,true)+'.'+Math.floor((Math.max(0,g)%1)*10);
+async function rehAnalyze(file){let dur=0,pk=new Uint8Array(0);
+ try{const AC=window.AudioContext||window.webkitAudioContext,ac=new AC();
+  const dec=await Promise.race([ac.decodeAudioData(await file.arrayBuffer()),new Promise((_,ko)=>setTimeout(()=>ko(new Error('t')),120000))]);
+  dur=dec.duration;const ch=dec.getChannelData(0),n=Math.max(1,Math.ceil(dur*5)),w=Math.max(1,Math.floor(ch.length/n)),raw=new Float32Array(n);let mx=0;
+  for(let i=0;i<n;i++){let m=0;for(let j=0;j<w;j+=Math.max(1,w>>6))m=Math.max(m,Math.abs(ch[i*w+j]||0));raw[i]=m;mx=Math.max(mx,m)}
+  pk=new Uint8Array(n);for(let i=0;i<n;i++)pk[i]=Math.round(Math.pow(raw[i]/(mx||1),.7)*255);try{ac.close()}catch(e){}}catch(e){}
+ if(!dur)dur=await new Promise(ok=>{const a=new Audio(URL.createObjectURL(file));a.onloadedmetadata=()=>ok(a.duration||0);a.onerror=()=>ok(0);setTimeout(()=>ok(0),8000)});
+ return {dur,pk}}
+async function rehAdd(file){
+ if(!CLOUD||!SB){toast('Requiere la versión con Supabase');return}
+ if(file.size>52428800){$('rehMsg').textContent=file.name+' pesa más de 50 MB: pártelo en trozos más pequeños.';return}
+ $('rehMsg').textContent='Analizando '+file.name+'… (puede tardar un poco)';const an=await rehAnalyze(file);
+ $('rehMsg').textContent='Subiendo '+file.name+'…';
+ const ext=((file.name.match(/\.[A-Za-z0-9]{1,8}$/)||[''])[0]).toLowerCase(),path='rehearsal/'+Date.now()+'-'+Math.random().toString(36).slice(2,6)+ext;
+ const {error}=await SB.storage.from('files').upload(path,file,{contentType:file.type||undefined});
+ if(error){$('rehMsg').textContent='No se pudo subir: '+error.message;return}
+ RLOC[path]=URL.createObjectURL(file);S.rehearsal=S.rehearsal||{parts:[]};
+ S.rehearsal.parts.push({f:path,name:file.name,dur:an.dur,size:file.size,pk:u8b64(an.pk)});dirty();buildReh()}
+function rehRows(){const sel=RP.rowSel;
+ return S.moments.map((m,mi)=>{if(isTr(m))return '';const r=m.reh,ok=r&&r.b>r.a;
+  return `<div class="trow" style="flex-wrap:wrap;gap:6px"><span class="tx" style="flex:1;min-width:150px">${esc(mTitle(m))}${ok?'':' <span class="tag">SIN MARCAR</span>'}</span><input class="ti mono" data-ra="${mi}" value="${r?rt(r.a):''}" placeholder="inicio" style="width:96px"><input class="ti mono" data-rb="${mi}" value="${r?rt(r.b):''}" placeholder="fin" style="width:96px"><button class="btn sm" data-rm="${mi}:a">⤓ Inicio aquí</button><button class="btn sm" data-rm="${mi}:b">⤒ Fin aquí</button>${ok?`<button class="btn sm" data-rt="${mi}">▶ Probar</button><button class="btn sm" data-rc="${mi}">✕</button>`:''}</div>`}).join('')}
+function buildReh(){const P=rehParts(),off=rehOff();
+ let h='<div class="hint" style="margin:0 0 10px">Sube el audio del ensayo en partes (hasta 50 MB cada una). Se escucha por streaming, nadie tiene que descargarlo. Después marca dónde empieza y acaba cada tema.</div>';
+ h+=P.map((p,i)=>`<div class="trow"><span class="tx">Parte ${i+1} · ${esc(p.name)} · ${fmt(p.dur,true)} · ${(p.size/1048576).toFixed(1)} MB</span><button class="btn sm" data-rx="${i}">Quitar</button></div>`).join('');
+ h+='<div style="margin:10px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><label class="btn" style="cursor:pointer">＋ Subir parte<input type="file" id="rehPick" accept="audio/*" hidden></label><span id="rehMsg" class="hint"></span></div>';
+ if(P.length){h+='<div style="display:flex;gap:8px;align-items:center;margin:14px 0 6px;flex-wrap:wrap"><button class="btn" id="rpPlay" style="min-width:48px">▶</button><button class="btn sm" data-rs="-10">−10 s</button><button class="btn sm" data-rs="-1">−1 s</button><button class="btn sm" data-rs="1">+1 s</button><button class="btn sm" data-rs="10">+10 s</button><b class="mono" id="rpT">0:00:00.0</b><span class="hint" style="margin:0">/ '+fmt(off.total,true)+'</span><select id="rpZ" class="ti"><option value="30">Zoom 30 s</option><option value="120" selected>Zoom 2 min</option><option value="600">Zoom 10 min</option></select></div>'
+  +'<canvas id="rehWin" style="width:100%;height:120px;background:#0e0e0d;border:1px solid var(--line);cursor:crosshair;display:block"></canvas><canvas id="rehOv" style="width:100%;height:44px;background:#0e0e0d;border:1px solid var(--line);margin-top:6px;cursor:pointer;display:block"></canvas>'
+  +'<div class="hint" style="margin:8px 0">Toca la onda para colocarte, dale a ▶ y pulsa «Inicio aquí» / «Fin aquí» en cada tema cuando suene. También puedes escribir el tiempo a mano.</div><div id="rehRows">'+rehRows()+'</div>'}
+ $('rehBody').innerHTML=h;if(P.length&&!RP.raf)RP.raf=requestAnimationFrame(rehDraw)}
+async function rpSeek(g,play){const off=rehOff();if(!off.total)return;g=Math.max(0,Math.min(off.total-.05,g));const pi=rehPartAt(g,off);RP.g=g;
+ if(RP.part!==pi||!RP.el){if(RP.el){try{RP.el.pause()}catch(e){}}RP.el=null;const P=rehParts()[pi],u=RLOC[P.f]||await fileUrl(P.f);if(!u){toast('No se pudo abrir el audio');return}
+  const el=new Audio(u);el.preload='metadata';RP.el=el;RP.part=pi;await new Promise(ok=>{el.onloadedmetadata=ok;el.onerror=ok;setTimeout(ok,5000)})}
+ try{RP.el.currentTime=g-off[pi]}catch(e){}
+ if(play)RP.el.play().catch(()=>audBlk())}
+function rpPause(){if(RP.el&&!RP.el.paused)try{RP.el.pause()}catch(e){}}
+function rehDraw(){const md=$('mReh');if(!md.classList.contains('open')){RP.raf=0;rpPause();return}RP.raf=requestAnimationFrame(rehDraw);
+ const off=rehOff(),tot=off.total,cw=$('rehWin'),co=$('rehOv');if(!tot||!cw||!co)return;
+ if(RP.el&&!RP.el.paused){RP.g=off[RP.part]+RP.el.currentTime;
+  if(RP.stopAt!=null&&RP.g>=RP.stopAt){rpPause();RP.stopAt=null}
+  else if(RP.el.ended||RP.el.currentTime>=(rehParts()[RP.part].dur||1e9)-.05){if(RP.part+1<off.length)rpSeek(off[RP.part+1],true);else rpPause()}}
+ $('rpT').textContent=rt(RP.g);$('rpPlay').textContent=(RP.el&&!RP.el.paused)?'❚❚':'▶';
+ const dp=devicePixelRatio||1,win=+$('rpZ').value||120;
+ const draw=(cv,v0,v1,h)=>{const W_=cv.clientWidth;if(cv.width!==Math.round(W_*dp)||cv.height!==Math.round(h*dp)){cv.width=Math.round(W_*dp);cv.height=Math.round(h*dp)}
+  const c=cv.getContext('2d');c.setTransform(dp,0,0,dp,0,0);c.clearRect(0,0,W_,h);const sp=v1-v0,x=g=>(g-v0)/sp*W_;
+  c.fillStyle='#8a877f';const n=Math.floor(W_/2);for(let i=0;i<n;i++){const g=v0+i/n*sp;if(g<0||g>=tot)continue;const p=rehPk(g,off),bh=Math.max(1,p*(h-6));c.fillRect(i*2,(h-bh)/2,1.4,bh)}
+  S.moments.forEach((m,mi)=>{const r=m.reh;if(!r||!(r.b>r.a))return;const a=x(r.a),b=x(r.b);if(b<0||a>W_)return;c.fillStyle=mi%2?'rgba(143,182,217,.22)':'rgba(224,178,79,.22)';c.fillRect(a,0,b-a,h);c.fillStyle='#ece9e1';c.fillRect(a,0,1,h);c.fillRect(b-1,0,1,h);
+   if(h>60&&b-a>30){c.font='11px ui-monospace,monospace';c.fillText(String(mTitle(m)).slice(0,Math.max(3,Math.floor((b-a)/7))),Math.max(2,a)+3,12)}});
+  const px=x(RP.g);c.fillStyle='#ff6b61';c.fillRect(px-1,0,2,h)};
+ draw(cw,RP.g-win/2,RP.g+win/2,120);draw(co,0,tot,44)}
+function rehMark(mi,k){const m=S.moments[mi],g=Math.round(RP.g*10)/10;m.reh=m.reh||{a:g,b:g};
+ if(k==='a'){m.reh.a=g;if(m.reh.b<=g)m.reh.b=g}else{m.reh.b=g;if(m.reh.a>=g)m.reh.a=Math.max(0,g-1);
+  let nx=null;for(let q=mi+1;q<S.moments.length;q++)if(!isTr(S.moments[q])){nx=S.moments[q];break}if(nx&&!nx.reh)nx.reh={a:g,b:g}}
+ dirty();$('rehRows').innerHTML=rehRows()}
+function openReh(){if(!CLOUD||!SB){toast('Requiere la versión con Supabase');return}buildReh();$('mReh').classList.add('open');if(!RP.raf)RP.raf=requestAnimationFrame(rehDraw)}
+(()=>{const bd=$('rehBody');
+ bd.addEventListener('change',e=>{const t_=e.target;
+  if(t_.id==='rehPick'&&t_.files[0]){const f=t_.files[0];t_.value='';rehAdd(f);return}
+  const ia=t_.dataset.ra,ib=t_.dataset.rb;if(ia===undefined&&ib===undefined)return;
+  const mi=+(ia!==undefined?ia:ib),m=S.moments[mi],v=parseT(t_.value);if(isNaN(v)){$('rehRows').innerHTML=rehRows();return}
+  m.reh=m.reh||{a:0,b:0};if(ia!==undefined)m.reh.a=v;else m.reh.b=v;dirty();$('rehRows').innerHTML=rehRows()});
+ bd.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+  if(b.id==='rpPlay'){if(RP.el&&!RP.el.paused)rpPause();else{RP.stopAt=null;rpSeek(RP.g,true)}return}
+  if(d.rs){const wasP=RP.el&&!RP.el.paused;rpSeek(RP.g+(+d.rs),wasP);return}
+  if(d.rm){const [mi,k]=d.rm.split(':');rehMark(+mi,k);return}
+  if(d.rt){const m=S.moments[+d.rt];RP.stopAt=m.reh.b;rpSeek(m.reh.a,true);return}
+  if(d.rc){delete S.moments[+d.rc].reh;dirty();$('rehRows').innerHTML=rehRows();return}
+  if(d.rx!==undefined){if(RP.arm!==+d.rx){RP.arm=+d.rx;b.textContent='¿Seguro?';setTimeout(()=>{RP.arm=-1;b.textContent='Quitar'},3000);return}
+   const p=rehParts().splice(+d.rx,1)[0];RP.arm=-1;rpPause();RP.el=null;RP.part=-1;if(p&&SB)SB.storage.from('files').remove([p.f]);dirty();buildReh();toast('Parte quitada: revisa las marcas');return}});
+ const seekC=(cv,e,ov)=>{const r=cv.getBoundingClientRect(),f=(e.clientX-r.left)/r.width,tot=rehOff().total;if(!tot)return;const win=+$('rpZ').value||120,g=ov?f*tot:RP.g-win/2+f*win;const wasP=RP.el&&!RP.el.paused;rpSeek(g,wasP)};
+ bd.addEventListener('pointerdown',e=>{if(e.target.id==='rehWin')seekC(e.target,e,false);else if(e.target.id==='rehOv')seekC(e.target,e,true)})})();
+/* reproducción durante el show: el tema suena desde el audio del ensayo */
+function rehStop(){if(RA.el&&!RA.el.paused){try{RA.el.pause()}catch(e){}}}
+function rehLoad(pi){RA.part=pi;RA.loading=1;if(RA.el){try{RA.el.pause()}catch(e){}}RA.el=null;
+ if(RA.nxEl&&RA.nxPart===pi){RA.el=RA.nxEl;RA.nxEl=null;RA.nxPart=-1;RA.loading=0;return}
+ const P=rehParts()[pi];fileUrl(P.f).then(u=>{if(RA.part!==pi||!u){RA.loading=0;return}const el=new Audio(u);el.preload='metadata';el.onerror=()=>{delete URLC[P.f];if(RA.el===el){RA.el=null;RA.part=-1}};RA.el=el;RA.loading=0}).catch(()=>{RA.loading=0;RA.part=-1})}
+function rehSync(m){
+ if(!S.rehearsal||!rehParts().length||!CLOUD||!SB||!ME||ME.guest||!m.reh||!(m.reh.b>m.reh.a)||TRK[m.id]||audio||$('mReh').classList.contains('open')){rehStop();return}
+ const g=m.reh.a+(t-m.start);if(t<m.start||g>=m.reh.b){rehStop();return}
+ const off=rehOff(),pi=rehPartAt(g,off),loc=g-off[pi],P=rehParts();
+ if(RA.part!==pi){if(!RA.loading)rehLoad(pi);return}
+ const el=RA.el;if(!el)return;
+ if(loc>(P[pi].dur||0)-25&&pi+1<P.length&&RA.nxPart!==pi+1){RA.nxPart=pi+1;fileUrl(P[pi+1].f).then(u=>{if(u&&RA.nxPart===pi+1){const n=new Audio(u);n.preload='auto';RA.nxEl=n}})}
+ if(Math.abs(el.currentTime-loc)>.5){try{el.currentTime=loc}catch(e){}}
+ if(playing&&el.paused&&!el._fading){el.playbackRate=rate;el.volume=1;el.play().catch(()=>audBlk())}
+ if(!playing&&!el.paused)el.pause()}
+
 /* ===== lote E: equipo, chat, enlace, sin conexión ===== */
 function diffNames(a,b){const out=[];try{const am=new Map((a.moments||[]).map(m=>[m.id,m]));(b.moments||[]).forEach(m=>{const o=am.get(m.id);if(!o||JSON.stringify(o.cues)!==JSON.stringify(m.cues)||o.name!==m.name||o.start!==m.start||JSON.stringify([o.look,o.note,o.cm,o.refs,o.guest,o.imgs])!==JSON.stringify([m.look,m.note,m.cm,m.refs,m.guest,m.imgs]))out.push(mTitle(m))});
  if(JSON.stringify(a.notes)!==JSON.stringify(b.notes))out.push('notas');if(JSON.stringify(a.todo)!==JSON.stringify(b.todo))out.push('pendientes')}catch(e){}return out}
@@ -1756,13 +1862,14 @@ async function cloudReconnect(){if(!CLOUD||!ME||ME.guest)return;
 // presencia + chat
 var ONLINE=[],PRES=null,CHAT=[],chatRead=+(localStorage.getItem('showcaller.chatread')||0);
 function cloudExtras(){if(!SB||!ME||ME.guest)return;$('bOnline').style.display='';$('bChat').style.display='';
- try{if(PRES)SB.removeChannel(PRES);PRES=SB.channel('online-show',{config:{presence:{key:ME.id}}});
-  PRES.on('presence',{event:'sync'},()=>{const st=PRES.presenceState();ONLINE=Object.values(st).map(a=>a[0]).filter(Boolean);updOnline()}).subscribe(async stt=>{if(stt==='SUBSCRIBED')await PRES.track({name:ME.name,role:ME.role})})}catch(e){}
+ PRESOK=false;try{if(PRES)SB.removeChannel(PRES);PRES=SB.channel('online-show',{config:{presence:{key:ME.id}}});
+  PRES.on('presence',{event:'join'},({key,newPresences})=>{if(!PRESOK||key===ME.id)return;const n=(newPresences&&newPresences[0]&&newPresences[0].name)||'Alguien';joinPop(n)}).on('presence',{event:'sync'},()=>{const st=PRES.presenceState();ONLINE=Object.values(st).map(a=>a[0]).filter(Boolean);updOnline()}).subscribe(async stt=>{if(stt==='SUBSCRIBED'){await PRES.track({name:ME.name,role:ME.role});setTimeout(()=>{PRESOK=true},3000)}})}catch(e){}
  try{synStart()}catch(e){}
  try{loadPeople().then(()=>{if($('mTodo').classList.contains('open'))buildTodo()})}catch(e){}
  chatLoad();try{SB.channel('chat-1').on('postgres_changes',{event:'INSERT',schema:'public',table:'chat'},p=>{CHAT.push(p.new);if(CHAT.length>300)CHAT.shift();
   if($('mChat').classList.contains('open')){chatRender()}else{updChatN();if(p.new.user_id!==ME.id)chatPop(p.new)}}).subscribe()}catch(e){}}
-var chatPT=null;
+var chatPT=null,PRESOK=false,joinPT=null;
+function joinPop(n){const el=$('joinPop');el.innerHTML='🟢 <b>'+esc(n)+'</b> se ha conectado';el.classList.add('on');clearTimeout(joinPT);joinPT=setTimeout(()=>el.classList.remove('on'),10000)}
 function chatPop(m){const el=$('chatPop');el.innerHTML='<b>💬 '+esc(m.name)+'</b>'+esc(String(m.text).slice(0,180))+'<i>Toca para abrir el chat</i>';el.classList.add('on');clearTimeout(chatPT);chatPT=setTimeout(()=>el.classList.remove('on'),10000)}
 $('chatPop').onclick=()=>{$('chatPop').classList.remove('on');clearTimeout(chatPT);$('bChat').click()};
 function updOnline(){const n=ONLINE.length;$('bOnline').textContent='● '+n+' conectado'+(n===1?'':'s');
@@ -1844,7 +1951,7 @@ function useShow(d,keep){
  applying=true;try{S=d;S.notes=S.notes||[];S.todo=S.todo||[];loadDepts();sortM();migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
   shownKey='';lastPanelIdx=-1;head();buildCues(curIdx());updPanel(true);updTodoN();
   if($('mTodo').classList.contains('open'))buildTodo();if($('mTimes').classList.contains('open'))buildTimes()}finally{applying=false}
- lastSnap=JSON.stringify(S);updUndo();try{syncRemoteTracks()}catch(e){}
+ lastSnap=JSON.stringify(S);updUndo();try{syncRemoteTracks()}catch(e){}try{if(S.rehearsal)rebuildPeaks()}catch(e){}
 }
 async function cloudLoad(){
  const {data,error}=await SB.from('shows').select('*').eq('id',1).maybeSingle();
