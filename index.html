@@ -215,8 +215,8 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
    <div class="eyebrow" id="liveBanner" style="display:none;margin-bottom:10px;font-size:12px"></div>
    <div class="eyebrow" id="eyebrow"></div>
    <div class="shead"><div class="stitle"><h1 id="mname"></h1><button class="chip" id="lookChip" style="display:none"></button></div>
-   <div class="tcbox"><div class="tc-label eyebrow">■ Timecode</div><div class="tc mono" id="tc">00:00</div></div></div>
-   <div class="meta mono"><span><span id="mlab">MOMENTO</span> <b id="mrem">-0:00</b></span><span>show <b id="shw">0:00:00</b></span><span id="audioInfo"></span><span id="chap" style="color:var(--dim)"></span></div>
+   <div class="tcbox"><div class="tc mono" id="tc">00:00</div></div></div>
+   <div class="meta mono"><span><span id="mlab">MOMENTO</span> <b id="mrem">-0:00</b></span><span>SHOW <b id="shw">0:00:00</b></span><span id="audioInfo"></span><span id="chap" style="color:var(--dim)"></span></div>
    <div class="bar"><i id="mbar" style="width:0"></i><div id="mticks"></div></div>
    <div class="next mono" id="next"></div>
    <div id="cues"></div>
@@ -348,7 +348,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.18'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.20'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
