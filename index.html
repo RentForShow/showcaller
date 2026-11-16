@@ -348,7 +348,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.13'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.14'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -419,7 +419,7 @@ function keyOf(i){return i+'|'+S.moments[i].cues.length+'|'+S.notes.length+'|'+[
 function buildCues(i){
  const m=S.moments[i];$('mname').textContent=mTitle(m);updLookChip(m);
  {const bk=S.blocks[blockOf(m.start)]||{name:'BLOQUE',mood:''};
- $('eyebrow').innerHTML=esc(bk.name.toUpperCase())+' · '+(i+1)+' / '+S.moments.length+(m.kind!=='momento'?' · '+esc(m.kind.toUpperCase()):'')+(bk.mood?' · <button class="chip" id="chipMood">▦ MOODBOARD</button>':'');
+ $('eyebrow').innerHTML=esc(bk.name.toUpperCase())+(isTr(m)?'':' · '+(S.moments.slice(0,i+1).filter(x=>!isTr(x)).length)+' / '+S.moments.filter(x=>!isTr(x)).length)+(m.kind!=='momento'?' · '+esc(m.kind.toUpperCase()):'')+(bk.mood?' · <button class="chip" id="chipMood">▦ MOODBOARD</button>':'');
  $('mlab').textContent=m.num!==undefined?'TEMA':'MOMENTO';$('chap').textContent=bk.name.toUpperCase();
  const enT=Math.max(1,momEnd(i)-m.start);
  $('mticks').innerHTML=m.cues.filter(c=>enabled.has(c.d)).map(c=>`<span style="left:${Math.min(100,c.o/enT*100)}%;background:${(D[c.d]||D.notas).c}"></span>`).join('')}
