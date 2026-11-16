@@ -153,6 +153,12 @@ footer>*,#app>*,main>*{min-width:0}
 .mcol .acts{display:flex;gap:16px;font-size:12px;color:var(--mut)}
 .mcol .acts button:hover{color:var(--tx)}
 .form{padding:20px 24px;display:flex;flex-direction:column;gap:12px;max-width:440px}
+.mbox>.form,.mbox>#tBody{overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+.mbox>.form{max-width:none}
+#chatPop{position:fixed;top:14px;right:14px;z-index:90;max-width:min(340px,calc(100vw - 28px));background:#1d1d1b;border:1px solid var(--tx);border-radius:10px;padding:10px 14px;box-shadow:0 8px 30px #000a;cursor:pointer;display:none}
+#chatPop.on{display:block}
+#chatPop b{display:block;font-size:12px;letter-spacing:.06em;margin-bottom:3px}
+#chatPop i{display:block;font-style:normal;font-size:12px;color:var(--mut);margin-top:4px}
 .form label{font-size:11px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;display:flex;flex-direction:column;gap:6px}
 .form input,.form select,.form textarea{background:#0e0e0d;border:1px solid var(--line);color:var(--tx);padding:10px;border-radius:6px;font:inherit;font-size:15px;letter-spacing:0;text-transform:none}
 .form .go{background:var(--tx);color:#000;padding:11px;border-radius:6px;font-weight:600}
@@ -249,7 +255,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  .sub{overflow-x:auto;white-space:nowrap;gap:12px;padding-bottom:2px;scrollbar-width:none}
  .sub::-webkit-scrollbar{display:none}
  .sub>*{flex:none}
- #expand,#bTrack{display:none}
+ #expand,#bTrack,#bSet{display:none}
  .sub button{padding:6px 4px}
  #nextTema{font-size:10px}
  .dd{max-width:calc(100vw - 16px)}
@@ -293,7 +299,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
    <button id="bSync" style="display:none"></button>
    <button id="bChat" style="display:none">💬 <span>Chat</span> <b id="chatN" class="mono" style="font-weight:500"></b></button>
    <button id="bUser"></button>
-   <button id="bFs" title="Pantalla completa del guion">⛶ <span>Escena</span></button>
+   <button id="bFs" title="Pantalla completa del guion">⛶ <span>Pantalla completa</span></button>
    <button id="bNight" title="Modo noche">🌑</button>
    <button id="bMenu">⋯</button>
   </div>
@@ -329,12 +335,11 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
     <button class="pb1" id="play">▶</button>
     <button class="pb2" id="prev">⏮</button>
     <button class="pb2" id="nxt">⏭</button>
-    <button class="pb2" id="go" title="Saltar al siguiente cue (Enter)" style="font-weight:700;letter-spacing:.08em;font-size:13px;width:auto;padding:0 14px">GO</button>
-    <button class="pb3" id="add" title="Nuevo cue">+</button>
+        <button class="pb3" id="add" title="Nuevo cue">+</button>
     <button class="pb3" id="addNote" title="Nota o petición" style="font-size:16px">✎</button>
     <div class="clock mono"><b id="ct">0:00</b> <span>/ <span id="dur">0:00</span></span></div>
    </div>
-   <div class="sub"><button id="expand">⤢ Expandir</button><button id="rate">⏱ x1</button><span class="seg" id="zoomSeg" style="display:inline-flex;font-size:12px"><button type="button" data-z="2" style="padding:4px 10px">Tema</button><button type="button" data-z="1" style="padding:4px 10px">Bloque</button><button type="button" data-z="0" class="on" style="padding:4px 10px">Show</button></span><button id="bAudio">🎚 Audio y salidas</button><button id="bUndo" disabled style="opacity:.4">↶ Deshacer</button><button id="bSel">☑ Seleccionar</button><button id="bSet">⚙ Preferencias</button><button id="bTrack">🎵 Cargar audio</button></div>
+   <div class="sub"><button id="expand">⤢ Expandir</button><button id="rate">⏱ x1</button><span class="seg" id="zoomSeg" style="display:inline-flex;font-size:12px"><button type="button" data-z="2" style="padding:4px 10px">Tema</button><button type="button" data-z="1" style="padding:4px 10px">Bloque</button><button type="button" data-z="0" class="on" style="padding:4px 10px">Show</button></span><button id="bAudio">🎚 Audio y salidas</button><button id="bUndo" disabled style="opacity:.4">↶ Deshacer</button><button id="bSet">⚙ Preferencias</button><button id="bTrack">🎵 Cargar audio</button></div>
   </div>
   <div style="min-width:0"><div id="selBar" class="mono"></div><div id="tlInfo" class="mono"></div><canvas id="tl"></canvas></div>
  </footer>
@@ -355,6 +360,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <label>Departamento<select id="fDep"></select></label>
   <label>Texto<input id="fTxt" required placeholder="Ej: Entrada de luz"></label>
   <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fPend" style="width:auto;flex:none"> Pendiente de confirmar (aún no es definitivo)</label>
+  <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fKey" style="width:auto;flex:none"> ★ Cue clave (destacado)</label>
   <div class="row2" style="margin:0"><button type="button" class="btn" id="qNow">Añadir en tiempo actual</button><button type="button" class="btn" id="qSong">Añadir al inicio de la canción</button></div>
   <div class="seg" id="fMode"><button type="button" data-m="0" class="on">Tiempo total</button><button type="button" data-m="1" id="fModeSong">Tiempo de la canción</button></div>
   <label id="fSongL" style="display:none">Canción<select id="fSong"></select></label>
@@ -362,10 +368,9 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <label>Acaba en (mm:ss o h:mm:ss)<input id="fEnd" class="mono"></label>
   <label>Encadenar tras otro cue (opcional)<select id="fCh"></select></label>
   <label id="fChOffL" style="display:none">Desfase tras ese cue (segundos)<input id="fChOff" type="number" step="0.5" value="0"></label>
-  <label>Quién lo ejecuta<input id="fWho" list="dlWho" placeholder="Ej: Borja"></label><datalist id="dlWho"></datalist>
+  <input id="fWho" type="hidden"><datalist id="dlWho"></datalist>
   <label>Nº o memoria de consola<input id="fMem" placeholder="Ej: Seq 12 · Cue 5.3"></label>
-  <label>Etiquetas (separadas por comas)<input id="fTags" placeholder="Ej: pirotecnia, láser"></label>
-  <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fKey" style="width:auto;flex:none"> ★ Cue clave (destacado y con aviso sonoro)</label>
+  <input id="fTags" type="hidden">
   <div id="fCmW"><div class="eyebrow" style="margin:6px 0">Comentarios</div><div id="fCm"></div><div style="display:flex;gap:8px;margin-top:6px"><input id="fCmT" placeholder="Escribir un comentario…" style="flex:1"><button type="button" class="btn" id="fCmAdd">Añadir</button></div></div>
   <div id="fFilesW"><div class="eyebrow" style="margin:6px 0">Archivos adjuntos</div><div id="fFiles" class="hint"></div><label class="btn" id="fPickL" style="display:inline-block;cursor:pointer;text-align:center">＋ Adjuntar foto o archivo<input type="file" id="fCuePick" multiple hidden></label></div>
   <div class="hint" id="fDurInfo"></div>
@@ -375,13 +380,11 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <button class="btn" type="button" id="fDel" style="display:none">Borrar cue</button>
  </form>
 </div></div>
-<div id="fsBar"><button id="fsPrev">⏮</button><button id="fsPlay">▶</button><button id="fsGo">GO</button><button id="fsNight">🌑</button><button id="fsExit">✕ Salir</button></div>
+<div id="chatPop"></div>
+<div id="fsBar"><button id="fsPrev">⏮</button><button id="fsPlay">▶</button><button id="fsNight">🌑</button><button id="fsExit">✕ Salir</button></div>
 <div class="modal" id="mSet"><div class="mbox" style="width:min(440px,100%)">
- <div class="mtop"><div><div class="eyebrow">Preferencias</div><h2>Aviso sonoro</h2></div><button data-close>✕</button></div>
+ <div class="mtop"><div><div class="eyebrow">Preferencias</div><h2>Ajustes</h2></div><button data-close>✕</button></div>
  <div class="form">
-  <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="sBeep" style="width:auto;flex:none"> Pitido suave 5 s antes de un cue clave (★)</label>
-  <label>Volumen del aviso<input type="range" id="sVol" min="0" max="1" step="0.05"></label>
-  <button class="btn" type="button" id="sTest">Probar sonido</button>
   <label style="display:flex;flex-direction:row;gap:10px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="sNight" style="width:auto;flex:none"> Modo noche (pantalla más oscura)</label>
   <div class="hint">Estas preferencias se guardan solo en este dispositivo.</div>
  </div>
@@ -483,7 +486,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.35'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.37'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -570,7 +573,7 @@ function buildCues(i){
  const enT=Math.max(1,momEnd(i)-m.start);
  $('mticks').innerHTML=m.cues.filter(c=>enabled.has(c.d)).map(c=>`<span style="left:${Math.min(100,c.o/enT*100)}%;background:${(D[c.d]||D.notas).c}"></span>`).join('')}
  const list=carryOf(i).concat(m.cues.map((c,k)=>({j:i,k,c})).filter(x=>enabled.has(x.c.d)));
- $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.key?'<span class="tag keytag">★ CLAVE</span>':''}${c.ex?'<span class="tag xtag">▸ '+esc(c.ex)+'</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${c.pd===1?'<span class="tag pdtag">PENDIENTE</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}<span class="rg mono">${fmt(a)}${c.e>0?' → '+fmt(a+c.e)+' · '+fdur(c.e):''}</span>${c.pd===1?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.tg&&c.tg.length?`<div class="atts">${c.tg.map(g=>'<span class="tag">#'+esc(g)+'</span>').join('')}</div>`:''}${c.cm&&c.cm.length?`<div class="cmts">${c.cm.slice(-3).map(q=>'💬 <b>'+esc(q.by||'')+'</b> '+esc(q.x)).join('<br>')}</div>`:''}${CLOUD&&c.refs&&c.refs.length?`<div class="atts">📎 ${c.refs.map(r=>`<a data-f="${esc(r.f)}" data-open="1">${esc(r.name||'archivo')}</a>`).join('')}</div>`:''}${c.by?`<div class="by">${esc(byTxt(c))}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
+ $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.key?'<span class="tag keytag">★ CLAVE</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${c.pd===1?'<span class="tag pdtag">PENDIENTE</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}<span class="rg mono">${fmt(a)}${c.e>0?' → '+fmt(a+c.e)+' · '+fdur(c.e):''}</span>${c.pd===1?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.cm&&c.cm.length?`<div class="cmts">${c.cm.slice(-3).map(q=>'💬 <b>'+esc(q.by||'')+'</b> '+esc(q.x)).join('<br>')}</div>`:''}${CLOUD&&c.refs&&c.refs.length?`<div class="atts">📎 ${c.refs.map(r=>`<a data-f="${esc(r.f)}" data-open="1">${esc(r.name||'archivo')}</a>`).join('')}</div>`:''}${c.by?`<div class="by">${esc(byTxt(c))}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
  const end=momEnd(i),last=i===S.moments.length-1;
  const ns=S.notes.filter(n=>n.t>=m.start&&(n.t<end||(last&&n.t<=end))&&(!n.d||enabled.has(n.d)));
  $('nbox').innerHTML=ns.length?'<div class="eyebrow" style="margin:20px 0 6px">Notas y peticiones</div>'+ns.map(n=>`<div class="nt${n.done?' done':''}"><span class="tag">${NT[n.k]}</span>${n.d?`<span class="tag">${D[n.d].n}</span>`:''}<span class="tx">${esc(n.x)}</span><span class="mono rg2">${fmt(n.t)}</span>${n.by?`<span class="by" title="${esc(byTxt(n))}">${esc(n.by)}</span>`:''}<button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`).join(''):'';
@@ -632,13 +635,13 @@ function panBy(dx){const v=view(),sp=v.v1-v.v0,D_=dur(),v0=Math.max(0,Math.min(D
 function setSeg(){document.querySelectorAll('#zoomSeg button').forEach(x=>x.classList.toggle('on',!zcust&&+x.dataset.z===zmode))}
 $('zoomSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;zmode=+b.dataset.z;zcust=null;setSeg()});
 cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect(),frac=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
- if(Math.abs(e.deltaX)>Math.abs(e.deltaY)||e.shiftKey){panBy(e.deltaX||e.deltaY);return}
- zoomAt(frac,Math.exp(e.deltaY*(e.ctrlKey?0.012:0.003)))},{passive:false});
+ if(e.ctrlKey||e.metaKey){zoomAt(frac,Math.exp(e.deltaY*0.012));return}
+ panBy(Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY)},{passive:false});
 const PT=new Map();let pinch=null;
 let EXP=false,HITS=[];
 const SH={show:'SHOW',orq:'ORQ',lx:'LX',rea:'REA',pan:'PANT',fx:'FX',aud:'AUD',back:'BACK',cam:'CAM',notas:'NOTAS'};
 const sh=id=>D[id].s||SH[id]||D[id].n.slice(0,4);
-function G(){const n=DEPTS.length;if(EXP){const ly=94,lh=13,ms=ly+n*lh+10,bs=ms+20;return{H:bs+18,wf0:28,wf:56,ly,lh,ms,bs,rows:n}}return{H:126,wf0:26,wf:36,ly:66,lh:11,rows:5}}
+function G(){const n=DEPTS.length;if(!EXP&&document.documentElement.classList.contains('mob'))return{H:92,wf0:22,wf:22,ly:48,lh:9,rows:5};if(EXP){const ly=94,lh=13,ms=ly+n*lh+10,bs=ms+20;return{H:bs+18,wf0:28,wf:56,ly,lh,ms,bs,rows:n}}return{H:126,wf0:26,wf:36,ly:66,lh:11,rows:5}}
 function applyExp(){cv.style.height=G().H+'px';document.querySelector('footer').classList.toggle('exp',EXP);$('expand').textContent=EXP?'⤡ Contraer':'⤢ Expandir';sizeTL()}
 $('expand').onclick=()=>{EXP=!EXP;applyExp()};
 function fit(txt,room){while(txt&&cx.measureText(txt).width>room)txt=txt.slice(0,-1);return txt}
@@ -710,9 +713,8 @@ function evHit(e){const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clie
 function isResize(h,e){const r=cv.getBoundingClientRect(),x=e.clientX-r.left;return (h.e.c.e||0)>0&&h.bx1-h.bx0>14&&x>=h.bx1-8&&x<=h.bx1+3}
 function updSel(){const n=SEL.size,b=$('selBar');b.style.display=(n||SELMODE)?'flex':'none';
  b.innerHTML=(n?`<b>${n} seleccionado${n>1?'s':''}</b>`:'<span style="color:var(--mut)">Modo selección: toca cues en el timeline</span>')+(n?'<button data-sm="-5">−5 s</button><button data-sm="-1">−1 s</button><button data-sm="1">+1 s</button><button data-sm="5">+5 s</button><button data-sm="del">Borrar</button><button data-sm="none">Quitar selección</button>':'')+'<button data-sm="tema">Todos los del tema</button>';
- $('bSel').classList.toggle('on',SELMODE)}
+ }
 function toggleSel(c){if(SEL.has(c))SEL.delete(c);else SEL.add(c);updSel()}
-$('bSel').onclick=()=>{SELMODE=!SELMODE;if(!SELMODE)SEL.clear();updSel()};
 $('selBar').addEventListener('click',e=>{const b=e.target.closest('[data-sm]');if(!b)return;if(!can('cues')){toast('No tienes permiso');return}const k=b.dataset.sm;
  if(k==='none'){SEL.clear();updSel();return}
  if(k==='tema'){const m=S.moments[curIdx()];m.cues.forEach(c=>{if(enabled.has(c.d))SEL.add(c)});updSel();return}
@@ -723,8 +725,7 @@ cv.addEventListener('pointerdown',e=>{PT.set(e.pointerId,e.clientX);
  if(PT.size===2){drag=false;cdrag=null;frozen=null;const [a,b]=[...PT.values()];pinch={d:Math.abs(a-b)||1};return}
  tlInfo(e);if(live){toast('Modo directo: manda el timecode');return}
  const h=evHit(e);
- if(h&&can('cues')){const c=h.e.c;
-  if(SELMODE||e.shiftKey||e.metaKey||e.ctrlKey){toggleSel(c);return}
+ if(h&&ME&&ME.role==='admin'){const c=h.e.c;
   const res=isResize(h,e),list=res?(SEL.has(c)?[...SEL]:[c]):(SEL.has(c)?[...SEL]:[c]);
   cdrag={x:e.clientX,mode:res?'res':'mov',moved:false,view:{...VW},items:list.map(q=>({c:q,m:momOf(q),o0:q.o,e0:q.e||0}))};
   frozen={...VW};try{cv.setPointerCapture(e.pointerId)}catch(x){}return}
@@ -734,7 +735,7 @@ cv.addEventListener('pointermove',e=>{if(PT.has(e.pointerId))PT.set(e.pointerId,
  if(cdrag){const dx=e.clientX-cdrag.x;if(!cdrag.moved&&Math.abs(dx)<5)return;cdrag.moved=true;const r=cv.getBoundingClientRect(),dt=Math.round(dx/r.width*(cdrag.view.v1-cdrag.view.v0)*2)/2;
   cdrag.items.forEach(it=>{if(cdrag.mode==='mov')it.c.o=Math.max(-it.m.start,it.o0+dt);else it.c.e=Math.max(0,it.e0+dt)});
   const f=cdrag.items[0];$('tlInfo').textContent=cdrag.mode==='mov'?'Mover a '+fmt(f.m.start+f.c.o)+(cdrag.items.length>1?' · '+cdrag.items.length+' cues':''):'Duración '+fdur(f.c.e||0);return}
- if(drag)seekEv(e);else{tlInfo(e);const h=evHit(e);cv.style.cursor=h&&can('cues')?(isResize(h,e)?'ew-resize':'grab'):'pointer'}});
+ if(drag)seekEv(e);else{tlInfo(e);const h=evHit(e);cv.style.cursor=h&&ME&&ME.role==='admin'?(isResize(h,e)?'ew-resize':'grab'):'pointer'}});
 const ptEnd=e=>{PT.delete(e.pointerId);if(PT.size<2)pinch=null;
  if(cdrag){const cd=cdrag;cdrag=null;
   if(e.type==='pointercancel'){cd.items.forEach(it=>{it.c.o=it.o0;it.c.e=it.e0})}
@@ -795,10 +796,11 @@ function buildDep(){$('ddDep').innerHTML=`<label class="all"><input type="checkb
 $('ddDep').addEventListener('change',e=>{if(e.target.id==='allDep'){enabled=e.target.checked?new Set(DEPTS.map(d=>d.id)):new Set()}else{e.target.checked?enabled.add(e.target.dataset.d):enabled.delete(e.target.dataset.d)}buildDep();updPanel(true);saveEnabled()});
 $('bDep').onclick=()=>{const o=$('ddDep').classList.contains('open');closeDD();if(!o){buildDep();openDD($('ddDep'),$('bDep'))}};
 $('bMenu').onclick=()=>{const o=$('ddMenu').classList.contains('open');closeDD();if(!o)openDD($('ddMenu'),$('bMenu'))};
-$('ddMenu').innerHTML=['Añadir momento aquí|moment','Temas y duraciones|times','Renombrar show y sala|name','Duración del show (sin audio)|dur','Exportar guion (copiar JSON)|exp','Importar guion (archivo JSON)|imp','Rellenar con eventos de prueba|fake','Borrar eventos de prueba|unfake','Restaurar setlist inicial|reset','Deshacer último cambio|undo','Copiar cues de un tema a otro|copy','Enlace de solo lectura|share'].map(s=>{const[a,b]=s.split('|');return `<button class="it" data-a="${b}">${a}</button>`}).join('');
+$('ddMenu').innerHTML=['Añadir momento aquí|moment','Temas y duraciones|times','Renombrar show y sala|name','Duración del show (sin audio)|dur','Exportar guion (copiar JSON)|exp','Importar guion (archivo JSON)|imp','Rellenar con eventos de prueba|fake','Borrar eventos de prueba|unfake','Restaurar setlist inicial|reset','Deshacer último cambio|undo','Preferencias (modo noche)|prefs','Enlace de solo lectura|share'].map(s=>{const[a,b]=s.split('|');return `<button class="it" data-a="${b}">${a}</button>`}).join('');
 $('ddMenu').addEventListener('click',e=>{const a=e.target.dataset.a;if(!a)return;closeDD();
  if(['name','dur','exp','imp','reset','fake','unfake','share'].includes(a)&&(!ME||ME.role!=='admin')){toast('Solo el administrador puede hacerlo');return}
  if((a==='moment'||a==='times')&&!can('times')){toast('No tienes permiso para cambiar los temas');return}
+ if(a==='prefs'){$('bSet').click();return}
  if(a==='times'){buildTimes();$('mTimes').classList.add('open')}
  if(a==='moment')editor('Nuevo momento','Nombre del momento','',v=>{if(!v)return;S.moments.push({name:v,start:Math.floor(t),kind:'momento',cues:[]});sortM();save();lastPanelIdx=-1});
  if(a==='name')editor('Show','Nombre del show',S.name,v=>{if(v){S.name=v;head();save()}},()=>editor('Sala','Sala / venue',S.venue,v=>{S.venue=v;head();save()}));
@@ -1556,10 +1558,7 @@ applyNight();
 let bctx=null;
 function beep(vol){try{bctx=bctx||new (window.AudioContext||window.webkitAudioContext)();if(bctx.state==='suspended')bctx.resume();
  const o=bctx.createOscillator(),g=bctx.createGain(),n=bctx.currentTime;o.type='sine';o.frequency.value=880;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(vol===undefined?SET.vol:vol,n+.03);g.gain.exponentialRampToValueAtTime(.0008,n+.35);o.connect(g);g.connect(bctx.destination);o.start(n);o.stop(n+.4)}catch(e){}}
-$('bSet').onclick=()=>{$('sBeep').checked=SET.beep;$('sVol').value=SET.vol;$('sNight').checked=SET.night;$('mSet').classList.add('open')};
-$('sBeep').onchange=e=>{SET.beep=e.target.checked;saveSet()};
-$('sVol').oninput=e=>{SET.vol=+e.target.value;saveSet()};
-$('sTest').onclick=()=>beep();
+$('bSet').onclick=()=>{$('sNight').checked=SET.night;$('mSet').classList.add('open')};
 $('sNight').onchange=e=>{SET.night=e.target.checked;saveSet();applyNight()};
 const toggleNight=()=>{SET.night=!SET.night;saveSet();applyNight()};
 $('bNight').onclick=toggleNight;$('fsNight').onclick=toggleNight;
@@ -1569,13 +1568,10 @@ function frameExtra(i,m){
  try{syncTracks(i,m)}catch(e){}
  const nm=S.moments[i+1];$('nextTema').innerHTML=nm?'SIGUIENTE '+(isTr(nm)?'':'TEMA ')+'· '+esc(mTitle(nm))+' · en '+fmt(nm.start-t):'';
  if(t<lastT-1)beeped.clear();lastT=t;
- if(playing&&SET.beep){for(const mo of S.moments)for(const c of mo.cues){if(!c.key||!enabled.has(c.d))continue;const df=mo.start+c.o-t;if(df>0&&df<=5){const id=c.id||(mo.start+':'+c.o);if(!beeped.has(id)){beeped.add(id);beep()}}}}
 }
 // GO: siguiente cue
 function goNext(){let best=null;S.moments.forEach(mo=>mo.cues.forEach(c=>{if(!enabled.has(c.d))return;const a=mo.start+c.o;if(a>t+.05&&(best===null||a<best))best=a}));
  if(best===null){toast('No hay más cues');return}setT(best)}
-$('go').onclick=goNext;$('fsGo').onclick=goNext;
-addEventListener('keydown',e=>{if(e.code==='Enter'&&!/INPUT|TEXTAREA|SELECT|BUTTON/.test(e.target.tagName)&&!document.querySelector('.modal.open')){e.preventDefault();goNext()}});
 // ir a tema
 $('bJump').onclick=()=>{const o=$('ddJump').classList.contains('open');closeDD();if(o)return;const ci=curIdx();
  $('ddJump').innerHTML=S.moments.map((m,i)=>`<button class="it${i===ci?' cur':''}${isTr(m)?' tr':''}" data-j="${i}">${i===ci?'● ':''}${esc(mTitle(m))}<span class="mono">${fmt(m.start,true)}</span></button>`).join('');
@@ -1618,12 +1614,14 @@ $('fCuePick').onchange=async e=>{const fs=[...e.target.files];e.target.value='';
  renderCF();toast('Archivos listos: pulsa Guardar cambios')};
 
 const MOBQ=matchMedia('(max-width:700px),(max-height:520px) and (pointer:coarse)');
-function applyMob(){document.documentElement.classList.toggle('mob',MOBQ.matches);try{sizeTL()}catch(e){}}
+function applyMob(){document.documentElement.classList.toggle('mob',MOBQ.matches);try{applyExp()}catch(e){}if(MOBQ.matches){try{zmode=2;zcust=null;setSeg()}catch(e){}}}
 applyMob();try{MOBQ.addEventListener('change',applyMob)}catch(e){}
 if(!zcust){zmode=2;try{setSeg()}catch(e){}}
 
 /* ===== lote B ===== */
-function peopleNames(){try{const a=(CLOUD&&PROF&&PROF.length)?PROF.map(p=>p.name||p.email):USERS.map(u=>u.name);return [...new Set(a.filter(Boolean))]}catch(e){return []}}
+var PEOPLE=[];
+async function loadPeople(){try{const {data}=await SB.from('profiles').select('name,email,status');if(data)PEOPLE=data.filter(p=>p.status!=='pending'&&p.status!=='banned'&&p.status!=='blocked')}catch(e){}}
+function peopleNames(){try{const a=CLOUD?[...PEOPLE.map(p=>p.name||p.email),...ONLINE.map(o=>o.name),ME&&ME.name]:USERS.map(u=>u.name);return [...new Set(a.filter(Boolean))]}catch(e){return []}}
 function renderCm(){$('fCmW').style.display=can('cues')?'':'none';
  $('fCm').innerHTML=ecCm.length?ecCm.map((q,k)=>`<div class="hint" style="margin:4px 0"><b>${esc(q.by||'')}</b> · ${new Date(q.at||0).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}: ${esc(q.x)} ${(ME&&(ME.role==='admin'||q.by===who()))?`<button type="button" data-cmd="${k}" title="Quitar">✕</button>`:''}</div>`).join(''):'<div class="hint">Sin comentarios.</div>'}
 $('fCm').addEventListener('click',e=>{const b=e.target.closest('[data-cmd]');if(!b)return;ecCm.splice(+b.dataset.cmd,1);renderCm()});
@@ -1756,8 +1754,12 @@ function cloudExtras(){if(!SB||!ME||ME.guest)return;$('bOnline').style.display='
  try{if(PRES)SB.removeChannel(PRES);PRES=SB.channel('online-show',{config:{presence:{key:ME.id}}});
   PRES.on('presence',{event:'sync'},()=>{const st=PRES.presenceState();ONLINE=Object.values(st).map(a=>a[0]).filter(Boolean);updOnline()}).subscribe(async stt=>{if(stt==='SUBSCRIBED')await PRES.track({name:ME.name,role:ME.role})})}catch(e){}
  try{synStart()}catch(e){}
+ try{loadPeople().then(()=>{if($('mTodo').classList.contains('open'))buildTodo()})}catch(e){}
  chatLoad();try{SB.channel('chat-1').on('postgres_changes',{event:'INSERT',schema:'public',table:'chat'},p=>{CHAT.push(p.new);if(CHAT.length>300)CHAT.shift();
-  if($('mChat').classList.contains('open')){chatRender()}else{updChatN();if(p.new.user_id!==ME.id)toast('💬 '+p.new.name+': '+String(p.new.text).slice(0,60))}}).subscribe()}catch(e){}}
+  if($('mChat').classList.contains('open')){chatRender()}else{updChatN();if(p.new.user_id!==ME.id)chatPop(p.new)}}).subscribe()}catch(e){}}
+var chatPT=null;
+function chatPop(m){const el=$('chatPop');el.innerHTML='<b>💬 '+esc(m.name)+'</b>'+esc(String(m.text).slice(0,180))+'<i>Toca para abrir el chat</i>';el.classList.add('on');clearTimeout(chatPT);chatPT=setTimeout(()=>el.classList.remove('on'),10000)}
+$('chatPop').onclick=()=>{$('chatPop').classList.remove('on');clearTimeout(chatPT);$('bChat').click()};
 function updOnline(){const n=ONLINE.length;$('bOnline').textContent='● '+n+' conectado'+(n===1?'':'s');
  $('ddOnline').innerHTML='<div class="hint" style="margin:0 0 6px">Conectados ahora</div>'+ONLINE.map(o=>`<div style="padding:4px 0">${esc(o.name||'?')} <span class="mono" style="color:var(--mut);font-size:11px">${o.role==='admin'?'ADMIN':o.role==='viewer'?'SOLO LECTURA':'EDITOR'}</span></div>`).join('')}
 $('bOnline').onclick=()=>{const o=$('ddOnline').classList.contains('open');closeDD();if(!o)openDD($('ddOnline'),$('bOnline'))};
