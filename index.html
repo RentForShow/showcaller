@@ -29,7 +29,9 @@ header{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:
 .live .live-dot{background:#e5534b;box-shadow:0 0 8px #e5534b}
 main{display:grid;grid-template-columns:1fr;position:relative;overflow:hidden;min-height:0}
 main.withpanel{grid-template-columns:1fr minmax(300px,38%)}
-#stage{padding:22px 22px 80px;overflow-y:auto}
+#stage{padding:22px 22px 20px;overflow:hidden;display:flex;flex-direction:column}
+#stage>*{flex:none}
+#stage>#cues{flex:1 1 auto;min-height:0;overflow-y:auto}
 .eyebrow{font-size:11px;letter-spacing:.18em;color:var(--mut);text-transform:uppercase}
 h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:0;line-height:1.1}
 .shead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:6px 0 10px}
@@ -56,7 +58,7 @@ h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:
 #cueImg.on{display:flex;opacity:1}
 #cueImg img{width:100%;height:100%;max-height:100%;object-fit:contain;display:block}
 #stage.hasimg .cue{margin-right:calc(min(38vw,600px) + 5%)}
-html.mob #cueImg{right:0;left:0;top:auto;bottom:0;width:100%;max-height:34%;border-radius:0}
+html.mob #cueImg{right:8px;left:auto;top:auto;bottom:8px;width:36vw;max-height:22%;border-radius:8px}
 html.mob #stage.hasimg .cue{margin-right:0}
 .cue.key .txt{font-weight:700}.keytag{margin-left:8px;background:var(--tx);color:#0e0e0d!important;border-color:var(--tx)!important;font-weight:800}
 .atts{margin-top:6px;font-size:12px;display:flex;gap:10px;flex-wrap:wrap}.atts a{color:var(--mut);text-decoration:underline}
@@ -186,8 +188,8 @@ footer>*,#app>*,main>*{min-width:0}
 .cue.act{background:#ffffff08}.cue.act .cd{color:var(--tx);font-weight:700}
 .nt{display:flex;gap:6px;align-items:center;padding:4px 0;border-top:1px solid var(--line);font-size:12px;flex-wrap:wrap}
 .nt .tag{font-size:9px;padding:0 5px}
-#nbox{margin-top:10px}
-.nbt{font-size:11px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase;padding:4px 0}.nbt:hover{color:var(--tx)}
+#nbox{margin-top:10px;max-height:33%;overflow-y:auto;flex:none}
+.nbt{display:block;font-size:11px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase;padding:4px 0}.nbt:hover{color:var(--tx)}
 .nt.done .tx{text-decoration:line-through;color:var(--dim)}
 .nt .tx{flex:1;min-width:140px}.nt .rg2{color:var(--mut);font-size:12px}
 .tag{font-size:10px;letter-spacing:.12em;border:1px solid #555;border-radius:4px;padding:1px 6px;white-space:nowrap;color:var(--tx)}
@@ -247,7 +249,11 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  #bMenu{position:sticky;right:0;background:var(--bg);box-shadow:-8px 0 8px var(--bg)}
  header{flex-wrap:nowrap}
  .logo{flex:none}
- #stage{padding:14px 14px 40px}
+ #stage{padding:12px 14px 70px;display:block;overflow-y:auto}
+ #stage>#cues{overflow:visible}
+ #nbox{max-height:none;overflow:visible}
+ .meta,.bar{display:none}
+ #eyebrow{font-size:11px}
  .shead{gap:8px}
  .stitle h1{font-size:clamp(20px,6.4vw,30px)}
  .tc{font-size:clamp(34px,11vw,52px)!important}
@@ -508,7 +514,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.55'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.57'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -599,12 +605,10 @@ function buildCues(i){
  $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o;return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><div class="dep"><span class="dot"></span>${d.n}${c.key?'<span class="tag keytag">★ IMPORTANTE</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${c.pd===1?'<span class="tag pdtag">? PENDIENTE</span>':''}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400">viene de ${esc(mTitle(pm))}</span>`:''}${c.pd===1?'<button class="cf" title="Confirmar">✓ Confirmar</button>':''}<button class="ed" title="Editar">✎</button></div><div class="row"><div class="txt">${esc(c.t)}</div><div class="cd mono"></div></div>${c.cm&&c.cm.length?`<div class="cmts">${c.cm.slice(-3).map(q=>'💬 <b>'+esc(dn(q.by)||'')+'</b> '+esc(q.x)).join('<br>')}</div>`:''}${CLOUD&&c.refs&&c.refs.length?`<div class="atts">📎 ${c.refs.map(r=>`<a data-f="${esc(r.f)}" data-open="1">${esc(r.name||'archivo')}</a>`).join('')}</div>`:''}<div class="pb"><i></i></div></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
  const end=momEnd(i),last=i===S.moments.length-1;
  const ns=S.notes.filter(n=>n.t>=m.start&&(n.t<end||(last&&n.t<=end))&&(!n.d||enabled.has(n.d)));
- $('nbox').innerHTML=ns.length?`<button class="nbt" data-nbt="1">${NBOPEN?'▾':'▸'} Notas y peticiones (${ns.length})</button>`+(NBOPEN?ns.map(n=>`<div class="nt${n.done?' done':''}"><span class="tag">${NT[n.k]}</span>${n.d&&D[n.d]?`<span class="tag" style="background:${D[n.d].c};border-color:${D[n.d].c};color:#0e0e0d;font-weight:700">${D[n.d].n}</span>`:''}<span class="tx">${esc(n.x)}</span><button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`).join(''):''):'';
+ $('nbox').innerHTML=ns.length?`<div class="nbt">Notas y peticiones (${ns.length})</div>`+(ns.map(n=>`<div class="nt${n.done?' done':''}"><span class="tag">${NT[n.k]}</span>${n.d&&D[n.d]?`<span class="tag" style="background:${D[n.d].c};border-color:${D[n.d].c};color:#0e0e0d;font-weight:700">${D[n.d].n}</span>`:''}<span class="tx">${esc(n.x)}</span><button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`).join('')):'';
  shownIdx=i;shownKey=keyOf(i);
  try{hydrateRefs($('cues'))}catch(e){}
 }
-var NBOPEN=false;
-$('nbox').addEventListener('click',e=>{if(e.target.closest('[data-nbt]')){NBOPEN=!NBOPEN;shownKey='';}});
 $('eyebrow').addEventListener('click',e=>{if(e.target.id==='chipMood'){buildMood();$('mMood').classList.add('open')}});
 $('stage').addEventListener('click',e=>{const cf=e.target.closest('.cf');if(cf){const el=cf.closest('.cue');if(!can('cues')){toast('No tienes permiso');return}const c=S.moments[+el.dataset.m].cues[+el.dataset.k];c.pd=2;c.pdBy=who();c.ed=who();c.eat=Date.now();dirty();toast('Cue confirmado');return}const b=e.target.closest('.ed');if(!b)return;
  if(b.dataset.n!==undefined){openNote(S.notes[+b.dataset.n]);return}
