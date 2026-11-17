@@ -100,9 +100,10 @@ body.cmp #bNight{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/200
 #bSetlE{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E");font-size:0}#bSetlE::before{width:16px;height:16px}
 body:not(.adm) #bOnline{display:none!important}
 body.cmp #bMenu{display:none}
-@keyframes act{0%,100%{box-shadow:0 0 0 1.5px #fff;color:#fff;background:#ffffff1f}50%{box-shadow:0 0 0 1.5px #55534e;color:#77746d;background:transparent}}
+@keyframes act{0%,100%{box-shadow:inset 0 0 0 1.5px #fff;color:#fff;background:#ffffff1f}50%{box-shadow:inset 0 0 0 1.5px #55534e;color:#77746d;background:transparent}}
+body.cmp #bSync{padding:4px 5px}
 body.cmp #bSync[data-act='1']{animation:act 1.6s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){body.cmp #bSync[data-act='1']{animation:none;box-shadow:0 0 0 1.5px #fff;color:#fff}}
+@media (prefers-reduced-motion:reduce){body.cmp #bSync[data-act='1']{animation:none;box-shadow:inset 0 0 0 1.5px #fff;color:#fff}}
 body.cmp #bFs,body.cmp #bNight{order:90}
 body.cmp #bUser{order:99}
 .phead{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;font-size:11px;letter-spacing:.18em;color:var(--mut)}
@@ -167,14 +168,18 @@ footer>*,#app>*,main>*{min-width:0}
 .mtop{display:flex;justify-content:space-between;align-items:flex-start;padding:20px 24px;border-bottom:1px solid var(--line)}
 .mtop h2{font-size:26px;font-weight:500;margin-top:4px}
 .mcols{display:flex;gap:0;overflow:auto;padding:24px 8px 24px 24px}
-.mone{display:flex;flex-direction:column;gap:14px;padding:20px 24px 28px;overflow:auto}
-.mone .bar2{display:flex;gap:18px;align-items:center;justify-content:flex-end;flex-wrap:wrap;font-size:14px;color:var(--mut)}
-.mone .bar2 button{padding:6px 4px}.mone .bar2 button:hover{color:var(--tx)}
-.mone .rg{font-size:14px;color:var(--mut)}
-.mone .desc{font-size:22px;line-height:1.45;color:#e6e3db;white-space:pre-wrap;max-width:1000px}
-.mone .desc.none{color:var(--dim);font-size:16px}
-.mone .mimgs{grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px}
-.mone .mi img{height:auto;max-height:70vh;object-fit:contain;background:#000}
+.mone{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start;padding:20px 24px 28px;overflow:auto}
+.mone .side{position:sticky;top:0;display:flex;flex-direction:column;gap:14px}
+.mone .bar2{display:flex;gap:4px 14px;align-items:center;justify-content:flex-start;flex-wrap:wrap;font-size:13px;color:var(--mut)}
+.mone .bar2 button{padding:5px 2px}.mone .bar2 button:hover{color:var(--tx)}
+.mone .rg{font-size:13px;color:var(--mut)}
+.mone .desc{font-size:15px;line-height:1.55;color:#e6e3db;white-space:pre-wrap}
+.mone .desc.none{color:var(--dim);font-size:14px}
+.mone .mimgs{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
+.mone .mi{position:relative}
+.mone .mi img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;max-height:none;background:#000;cursor:zoom-in;display:block;border-radius:6px}
+.mone .mi button{position:absolute;top:6px;right:6px;background:#000b;color:#fff;border-radius:50%;width:26px;height:26px;padding:0;line-height:26px;text-align:center}
+@media (max-width:900px){.mone{grid-template-columns:1fr}.mone .side{position:static}}
 .mcol{min-width:280px;flex:1;border-left:1px solid var(--line);padding:0 24px 0 20px;display:flex;flex-direction:column;gap:8px}
 .mcol h3{font-size:20px;font-weight:500}
 .mcol .rg{font-size:12px;color:var(--mut)}
@@ -586,7 +591,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.06'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.09'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -967,13 +972,13 @@ function buildMood(){if(MB!==null&&!S.blocks[MB])MB=null;
  document.querySelector('#mMood .mtop h2').textContent=MB===null?'Bloques':S.blocks[MB].name;
  document.querySelector('#mMood .mtop .eyebrow').textContent=MB===null?'Moodboard del show':'Moodboard · '+(MB+1)+' / '+S.blocks.length;
  if(MB!==null){const i=MB,b=S.blocks[i];b.imgs=b.imgs||[];const end=i+1<S.blocks.length?S.blocks[i+1].start:dur();
-  const imgs=b.imgs.concat(...S.moments.filter(mo=>blockOf(mo.start)===i&&mo.imgs&&mo.imgs.length).map(mo=>mo.imgs));
-  const th=imgs.map(r=>fileKind(r)==='img'?`<div class="mi"><img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}"></div>`:`<div class="mi"><a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">${fileKind(r)==='video'?'🎞':fileKind(r)==='audio'?'🎵':'📄'} ${esc(r.name||'Archivo')}</a></div>`).join('');
-  $('mcols').innerHTML=`<div class="bar2"><div class="rg mono" style="margin-right:auto">${fmt(b.start,true)} – ${fmt(end,true)}</div><button data-mall="1">▦ Todos los bloques</button><button data-go="${i}">▷ Ir al bloque</button><button data-e="${i}">✎ Editar</button>${cm0?`<button data-mup="${i}">＋ Fotos</button>`:''}<button data-mnav="-1"${i<=0?' disabled style="opacity:.3"':''}>‹</button><button data-mnav="1"${i>=S.blocks.length-1?' disabled style="opacity:.3"':''}>›</button></div><div class="desc${b.mood?'':' none'}">${b.mood?esc(b.mood):'Sin moodboard'}</div>${th?`<div class="mimgs">${th}</div>`:''}`;
+  const imgs=[];b.imgs.forEach((r,k)=>imgs.push([r,'b:'+i+':'+k]));S.moments.forEach((mo,mi)=>{if(blockOf(mo.start)===i&&mo.imgs)mo.imgs.forEach((r,k)=>imgs.push([r,'m:'+mi+':'+k]))});
+  const th=imgs.map(([r,id])=>{const x=fileKind(r)==='img'?`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}">`:`<a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">${fileKind(r)==='video'?'🎞':fileKind(r)==='audio'?'🎵':'📄'} ${esc(r.name||'Archivo')}</a>`;return `<div class="mi">${x}${cm0?`<button data-mdel2="${id}" title="Borrar foto">✕</button>`:''}</div>`}).join('');
+  $('mcols').innerHTML=`<div class="side"><div class="rg mono">${fmt(b.start,true)} – ${fmt(end,true)}</div><div class="bar2"><button data-mall="1">▦ Todos los bloques</button><button data-go="${i}">▷ Ir al bloque</button><button data-e="${i}">✎ Editar</button>${ME&&ME.role==='admin'?`<button data-bname="${i}">✎ Nombre</button>`:''}${cm0?`<button data-mup="${i}">＋ Fotos</button>`:''}<button data-mnav="-1"${i<=0?' disabled style="opacity:.3"':''}>‹</button><button data-mnav="1"${i>=S.blocks.length-1?' disabled style="opacity:.3"':''}>›</button></div><div class="desc${b.mood?'':' none'}">${b.mood?esc(b.mood):'Sin moodboard'}</div></div><div class="mimgs">${th||'<div class="hint">Sin fotos todavía.</div>'}</div>`;
   hydrateRefs($('mcols'));return}
  $('mcols').innerHTML=S.blocks.map((b,i)=>{const end=i+1<S.blocks.length?S.blocks[i+1].start:dur(),cm=can('mood');b.imgs=b.imgs||[];
  const th=b.imgs.map((r,k)=>{const x=fileKind(r)==='img'?`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}">`:`<a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">${fileKind(r)==='video'?'🎞':fileKind(r)==='audio'?'🎵':'📄'} ${esc(r.name||'Archivo')}</a>`;return `<div class="mi">${x}${cm?`<button data-mdel="${i}:${k}" title="Quitar">✕</button>`:''}</div>`}).join('');
- return `<div class="mcol" data-b="${i}"><h3>${esc(b.name)}</h3><div class="rg mono">${fmt(b.start,true)} – ${fmt(end,true)}</div><p class="${b.mood?'':'none'}">${b.mood?esc(b.mood):'Sin moodboard'}</p>${th?`<div class="mimgs">${th}</div>`:''}${S.moments.filter(mo=>blockOf(mo.start)===i&&mo.imgs&&mo.imgs.length).map(mo=>`<div class="eyebrow" style="margin:12px 0 4px">${esc(mTitle(mo))}</div><div class="mimgs">${mo.imgs.map(r=>fileKind(r)==='img'?`<div class="mi"><img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}"></div>`:'').join('')}</div>`).join('')}<div class="acts"><button data-e="${i}">Editar</button>${cm?`<button data-mup="${i}">＋ Fotos</button>`:''}<button data-g="${i}">Abrir en grande</button></div></div>`}).join('');hydrateRefs($('mcols'))}
+ return `<div class="mcol" data-b="${i}"><h3>${esc(b.name)}</h3><div class="rg mono">${fmt(b.start,true)} – ${fmt(end,true)}</div><p class="${b.mood?'':'none'}">${b.mood?esc(b.mood):'Sin moodboard'}</p>${th?`<div class="mimgs">${th}</div>`:''}${S.moments.filter(mo=>blockOf(mo.start)===i&&mo.imgs&&mo.imgs.length).map(mo=>`<div class="eyebrow" style="margin:12px 0 4px">${esc(mTitle(mo))}</div><div class="mimgs">${mo.imgs.map(r=>fileKind(r)==='img'?`<div class="mi"><img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}"></div>`:'').join('')}</div>`).join('')}<div class="acts"><button data-e="${i}">Editar</button>${ME&&ME.role==='admin'?`<button data-bname="${i}">Nombre</button>`:''}${cm?`<button data-mup="${i}">＋ Fotos</button>`:''}<button data-g="${i}">Abrir en grande</button></div></div>`}).join('');hydrateRefs($('mcols'))}
 $('bMood').onclick=()=>{MB=null;buildMood();$('mMood').classList.add('open')};
 async function uploadMood(files,bi){
  const b=S.blocks[bi];if(!b||!can('mood'))return;if(!CLOUD||!SB){toast('Subir fotos requiere la web conectada a Supabase');return}b.imgs=b.imgs||[];let ok=0;
@@ -992,6 +997,8 @@ $('mcols').addEventListener('dragover',e=>{if(e.target.closest('.mcol')&&can('mo
 $('mcols').addEventListener('drop',e=>{const c=e.target.closest('.mcol');if(!c||!can('mood'))return;e.preventDefault();if(e.dataTransfer.files.length)uploadMood([...e.dataTransfer.files],+c.dataset.b)});
 $('mcols').addEventListener('click',e=>{
  if(e.target.tagName==='IMG'&&e.target.src){showImg(e.target.src);return}
+ const bn=e.target.dataset.bname;if(bn!==undefined){if(!ME||ME.role!=='admin'){toast('Solo el administrador puede renombrar bloques');return}const b=S.blocks[+bn];editor('Bloque','Nombre del bloque',b.name,v=>{if(!v)return;b.name=v;dirty();try{head()}catch(e){}buildMood();toast('Bloque renombrado')});return}
+ const m2=e.target.dataset.mdel2;if(m2!==undefined&&can('mood')){const [ty,x,k]=m2.split(':'),arr=ty==='b'?S.blocks[+x].imgs:S.moments[+x].imgs,r=arr&&arr[+k];if(!r||!confirm('¿Borrar esta foto del moodboard?'))return;arr.splice(+k,1);if(r.f&&SB)SB.storage.from('files').remove([r.f]);save();buildMood();toast('Foto borrada');return}
  const up=e.target.dataset.mup,md=e.target.dataset.mdel;
  if(up!==undefined){if(!CLOUD){toast('Subir fotos requiere la web conectada a Supabase');return}$('mPick').dataset.b=up;$('mPick').click();return}
  if(md!==undefined&&can('mood')){const [bi,k]=md.split(':').map(Number),r=S.blocks[bi].imgs.splice(k,1)[0];if(r&&SB)SB.storage.from('files').remove([r.f]);save();buildMood();return}
