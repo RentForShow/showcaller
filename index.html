@@ -100,7 +100,7 @@ body.cmp #bNight{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/200
 #bSetlE{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E");font-size:0}#bSetlE::before{width:16px;height:16px}
 body:not(.adm) #bOnline{display:none!important}
 body.cmp #bMenu{display:none}
-@keyframes emit{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes emit{0%,100%{background:#ffffff;filter:drop-shadow(0 0 3px #ffffffaa)}50%{background:#6f6d68;filter:none}}
 body.cmp #bSync[data-em='1']::before{animation:emit 1.6s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){body.cmp #bSync[data-em='1']::before{animation:none}}
 body.cmp #bFs,body.cmp #bNight{order:90}
@@ -159,6 +159,8 @@ footer>*,#app>*,main>*{min-width:0}
 .sub button:hover{color:var(--tx)}
 #tl{width:100%;display:block;touch-action:none;cursor:pointer}
 #mm{grid-column:1/-1;width:100%;display:block;touch-action:none;cursor:pointer}
+.chatdd{position:fixed;z-index:60;display:none;flex-direction:column;width:min(340px,calc(100vw - 16px));background:#161615;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px #0009;overflow:hidden}
+.chatdd.open{display:flex}
 .modal{position:fixed;inset:0;background:#000b;z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .modal.open{display:flex}
 .mbox{background:#161615;border:1px solid var(--line);border-radius:10px;width:min(1000px,100%);max-height:92%;display:flex;flex-direction:column;overflow:hidden}
@@ -483,12 +485,12 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
   <button class="go" type="submit">Copiar cues</button>
  </form>
 </div></div>
-<div class="modal" id="mChat"><div class="mbox" style="width:min(520px,100%)">
- <div class="mtop"><div><div class="eyebrow">Chat del equipo</div><h2>Mensajes</h2></div><button data-close>✕</button></div>
- <div id="chatAdm" style="display:none;padding:8px 24px 0"><button class="btn sm" id="chatClr">🗑 Borrar todo el chat</button></div>
- <div id="chatList" style="max-height:52vh;overflow:auto;padding:6px 24px"></div>
- <form class="form" id="fChat" style="flex-direction:row;gap:8px;padding:12px 24px"><input id="chatT" placeholder="Escribe un mensaje…" maxlength="1000" autocomplete="off" style="flex:1"><button class="btn" type="submit">Enviar</button></form>
-</div></div>
+<div id="mChat" class="chatdd">
+ <div class="mtop" style="padding:10px 14px"><div class="eyebrow" style="margin:0">Chat del equipo</div><span style="flex:1"></span><button class="btn sm" id="chatClr" style="display:none;margin-right:8px">Borrar todo</button><button id="chatX" title="Cerrar el chat">✕</button></div>
+ <div id="chatAdm" style="display:none"></div>
+ <div id="chatList" style="max-height:min(46vh,360px);min-height:80px;overflow:auto;padding:4px 14px"></div>
+ <form class="form" id="fChat" style="flex-direction:row;gap:8px;padding:10px 12px"><input id="chatT" placeholder="Escribe un mensaje…" maxlength="1000" autocomplete="off" style="flex:1;min-width:0"><button class="btn" type="submit">Enviar</button></form>
+</div>
 <div class="modal" id="mShare"><div class="mbox" style="width:min(560px,100%)">
  <div class="mtop"><div><div class="eyebrow">Invitados</div><h2>Enlace de solo lectura</h2></div><button data-close>✕</button></div>
  <div id="shareBody" style="padding:6px 24px 20px"></div>
@@ -584,7 +586,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.04'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.05'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -2060,10 +2062,13 @@ document.addEventListener('click',e=>{if(e.target.id==='histOpen'){closeDD();ses
 $('bOnline').onclick=()=>{const o=$('ddOnline').classList.contains('open');closeDD();if(!o)openDD($('ddOnline'),$('bOnline'))};
 async function chatLoad(){try{const {data,error}=await SB.from('chat').select('*').order('created_at',{ascending:false}).limit(100);if(!error&&data){CHAT=data.reverse();updChatN()}}catch(e){}}
 function updChatN(){const n=CHAT.filter(m=>new Date(m.created_at).getTime()>chatRead&&m.user_id!==(ME&&ME.id)).length;$('chatN').textContent=n?'('+n+')':''}
-function chatRender(){const l=$('chatList');$('chatAdm').style.display=ME&&ME.role==='admin'&&CHAT.length?'':'none';l.innerHTML=CHAT.length?CHAT.map(m=>`<div style="padding:7px 0;border-top:1px solid var(--line)"><div class="hint" style="margin:0 0 2px"><b>${esc(m.name)}</b> · ${new Date(m.created_at).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div><div style="display:flex;gap:8px;align-items:flex-start"><span style="flex:1">${esc(m.text)}</span>${ME&&ME.role==='admin'?`<button class="ed" data-cdel="${m.id}" title="Borrar mensaje">🗑</button>`:''}</div></div>`).join(''):'<div class="hint" style="padding:14px 0">Sin mensajes todavía.</div>';l.scrollTop=l.scrollHeight;chatRead=Date.now();try{localStorage.setItem('showcaller.chatread',String(chatRead))}catch(e){}updChatN()}
+function chatRender(){const l=$('chatList');$('chatClr').style.display=ME&&ME.role==='admin'&&CHAT.length?'':'none';l.innerHTML=CHAT.length?CHAT.map(m=>`<div style="padding:7px 0;border-top:1px solid var(--line)"><div class="hint" style="margin:0 0 2px"><b>${esc(m.name)}</b> · ${new Date(m.created_at).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div><div style="display:flex;gap:8px;align-items:flex-start"><span style="flex:1">${esc(m.text)}</span>${ME&&ME.role==='admin'?`<button class="ed" data-cdel="${m.id}" title="Borrar mensaje">🗑</button>`:''}</div></div>`).join(''):'<div class="hint" style="padding:14px 0">Sin mensajes todavía.</div>';l.scrollTop=l.scrollHeight;chatRead=Date.now();try{localStorage.setItem('showcaller.chatread',String(chatRead))}catch(e){}updChatN()}
 $('chatList').addEventListener('click',async e=>{const b=e.target.closest('[data-cdel]');if(!b)return;const id=+b.dataset.cdel;if(!SB||!confirm('¿Borrar este mensaje para todos?'))return;const {error}=await SB.from('chat').delete().eq('id',id);if(error){toast('No se pudo borrar: '+error.message);return}CHAT=CHAT.filter(m=>m.id!==id);chatRender()});
 $('chatClr').onclick=async()=>{if(!ME||ME.role!=='admin'||!SB)return;if(!confirm('¿Borrar TODO el chat para todos? No se puede deshacer.'))return;const {error}=await SB.from('chat').delete().gte('id',0);if(error){toast('No se pudo borrar: '+error.message);return}CHAT=[];chatRender();toast('Chat borrado')};
-$('bChat').onclick=()=>{chatRender();$('mChat').classList.add('open');setTimeout(()=>$('chatT').focus(),50)};
+function chatPos(){const c=$('mChat');if(!c.classList.contains('open'))return;const hr=document.querySelector('header').getBoundingClientRect(),b=$('bChat').getBoundingClientRect(),w=c.offsetWidth;c.style.top=(hr.bottom+4)+'px';c.style.left=Math.max(8,Math.min(innerWidth-w-8,b.right-w))+'px'}
+function chatClose(){$('mChat').classList.remove('open')}
+$('chatX').onclick=chatClose;addEventListener('resize',chatPos);
+$('bChat').onclick=()=>{const c=$('mChat');if(c.classList.contains('open')){chatClose();return}chatRender();c.classList.add('open');chatPos();setTimeout(()=>$('chatT').focus(),50)};
 $('fChat').onsubmit=async e=>{e.preventDefault();const v=$('chatT').value.trim();if(!v||!SB)return;$('chatT').value='';const {error}=await SB.from('chat').insert({name:ME.name,text:v});if(error){toast('No se pudo enviar: '+error.message+' (¿has ejecutado supabase_chat.sql?)');$('chatT').value=v}};
 // enlace de solo lectura
 async function openShare(){if(!CLOUD||!SB){toast('Requiere la versión con Supabase');return}$('mShare').classList.add('open');shareRender()}
