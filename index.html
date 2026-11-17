@@ -374,7 +374,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
    <div id="nbox"></div>
   </section>
   <aside id="panel">
-   <div class="phead"><span>GUION</span><button id="pClose">✕</button></div>
+   <div class="phead"><span>GUION</span><span style="flex:1"></span><button id="bSetl" class="chip" style="display:none;margin-right:10px;letter-spacing:.08em">📄 Setlist</button><button id="pClose">✕</button></div>
    <div class="psearch">🔍︎<input id="q" placeholder="Buscar"></div>
    <div id="glist"></div>
    <button id="gNow">Volver al ahora</button>
@@ -559,7 +559,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.99'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.00'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1580,7 +1580,7 @@ function showAuth(m){
  $('aPass').autocomplete=setup||reg?'new-password':'current-password';
 }
 $('aSwitch').onclick=()=>showAuth(authMode==='register'?'login':'register');
-function applyRole(){
+function applyRole(){try{$('bSetl').style.display=ME&&ME.role==='admin'&&CLOUD?'':'none'}catch(e){}
  const np=ME.role==='admin'?nPending():0;
  $('bUser').innerHTML='<b style="font-weight:500">'+esc(ME.name)+(np?' ('+np+')':'')+'</b>';
  $('ddUser').innerHTML=`<div class="hint" style="margin:0 0 6px">Sesión: <b>${esc(ME.name)}</b> · ${ME.role==='admin'?'ADMIN':ME.role==='viewer'?'SOLO LECTURA':ME.role==='reader'?'LECTOR':'EDITOR'}</div>`+(CLOUD?'<button class="it" data-u="pw">Cambiar mi contraseña</button>':'')+(ME.role==='admin'?`<button class="it" data-u="settings">Ajustes${np?' ('+np+' solicitud'+(np>1?'es':'')+')':''}</button>`:'')+'<button class="it" data-u="out">Cerrar sesión</button>';
@@ -1620,7 +1620,7 @@ $('ddUser').addEventListener('click',e=>{const a=e.target.dataset.u;if(!a)return
 /* ajustes */
 function buildSettings(){
  const np=nPending();
- $('sBody').innerHTML=[['users','Usuarios y permisos',np?np+' solicitud'+(np>1?'es':'')+' pendiente'+(np>1?'s':'')+' de aprobar':'Aprobar solicitudes, dar permisos y echar usuarios'],['depts','Departamentos','Crear, renombrar o quitar departamentos'],['songs','Temas y duraciones','Añadir, quitar, ordenar y cambiar la duración de cada tema'],['sess','Historial','Quién se ha conectado y qué ha cambiado cada uno'],['setl','Setlist físico','Foto o PDF del setlist en papel (solo tú lo ves)']].map(([k,t,d])=>`<button class="srow" data-s="${k}"><b>${t}</b><span>${d}</span></button>`).join('');
+ $('sBody').innerHTML=[['users','Usuarios y permisos',np?np+' solicitud'+(np>1?'es':'')+' pendiente'+(np>1?'s':'')+' de aprobar':'Aprobar solicitudes, dar permisos y echar usuarios'],['depts','Departamentos','Crear, renombrar o quitar departamentos'],['songs','Temas y duraciones','Añadir, quitar, ordenar y cambiar la duración de cada tema'],['sess','Historial','Quién se ha conectado y qué ha cambiado cada uno']].map(([k,t,d])=>`<button class="srow" data-s="${k}"><b>${t}</b><span>${d}</span></button>`).join('');
 }
 $('sBody').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s;
  if(k==='users'){buildUsers();$('mUsers').classList.add('open')}
@@ -2206,6 +2206,7 @@ async function logChanges(){if(!SB||!ME||ME.guest||isRO(ME.role))return;try{cons
 
 
 /* setlist físico (solo admin) */
+$('bSetl').onclick=()=>{setlLoad();$('mSetl').classList.add('open')};
 async function setlLoad(){const L=$('setlList');if(!SB||!CLOUD){L.innerHTML='<div class="hint">Requiere la nube activa.</div>';return}L.innerHTML='<div class="hint">Cargando…</div>';
  const{data,error}=await SB.storage.from('files').list('admin',{limit:100,sortBy:{column:'name',order:'desc'}});
  if(error){L.innerHTML='<div class="hint">No se pudo leer: '+esc(error.message)+' (¿has ejecutado supabase_setlist_admin.sql?)</div>';return}
