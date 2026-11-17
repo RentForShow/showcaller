@@ -459,6 +459,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 </div></div>
 <div class="modal" id="mChat"><div class="mbox" style="width:min(520px,100%)">
  <div class="mtop"><div><div class="eyebrow">Chat del equipo</div><h2>Mensajes</h2></div><button data-close>✕</button></div>
+ <div id="chatAdm" style="display:none;padding:8px 24px 0"><button class="btn sm" id="chatClr">🗑 Borrar todo el chat</button></div>
  <div id="chatList" style="max-height:52vh;overflow:auto;padding:6px 24px"></div>
  <form class="form" id="fChat" style="flex-direction:row;gap:8px;padding:12px 24px"><input id="chatT" placeholder="Escribe un mensaje…" maxlength="1000" autocomplete="off" style="flex:1"><button class="btn" type="submit">Enviar</button></form>
 </div></div>
@@ -487,8 +488,9 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  <div id="sBody" style="padding-bottom:8px"></div>
 </div></div>
 <div class="modal" id="mSess"><div class="mbox" style="width:min(640px,100%)">
- <div class="mtop"><div><div class="eyebrow">Ajustes</div><h2>Actividad</h2></div><button data-close>✕</button></div>
- <div class="hint" style="padding:12px 24px 4px">Quién ha abierto la app y hasta cuándo. La salida es la hora del último aviso de conexión (puede desviarse un minuto).</div>
+ <div class="mtop"><div><div class="eyebrow">Ajustes</div><h2>Historial</h2></div><button data-close>✕</button></div>
+ <div class="tform"><button class="btn" id="sessTabC">Conexiones</button> <button class="btn" id="sessTabX">Cambios</button></div>
+ <div class="hint" id="sessHint" style="padding:4px 24px"></div>
  <div class="tform"><button class="btn" id="sessRef">Actualizar</button> <button class="btn" id="sessClr">Borrar historial</button></div>
  <div id="sessList" style="overflow-y:auto;padding:0 24px 16px"></div>
 </div></div>
@@ -550,7 +552,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.90'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.91'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1610,13 +1612,13 @@ $('ddUser').addEventListener('click',e=>{const a=e.target.dataset.u;if(!a)return
 /* ajustes */
 function buildSettings(){
  const np=nPending();
- $('sBody').innerHTML=[['users','Usuarios y permisos',np?np+' solicitud'+(np>1?'es':'')+' pendiente'+(np>1?'s':'')+' de aprobar':'Aprobar solicitudes, dar permisos y echar usuarios'],['depts','Departamentos','Crear, renombrar o quitar departamentos'],['songs','Temas y duraciones','Añadir, quitar, ordenar y cambiar la duración de cada tema'],['sess','Actividad','Quién ha abierto la app, a qué hora entró y cuándo salió']].map(([k,t,d])=>`<button class="srow" data-s="${k}"><b>${t}</b><span>${d}</span></button>`).join('');
+ $('sBody').innerHTML=[['users','Usuarios y permisos',np?np+' solicitud'+(np>1?'es':'')+' pendiente'+(np>1?'s':'')+' de aprobar':'Aprobar solicitudes, dar permisos y echar usuarios'],['depts','Departamentos','Crear, renombrar o quitar departamentos'],['songs','Temas y duraciones','Añadir, quitar, ordenar y cambiar la duración de cada tema'],['sess','Historial','Quién se ha conectado y qué ha cambiado cada uno']].map(([k,t,d])=>`<button class="srow" data-s="${k}"><b>${t}</b><span>${d}</span></button>`).join('');
 }
 $('sBody').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s;
  if(k==='users'){buildUsers();$('mUsers').classList.add('open')}
  else if(k==='depts'){buildDepts();$('mDepts').classList.add('open')}
  else if(k==='songs'){buildTimes();$('mTimes').classList.add('open')}
- else if(k==='sess'){loadSess();$('mSess').classList.add('open')}});
+ else if(k==='sess'){sessTab('c');$('mSess').classList.add('open')}});
 /* usuarios y permisos */
 const PERMS=[['cues','Cues'],['notes','Notas y pendientes'],['times','Temas y tiempos'],['mood','Moodboard']];
 function buildUsers(){
@@ -2008,6 +2010,7 @@ function cloudExtras(){if(!SB||!ME||ME.guest)return;$('bOnline').style.display='
   PRES.on('presence',{event:'join'},({key,newPresences})=>{if(!PRESOK||key===ME.id)return;const n=(newPresences&&newPresences[0]&&newPresences[0].name)||'Alguien';joinPop(n)}).on('presence',{event:'sync'},()=>{const st=PRES.presenceState();ONLINE=Object.values(st).map(a=>a[0]).filter(Boolean);updOnline()}).subscribe(async stt=>{if(stt==='SUBSCRIBED'){await PRES.track({name:ME.name,role:ME.role});setTimeout(()=>{PRESOK=true},3000)}})}catch(e){}
  try{synStart()}catch(e){}
  try{sessStart()}catch(e){}
+ try{if(PREV===null)PREV=JSON.stringify(S)}catch(e){}
  try{loadPeople().then(()=>{if($('mTodo').classList.contains('open'))buildTodo()})}catch(e){}
  chatLoad();try{SB.channel('chat-1').on('postgres_changes',{event:'INSERT',schema:'public',table:'chat'},p=>{CHAT.push(p.new);if(CHAT.length>300)CHAT.shift();
   if($('mChat').classList.contains('open')){chatRender()}else{updChatN();if(p.new.user_id!==ME.id)chatPop(p.new)}}).on('postgres_changes',{event:'DELETE',schema:'public',table:'chat'},p=>{const id=p.old&&p.old.id;if(id==null)return;CHAT=CHAT.filter(m=>m.id!==id);if($('mChat').classList.contains('open'))chatRender()}).subscribe()}catch(e){}}
@@ -2017,12 +2020,14 @@ function joinPop(n){const el=$('joinPop');el.innerHTML='🟢 <b>'+esc(n)+'</b> s
 function chatPop(m){const el=$('chatPop');el.innerHTML='<b>💬 '+esc(m.name)+'</b>'+esc(String(m.text).slice(0,180))+'<i>Toca para abrir el chat</i>';el.classList.add('on');clearTimeout(chatPT);chatPT=setTimeout(()=>el.classList.remove('on'),10000)}
 $('chatPop').onclick=()=>{$('chatPop').classList.remove('on');clearTimeout(chatPT);$('bChat').click()};
 function updOnline(){const n=ONLINE.length;$('bOnline').textContent='● '+n+' conectado'+(n===1?'':'s');
- $('ddOnline').innerHTML='<div class="hint" style="margin:0 0 6px">Conectados ahora</div>'+ONLINE.map(o=>`<div style="padding:4px 0">${esc(o.name||'?')} <span class="mono" style="color:var(--mut);font-size:11px">${o.role==='admin'?'ADMIN':o.role==='viewer'?'SOLO LECTURA':o.role==='reader'?'LECTOR':'EDITOR'}</span></div>`).join('')}
+ $('ddOnline').innerHTML='<div class="hint" style="margin:0 0 6px">Conectados ahora</div>'+ONLINE.map(o=>`<div style="padding:4px 0">${esc(o.name||'?')} <span class="mono" style="color:var(--mut);font-size:11px">${o.role==='admin'?'ADMIN':o.role==='viewer'?'SOLO LECTURA':o.role==='reader'?'LECTOR':'EDITOR'}</span></div>`).join('')+(ME&&ME.role==='admin'?'<button class="btn sm" id="histOpen" style="margin-top:10px">📋 Historial y cambios</button>':'')}
+document.addEventListener('click',e=>{if(e.target.id==='histOpen'){closeDD();sessTab('c');$('mSess').classList.add('open')}});
 $('bOnline').onclick=()=>{const o=$('ddOnline').classList.contains('open');closeDD();if(!o)openDD($('ddOnline'),$('bOnline'))};
 async function chatLoad(){try{const {data,error}=await SB.from('chat').select('*').order('created_at',{ascending:false}).limit(100);if(!error&&data){CHAT=data.reverse();updChatN()}}catch(e){}}
 function updChatN(){const n=CHAT.filter(m=>new Date(m.created_at).getTime()>chatRead&&m.user_id!==(ME&&ME.id)).length;$('chatN').textContent=n?'('+n+')':''}
-function chatRender(){const l=$('chatList');l.innerHTML=CHAT.length?CHAT.map(m=>`<div style="padding:7px 0;border-top:1px solid var(--line)"><div class="hint" style="margin:0 0 2px"><b>${esc(m.name)}</b> · ${new Date(m.created_at).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div><div style="display:flex;gap:8px;align-items:flex-start"><span style="flex:1">${esc(m.text)}</span>${ME&&ME.role==='admin'?`<button class="ed" data-cdel="${m.id}" title="Borrar mensaje">🗑</button>`:''}</div></div>`).join(''):'<div class="hint" style="padding:14px 0">Sin mensajes todavía.</div>';l.scrollTop=l.scrollHeight;chatRead=Date.now();try{localStorage.setItem('showcaller.chatread',String(chatRead))}catch(e){}updChatN()}
+function chatRender(){const l=$('chatList');$('chatAdm').style.display=ME&&ME.role==='admin'&&CHAT.length?'':'none';l.innerHTML=CHAT.length?CHAT.map(m=>`<div style="padding:7px 0;border-top:1px solid var(--line)"><div class="hint" style="margin:0 0 2px"><b>${esc(m.name)}</b> · ${new Date(m.created_at).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div><div style="display:flex;gap:8px;align-items:flex-start"><span style="flex:1">${esc(m.text)}</span>${ME&&ME.role==='admin'?`<button class="ed" data-cdel="${m.id}" title="Borrar mensaje">🗑</button>`:''}</div></div>`).join(''):'<div class="hint" style="padding:14px 0">Sin mensajes todavía.</div>';l.scrollTop=l.scrollHeight;chatRead=Date.now();try{localStorage.setItem('showcaller.chatread',String(chatRead))}catch(e){}updChatN()}
 $('chatList').addEventListener('click',async e=>{const b=e.target.closest('[data-cdel]');if(!b)return;const id=+b.dataset.cdel;if(!SB||!confirm('¿Borrar este mensaje para todos?'))return;const {error}=await SB.from('chat').delete().eq('id',id);if(error){toast('No se pudo borrar: '+error.message);return}CHAT=CHAT.filter(m=>m.id!==id);chatRender()});
+$('chatClr').onclick=async()=>{if(!ME||ME.role!=='admin'||!SB)return;if(!confirm('¿Borrar TODO el chat para todos? No se puede deshacer.'))return;const {error}=await SB.from('chat').delete().gte('id',0);if(error){toast('No se pudo borrar: '+error.message);return}CHAT=[];chatRender();toast('Chat borrado')};
 $('bChat').onclick=()=>{chatRender();$('mChat').classList.add('open');setTimeout(()=>$('chatT').focus(),50)};
 $('fChat').onsubmit=async e=>{e.preventDefault();const v=$('chatT').value.trim();if(!v||!SB)return;$('chatT').value='';const {error}=await SB.from('chat').insert({name:ME.name,text:v});if(error){toast('No se pudo enviar: '+error.message+' (¿has ejecutado supabase_chat.sql?)');$('chatT').value=v}};
 // enlace de solo lectura
@@ -2095,7 +2100,7 @@ function useShow(d,keep){
  if(!keep)UH=[];SEL.clear();try{updSel()}catch(e){}
  applying=true;try{S=d;S.notes=S.notes||[];S.todo=S.todo||[];loadDepts();sortM();migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
   shownKey='';lastPanelIdx=-1;head();buildCues(curIdx());updPanel(true);updTodoN();
-  if($('mTodo').classList.contains('open'))buildTodo();if($('mTimes').classList.contains('open'))buildTimes()}finally{applying=false}
+  if($('mTodo').classList.contains('open'))buildTodo();if($('mTimes').classList.contains('open'))buildTimes()}finally{applying=false;try{PREV=JSON.stringify(S)}catch(e){}}
  lastSnap=JSON.stringify(S);updUndo();try{syncRemoteTracks()}catch(e){}try{if(S.rehearsal)rebuildPeaks()}catch(e){}
 }
 async function cloudLoad(){
@@ -2108,7 +2113,7 @@ async function cloudPush(){
  pushTimer=null;if(!SB||!ME)return;
  const {error}=await SB.from('shows').upsert({id:1,data:S,updated_at:new Date().toISOString(),updated_by:ME.id,updated_name:ME.name});
  if(error){try{localStorage.setItem('showcaller.unsynced','1')}catch(e){}toast(navigator.onLine?'No se pudo guardar en la nube: '+error.message:'Sin conexión: tus cambios se enviarán al volver')}
- else{try{localStorage.removeItem('showcaller.unsynced')}catch(e){}}
+ else{try{localStorage.removeItem('showcaller.unsynced')}catch(e){}logChanges()}
 }
 function cloudListen(){
  SB.channel('show-1').on('postgres_changes',{event:'*',schema:'public',table:'shows'},async()=>{
@@ -2163,7 +2168,31 @@ async function loadSess(){const L=$('sessList');if(!SB){L.innerHTML='<div class=
  const f=x=>new Date(x).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),now=Date.now();
  L.innerHTML=(data||[]).map(r=>{const ls=new Date(r.last_seen).getTime(),on=!r.ended_at&&now-ls<150000,out=r.ended_at||r.last_seen,mins=Math.max(0,Math.round((new Date(out)-new Date(r.started_at))/60000));
   return `<div class="trow" style="gap:10px;flex-wrap:wrap;align-items:baseline"><b style="min-width:110px">${esc(r.name)}</b><span class="mono">${f(r.started_at)}</span><span class="mono">→ ${on?'<b>conectado ahora</b>':f(out)}</span><span class="hint" style="margin:0">${on?'':mins+' min · '}${esc(r.device||'')}</span></div>`}).join('')||'<div class="hint">Aún no hay registros.</div>'}
-document.addEventListener('click',async e=>{if(e.target.id==='sessRef')loadSess();else if(e.target.id==='sessClr'){const b=e.target;if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='¿Seguro?';setTimeout(()=>{b.dataset.arm='';b.textContent='Borrar historial'},3000);return}b.dataset.arm='';b.textContent='Borrar historial';await SB.from('sessions').delete().neq('id','00000000-0000-0000-0000-000000000000');loadSess()}});
+document.addEventListener('click',async e=>{if(e.target.id==='sessTabC')sessTab('c');else if(e.target.id==='sessTabX')sessTab('x');else if(e.target.id==='sessRef')sessTab(SESSTAB);else if(e.target.id==='sessClr'){const b=e.target;if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='¿Seguro?';setTimeout(()=>{b.dataset.arm='';b.textContent='Borrar historial'},3000);return}b.dataset.arm='';b.textContent='Borrar historial';if(SESSTAB==='c')await SB.from('sessions').delete().neq('id','00000000-0000-0000-0000-000000000000');else await SB.from('changes').delete().gte('id',0);sessTab(SESSTAB)}});
+
+var SESSTAB='c',PREV=null;
+function sessTab(t){SESSTAB=t;$('sessTabC').style.fontWeight=t==='c'?'700':'400';$('sessTabX').style.fontWeight=t==='x'?'700':'400';$('sessHint').textContent=t==='c'?'Quién ha abierto la app y hasta cuándo (la salida es el último aviso de conexión, ±1 min).':'Cambios guardados por cada usuario, del más reciente al más antiguo.';$('sessClr').textContent='Borrar historial';t==='c'?loadSess():loadChanges()}
+async function loadChanges(){const L=$('sessList');if(!SB){L.innerHTML='<div class="hint">Solo disponible con la nube activa.</div>';return}L.innerHTML='<div class="hint">Cargando…</div>';
+ const{data,error}=await SB.from('changes').select('*').order('at',{ascending:false}).limit(200);
+ if(error){L.innerHTML='<div class="hint">No se pudo leer: '+esc(error.message)+' (¿has ejecutado supabase_actividad.sql?)</div>';return}
+ const f=x=>new Date(x).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+ L.innerHTML=(data||[]).map(r=>`<div style="padding:8px 0;border-top:1px solid var(--line)"><div class="hint" style="margin:0 0 2px"><b>${esc(r.name)}</b> · ${f(r.at)}</div><div style="white-space:pre-wrap">${esc(r.summary)}</div></div>`).join('')||'<div class="hint">Aún no hay cambios registrados.</div>'}
+function diffS(a,b){const o=[],mm=x=>{const r={};(x.moments||[]).forEach(m=>r[m.id]=m);return r},A=mm(a),B=mm(b),dn=id=>((Dm[id]||{}).n||'?');
+ const ttl=m=>(m.num!==undefined?m.num+' ':'')+m.name;
+ Object.keys(B).forEach(id=>{if(!A[id])o.push('＋ Tema añadido: '+ttl(B[id]))});Object.keys(A).forEach(id=>{if(!B[id])o.push('✕ Tema quitado: '+ttl(A[id]))});
+ let mv=0;const cA={},cB={};
+ Object.keys(B).forEach(id=>{const x=A[id],y=B[id];if(!x)return;if(x.name!==y.name)o.push('Tema renombrado: '+x.name+' → '+y.name);if((x.note||'')!==(y.note||''))o.push('Notas del tema editadas: '+ttl(y));if((x.imgs||[]).length!==(y.imgs||[]).length)o.push('Moodboard de '+ttl(y)+': '+(x.imgs||[]).length+' → '+(y.imgs||[]).length+' archivos');if(JSON.stringify(x.trk||null)!==JSON.stringify(y.trk||null))o.push('Pista de audio cambiada en '+ttl(y));if(JSON.stringify(x.reh||null)!==JSON.stringify(y.reh||null))o.push('Tramo de ensayo cambiado en '+ttl(y));if(x.start!==y.start)mv++;(x.cues||[]).forEach(c=>cA[c.id]={c,m:x});(y.cues||[]).forEach(c=>cB[c.id]={c,m:y})});
+ if(mv===1)o.push('Tiempos de un tema modificados');else if(mv>1)o.push('Tiempos de '+mv+' temas modificados');
+ Object.keys(cB).forEach(id=>{const y=cB[id],x=cA[id];if(!x)o.push('＋ Cue en '+ttl(y.m)+' ('+dn(y.c.d)+'): '+String(y.c.t||'').slice(0,60));else if(JSON.stringify(x.c)!==JSON.stringify(y.c))o.push('Cue editado en '+ttl(y.m)+' ('+dn(y.c.d)+'): '+String(y.c.t||'').slice(0,60))});
+ Object.keys(cA).forEach(id=>{if(!cB[id]&&B[cA[id].m.id])o.push('✕ Cue quitado en '+ttl(cA[id].m)+' ('+dn(cA[id].c.d)+'): '+String(cA[id].c.t||'').slice(0,60))});
+ if((a.notes||[]).length!==(b.notes||[]).length||JSON.stringify(a.notes)!==JSON.stringify(b.notes))o.push('Notas y peticiones modificadas');
+ if(JSON.stringify(a.todo)!==JSON.stringify(b.todo))o.push('Lista de tareas modificada');
+ if(JSON.stringify(a.depts)!==JSON.stringify(b.depts))o.push('Departamentos modificados');
+ if(a.name!==b.name||a.venue!==b.venue)o.push('Nombre o sala del show cambiados');
+ if(!o.length&&JSON.stringify(a)!==JSON.stringify(b))o.push('Otros ajustes');
+ return o}
+async function logChanges(){if(!SB||!ME||ME.guest||isRO(ME.role))return;try{const cur=JSON.stringify(S);if(PREV===null){PREV=cur;return}if(cur===PREV)return;const d=diffS(JSON.parse(PREV),S);PREV=cur;if(!d.length)return;
+ await SB.from('changes').insert({name:ME.name,summary:d.slice(0,14).join('\n')+(d.length>14?'\n… y '+(d.length-14)+' más':'')})}catch(e){}}
 </script>
 </body>
 </html>
