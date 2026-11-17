@@ -495,6 +495,12 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  <div class="tform"><button class="btn" id="sessRef">Actualizar</button> <button class="btn" id="sessClr">Borrar historial</button></div>
  <div id="sessList" style="overflow-y:auto;padding:0 24px 16px"></div>
 </div></div>
+<div class="modal" id="mSetl"><div class="mbox" style="width:min(600px,100%)">
+ <div class="mtop"><div><div class="eyebrow">Solo admin</div><h2>Setlist físico</h2></div><button data-close>✕</button></div>
+ <div class="hint" style="padding:12px 24px 4px">Sube una foto o PDF del setlist en papel. Solo el admin puede verlo.</div>
+ <div class="tform"><button class="btn" id="setlUp">＋ Subir archivos</button></div>
+ <div id="setlList" style="overflow-y:auto;padding:0 24px 16px"></div>
+</div></div>
 <div class="modal" id="mDepts"><div class="mbox" style="width:min(580px,100%)">
  <div class="mtop"><div><div class="eyebrow">Ajustes</div><h2>Departamentos</h2></div><button data-close>✕</button></div>
  <form class="form" id="fDept" style="max-width:none">
@@ -553,7 +559,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.97'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.99'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1047,7 +1053,7 @@ function fakeData(){
 
 /* ===== ficha del tema: Look, notas, referencias y comentarios ===== */
 const LOOKC=[['Blanco cálido','#f2e6cf'],['Blanco neutro','#f5f5f5'],['Blanco frío','#dfe9f2'],['Ámbar','#e0a43a'],['Naranja','#e07b39'],['Rojo','#d1453b'],['Magenta','#c2399b'],['Rosa','#e68fb4'],['Violeta','#8a63d2'],['Azul','#3d6fd1'],['Azul hielo','#7fb4e0'],['Cian','#3cc2c8'],['Verde','#4fb46a'],['Lima','#b5d13c'],['Dorado','#c9a24a'],['Negro','#111111']];
-const lkName=h=>{const f=LOOKC.find(q=>q[1]===h);if(f)return f[0];const x=String(h).replace('#','');if(x.length!==6)return h;const c=[0,2,4].map(i=>parseInt(x.substr(i,2),16));let b=null,bd=1e9;LOOKC.forEach(([n,v])=>{const d=[1,3,5].reduce((a,i,k)=>a+(parseInt(v.substr(i,2),16)-c[k])**2,0);if(d<bd){bd=d;b=n}});return 'Propio (≈'+b+')'};
+const lkName=h=>{const f=LOOKC.concat(S.lookc||[]).find(q=>q[1]===h);if(f)return f[0];const x=String(h).replace('#','');if(x.length!==6)return h;const c=[0,2,4].map(i=>parseInt(x.substr(i,2),16));let b=null,bd=1e9;LOOKC.forEach(([n,v])=>{const d=[1,3,5].reduce((a,i,k)=>a+(parseInt(v.substr(i,2),16)-c[k])**2,0);if(d<bd){bd=d;b=n}});return 'Propio (≈'+b+')'};
 let mmI=0;
 function updGuest(m){const g=$('guestChip');if(m.guest){g.style.display='';g.textContent='👤 INVITADO · '+m.guest}else g.style.display='none'}
 function updLookChip(m){updGuest(m);
@@ -1097,7 +1103,7 @@ function buildMM(){
  const sec=t=>`<div class="eyebrow" style="margin:26px 0 10px">${t}</div>`,ro=adm?'':'readonly';
  let h=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px"><span class="mono" style="color:var(--mut)">${fmt(m.start,true)} → ${fmt(momEnd(i),true)} · ${fmt(momEnd(i)-m.start)}</span><button class="chip" data-mm="go">▸ Ir a la entrada</button></div>`;
  h+=sec('LOOK'+(adm?'':' (solo lectura)'));
- h+=`<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">${m.look.c.map((hx,k)=>`<span class="chip" style="color:var(--tx);display:inline-flex;gap:8px;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:${hx};border:1px solid #fff4"></span>${esc(lkName(hx))}${adm?` <button data-mm="lkdel" data-k="${k}" title="Quitar" style="padding:0 2px">✕</button>`:''}</span>`).join('')||(adm?'':'<span class="hint">Sin look definido todavía.</span>')}${adm?`<select class="ti" id="lkAdd"><option value="">+ Añadir color</option>${LOOKC.map(q=>`<option value="${q[1]}">${q[0]}</option>`).join('')}</select><label class="chip" style="display:inline-flex;gap:6px;align-items:center;cursor:pointer">＋ Color propio <input type="color" id="lkCust" value="#ffffff" style="width:26px;height:22px;padding:0;border:0;background:none"></label>`:''}</div>`;
+ h+=`<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">${m.look.c.map((hx,k)=>`<span class="chip" style="color:var(--tx);display:inline-flex;gap:8px;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:${hx};border:1px solid #fff4"></span>${esc(lkName(hx))}${adm?` <button data-mm="lkdel" data-k="${k}" title="Quitar" style="padding:0 2px">✕</button>`:''}</span>`).join('')||(adm?'':'<span class="hint">Sin look definido todavía.</span>')}${adm?`<select class="ti" id="lkAdd"><option value="">+ Añadir color</option>${LOOKC.concat(S.lookc||[]).map(q=>`<option value="${q[1]}">${esc(q[0])}</option>`).join('')}<option value="__new">＋ Color propio nuevo…</option></select><input type="color" id="lkCust" value="#ffffff" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" tabindex="-1">`:''}</div>`;
  h+=`<textarea class="ti" id="lkNote" rows="2" ${ro} placeholder="${adm?'Nota de look (p. ej. cálido, ámbar y blanco)':''}" style="width:100%;margin-top:12px;resize:vertical">${esc(m.look.n||'')}</textarea>`;
  h+=sec('INVITADO')+`<input class="ti" id="mmGuest" ${cn?'':'readonly'} placeholder="${cn?'Nombre del invitado (si lo hay)':''}" value="${esc(m.guest||'')}" style="width:100%">`;
  m.imgs=m.imgs||[];const cmo=can('mood');
@@ -1140,8 +1146,8 @@ $('mmBody').addEventListener('click',e=>{
 });
 $('mmBody').addEventListener('change',e=>{
  const m=S.moments[mmI],adm=ME&&ME.role==='admin';
- if(e.target.id==='lkCust'&&adm){m.look.c.push(e.target.value.toLowerCase());dirty();buildMM();return}
- if(e.target.id==='lkAdd'&&adm){if(e.target.value){m.look.c.push(e.target.value);dirty();buildMM()}}
+ if(e.target.id==='lkCust'&&adm){const hx=e.target.value.toLowerCase();let nm=(prompt('Nombre del color (para la lista):',lkName(hx).replace(/^Propio \(≈(.*)\)$/,'$1'))||'').trim();if(!nm){buildMM();return}S.lookc=S.lookc||[];if(!S.lookc.some(q=>q[1]===hx))S.lookc.push([nm,hx]);m.look.c.push(hx);dirty();buildMM();return}
+ if(e.target.id==='lkAdd'&&adm){if(e.target.value==='__new'){e.target.value='';const ci=$('lkCust');try{ci.showPicker?ci.showPicker():ci.click()}catch(x){ci.click()}return}if(e.target.value){m.look.c.push(e.target.value);dirty();buildMM()}}
  else if(e.target.id==='lkNote'&&adm){m.look.n=e.target.value.trim();dirty()}
  else if(e.target.id==='mmNote'&&can('notes')){m.note=e.target.value.trim();dirty()}
 });
@@ -1614,12 +1620,13 @@ $('ddUser').addEventListener('click',e=>{const a=e.target.dataset.u;if(!a)return
 /* ajustes */
 function buildSettings(){
  const np=nPending();
- $('sBody').innerHTML=[['users','Usuarios y permisos',np?np+' solicitud'+(np>1?'es':'')+' pendiente'+(np>1?'s':'')+' de aprobar':'Aprobar solicitudes, dar permisos y echar usuarios'],['depts','Departamentos','Crear, renombrar o quitar departamentos'],['songs','Temas y duraciones','Añadir, quitar, ordenar y cambiar la duración de cada tema'],['sess','Historial','Quién se ha conectado y qué ha cambiado cada uno']].map(([k,t,d])=>`<button class="srow" data-s="${k}"><b>${t}</b><span>${d}</span></button>`).join('');
+ $('sBody').innerHTML=[['users','Usuarios y permisos',np?np+' solicitud'+(np>1?'es':'')+' pendiente'+(np>1?'s':'')+' de aprobar':'Aprobar solicitudes, dar permisos y echar usuarios'],['depts','Departamentos','Crear, renombrar o quitar departamentos'],['songs','Temas y duraciones','Añadir, quitar, ordenar y cambiar la duración de cada tema'],['sess','Historial','Quién se ha conectado y qué ha cambiado cada uno'],['setl','Setlist físico','Foto o PDF del setlist en papel (solo tú lo ves)']].map(([k,t,d])=>`<button class="srow" data-s="${k}"><b>${t}</b><span>${d}</span></button>`).join('');
 }
 $('sBody').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s;
  if(k==='users'){buildUsers();$('mUsers').classList.add('open')}
  else if(k==='depts'){buildDepts();$('mDepts').classList.add('open')}
  else if(k==='songs'){buildTimes();$('mTimes').classList.add('open')}
+ else if(k==='setl'){setlLoad();$('mSetl').classList.add('open')}
  else if(k==='sess'){sessTab('c');$('mSess').classList.add('open')}});
 /* usuarios y permisos */
 const PERMS=[['cues','Cues'],['notes','Notas y pendientes'],['times','Temas y tiempos'],['mood','Moodboard']];
@@ -2197,6 +2204,24 @@ async function logChanges(){if(!SB||!ME||ME.guest||isRO(ME.role))return;try{cons
  await SB.from('changes').insert({name:ME.name,summary:d.slice(0,14).join('\n')+(d.length>14?'\n… y '+(d.length-14)+' más':'')})}catch(e){}}
 
 
+
+/* setlist físico (solo admin) */
+async function setlLoad(){const L=$('setlList');if(!SB||!CLOUD){L.innerHTML='<div class="hint">Requiere la nube activa.</div>';return}L.innerHTML='<div class="hint">Cargando…</div>';
+ const{data,error}=await SB.storage.from('files').list('admin',{limit:100,sortBy:{column:'name',order:'desc'}});
+ if(error){L.innerHTML='<div class="hint">No se pudo leer: '+esc(error.message)+' (¿has ejecutado supabase_setlist_admin.sql?)</div>';return}
+ const fs=(data||[]).filter(x=>x.name&&x.name!=='.emptyFolderPlaceholder');
+ L.innerHTML=fs.map(x=>{const nm=x.name.replace(/^\d+-/,'');return `<div class="trow" style="gap:10px;align-items:center"><span style="flex:1;word-break:break-all">${esc(nm)}</span><button class="btn sm" data-sv="${esc(x.name)}">Ver</button><button class="btn sm" data-sd="${esc(x.name)}">✕</button></div>`}).join('')||'<div class="hint">Todavía no hay nada subido.</div>'}
+(()=>{const i=document.createElement('input');i.type='file';i.multiple=true;i.accept='image/*,application/pdf';i.style.display='none';document.body.appendChild(i);
+ document.addEventListener('click',async e=>{
+  if(e.target.id==='setlUp'){i.click();return}
+  const v=e.target.closest('[data-sv]'),d=e.target.closest('[data-sd]');
+  if(v){const nm=v.dataset.sv,u=await fileUrl('admin/'+nm);if(!u){toast('No se pudo abrir');return}if(/\.(png|jpe?g|gif|webp|heic|avif)$/i.test(nm))showImg(u);else window.open(u,'_blank')}
+  else if(d){if(!confirm('¿Borrar este archivo?'))return;const{error}=await SB.storage.from('files').remove(['admin/'+d.dataset.sd]);if(error){toast('No se pudo borrar: '+error.message);return}setlLoad()}});
+ i.addEventListener('change',async()=>{const fs=[...i.files];i.value='';if(!ME||ME.role!=='admin'||!SB)return;let ok=0;
+  for(const f of fs){if(f.size>52428800){toast(f.name+' pesa más de 50 MB');continue}toast('Subiendo '+f.name+'…');
+   const safe=f.name.replace(/[^A-Za-z0-9._-]+/g,'_'),{error}=await SB.storage.from('files').upload('admin/'+Date.now()+'-'+safe,f,{contentType:f.type||undefined});
+   if(error){toast('No se pudo subir: '+error.message);continue}ok++}
+  if(ok){toast(ok+' archivo'+(ok>1?'s':'')+' subido'+(ok>1?'s':''));setlLoad()}})})();
 </script>
 </body>
 </html>
