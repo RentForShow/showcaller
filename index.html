@@ -82,10 +82,23 @@ body.fsg #fsBar button{padding:12px 18px;border:1px solid var(--line);border-rad
 main.withpanel #panel{display:flex}
 
 body.cmp #bJump span,body.cmp #bTodo span,body.cmp #bChat span,body.cmp #bFs span{display:none}
-body.cmp #bJump,body.cmp #bDep,body.cmp #bMood{font-size:0}
-body.cmp #bJump::before{content:'⇥';font-size:17px}
-body.cmp #bDep::before{content:'👤';font-size:17px}
-body.cmp #bMood::before{content:'';display:inline-block;width:30px;height:18px;vertical-align:middle;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 28' fill='none' stroke='black' stroke-width='2.4' stroke-linejoin='round'%3E%3Crect x='2' y='8' width='12' height='12' rx='1.5'/%3E%3Crect x='18' y='8' width='12' height='12' rx='1.5'/%3E%3Crect x='34' y='8' width='12' height='12' rx='1.5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 28' fill='none' stroke='black' stroke-width='2.4' stroke-linejoin='round'%3E%3Crect x='2' y='8' width='12' height='12' rx='1.5'/%3E%3Crect x='18' y='8' width='12' height='12' rx='1.5'/%3E%3Crect x='34' y='8' width='12' height='12' rx='1.5'/%3E%3C/svg%3E") center/contain no-repeat}
+body.cmp #bJump,body.cmp #bDep,body.cmp #bMood,body.cmp #bTodo,body.cmp #bSync,body.cmp #bChat,body.cmp #bFs,body.cmp #bNight{font-size:0}
+body.cmp #todoN,body.cmp #chatN{font-size:13px}
+body.cmp #bJump::before,body.cmp #bDep::before,body.cmp #bMood::before,body.cmp #bTodo::before,body.cmp #bSync::before,body.cmp #bChat::before,body.cmp #bFs::before,body.cmp #bNight::before,#bSetl::before,#bSetlE::before{content:'';display:inline-block;width:20px;height:20px;vertical-align:middle;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+body.cmp #bJump{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 12H4M9 7l4 5-4 5M20 5v14'/%3E%3C/svg%3E")}
+body.cmp #bDep{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 20c0-4 3.6-6 8-6s8 2 8 6'/%3E%3C/svg%3E")}
+body.cmp #bMood{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 28' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='8' width='12' height='12' rx='1.5'/%3E%3Crect x='18' y='8' width='12' height='12' rx='1.5'/%3E%3Crect x='34' y='8' width='12' height='12' rx='1.5'/%3E%3C/svg%3E")}
+body.cmp #bMood::before{width:32px}
+body.cmp #bTodo{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='4' width='16' height='16' rx='2'/%3E%3Cpath d='M8 12l3 3 5-6'/%3E%3C/svg%3E")}
+body.cmp #bSync{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20v-2M8 20v-5M12 20v-8M16 20v-11M20 20V4'/%3E%3C/svg%3E")}
+body.cmp #bSync[data-st=off]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20v-2M8 20v-5M12 20v-8M16 20v-11M20 20V4' opacity='.4'/%3E%3Cpath d='M3 3l18 18'/%3E%3C/svg%3E")}
+body.cmp #bSync[data-st=free]{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20v-2M8 20v-5M12 20v-8M16 20v-11M20 20V4' stroke-dasharray='2 2.4'/%3E%3C/svg%3E")}
+body.cmp #bChat{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h16v11h-9l-5 4v-4H4z'/%3E%3C/svg%3E")}
+body.cmp #bFs{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5'/%3E%3C/svg%3E")}
+body.cmp #bNight{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z'/%3E%3C/svg%3E")}
+#bSetl{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3h7l5 5v13H7z'/%3E%3Cpath d='M14 3v5h5M9 13h8M9 17h8'/%3E%3C/svg%3E")}#bSetl::before{width:16px;height:16px;margin-right:6px}
+#bSetlE{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E");font-size:0}#bSetlE::before{width:16px;height:16px}
+body:not(.adm) #bOnline{display:none!important}
 body.cmp #bMenu{display:none}
 body.cmp #bFs,body.cmp #bNight{order:90}
 body.cmp #bUser{order:99}
@@ -341,7 +354,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 }
 </style>
 </head>
-<body>
+<body class="cmp">
 <div id="app">
  <header>
   <div class="logo" id="logo">ShowCaller</div><div class="venue" id="venue"></div>
@@ -383,7 +396,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
    <div id="nbox"></div>
   </section>
   <aside id="panel">
-   <div class="phead"><span>GUION</span><span style="flex:1"></span><button id="bSetl" class="chip" style="display:none;margin-right:6px;letter-spacing:.08em">📄 Setlist</button><button id="bSetlE" class="chip" style="display:none;margin-right:10px" title="Editar setlist">✎</button><button id="pClose">✕</button></div>
+   <div class="phead"><span>GUION</span><span style="flex:1"></span><button id="bSetl" class="chip" style="display:none;margin-right:6px;letter-spacing:.08em">Setlist</button><button id="bSetlE" class="chip" style="display:none;margin-right:10px" title="Editar setlist">✎</button><button id="pClose">✕</button></div>
    <div class="psearch">🔍︎<input id="q" placeholder="Buscar"></div>
    <div id="glist"></div>
    <button id="gNow">Volver al ahora</button>
@@ -568,7 +581,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.01'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.02'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1589,11 +1602,12 @@ function showAuth(m){
  $('aPass').autocomplete=setup||reg?'new-password':'current-password';
 }
 $('aSwitch').onclick=()=>showAuth(authMode==='register'?'login':'register');
-function applyRole(){try{document.body.classList.toggle('cmp',!!ME&&ME.role==='admin')}catch(e){}try{$('bSetl').style.display=$('bSetlE').style.display=ME&&ME.role==='admin'&&CLOUD?'':'none'}catch(e){}
+function applyRole(){try{document.body.classList.toggle('adm',!!ME&&ME.role==='admin')}catch(e){}try{$('bSetl').style.display=$('bSetlE').style.display=ME&&ME.role==='admin'&&CLOUD?'':'none'}catch(e){}
  const np=ME.role==='admin'?nPending():0;
  $('bUser').innerHTML='<b style="font-weight:500">'+esc(ME.name)+(np?' ('+np+')':'')+'</b>';
- $('ddUser').innerHTML=`<div class="hint" style="margin:0 0 6px">Sesión: <b>${esc(ME.name)}</b> · ${ME.role==='admin'?'ADMIN':ME.role==='viewer'?'SOLO LECTURA':ME.role==='reader'?'LECTOR':'EDITOR'}</div>`+(ME.role==='admin'?'<div class="menucp">'+$('ddMenu').innerHTML+'<hr style="border:0;border-top:1px solid var(--line);margin:6px 0"></div>':'')+(CLOUD?'<button class="it" data-u="pw">Cambiar mi contraseña</button>':'')+(ME.role==='admin'?`<button class="it" data-u="settings">Ajustes${np?' ('+np+' solicitud'+(np>1?'es':'')+')':''}</button>`:'')+'<button class="it" data-u="out">Cerrar sesión</button>';
+ $('ddUser').innerHTML=`<div class="hint" style="margin:0 0 6px">Sesión: <b>${esc(ME.name)}</b> · ${ME.role==='admin'?'ADMIN':ME.role==='viewer'?'SOLO LECTURA':ME.role==='reader'?'LECTOR':'EDITOR'}</div>`+'<div class="menucp"></div>'+(CLOUD?'<button class="it" data-u="pw">Cambiar mi contraseña</button>':'')+(ME.role==='admin'?`<button class="it" data-u="settings">Ajustes${np?' ('+np+' solicitud'+(np>1?'es':'')+')':''}</button>`:'')+'<button class="it" data-u="out">Cerrar sesión</button>';
  document.querySelectorAll('#ddMenu .it').forEach(b=>{const a=b.dataset.a;if(['name','dur','exp','imp','reset','fake','unfake','share','reh'].includes(a))b.style.display=ME.role==='admin'?'':'none';if(a==='moment'||a==='times')b.style.display=can('times')?'':'none';if(a==='copy')b.style.display=can('cues')?'':'none'});
+ {const mc=$('ddUser').querySelector('.menucp');if(mc)mc.innerHTML=$('ddMenu').innerHTML+'<hr style="border:0;border-top:1px solid var(--line);margin:6px 0">'}
  restoreEnabled();
  try{updLookChip(S.moments[curIdx()])}catch(e){}
  $('bTrack').style.visibility=ME.role==='admin'?'':'hidden';try{$('bAudio')&&($('bAudio').style.display=NOHEAR()?'none':'')}catch(e){}$('ver').textContent=VERSION;$('ver').style.display=ME.role==='admin'?'':'none';
@@ -1899,8 +1913,8 @@ function synApply(){const p=MST;if(!p||!FOLLOW||EMIT||!ME||ME.guest)return;const
   if(p.pl){if(Math.abs(t-tg)>.4)setT(tg);if(!playing)play()}
   else{if(playing)pause(1);if(Math.abs(t-tg)>.05)setT(tg)}}finally{RAPPLY=false}}
 function synUI(){const b=$('bSync');if(!SB||!ME||ME.guest){b.style.display='none';return}b.style.display='';
- if(ME.role==='admin'){b.textContent=EMIT?'📡 EMITIENDO':'📡';b.title=EMIT?'Emitiendo al equipo (pulsa para parar)':'Emitir al equipo'}
- else{const live=MLIVE&&Date.now()-MLIVE<5000;b.textContent=!live?'⟲ Sin emisor':FOLLOW?'⟲ Siguiendo a '+(MBY||'admin'):'⟲ Libre (pulsa para seguir)'}
+ if(ME.role==='admin'){b.textContent='';b.dataset.st=EMIT?'on':'idle';b.title=EMIT?'Emitiendo al equipo (pulsa para parar)':'Emitir al equipo'}
+ else{const live=MLIVE&&Date.now()-MLIVE<5000;b.textContent='';b.dataset.st=!live?'off':FOLLOW?'on':'free';b.title=!live?'Sin emisor':FOLLOW?'Siguiendo a '+(MBY||'admin'):'Libre (pulsa para seguir)'}
  b.classList.toggle('live',ME.role==='admin'?EMIT:!!(MLIVE&&Date.now()-MLIVE<5000&&FOLLOW))}
 function synStart(){if(!SB||!ME||ME.guest)return;try{if(SYN)SB.removeChannel(SYN)}catch(e){}
  SYN=SB.channel('sync-show',{config:{broadcast:{self:false}}});
