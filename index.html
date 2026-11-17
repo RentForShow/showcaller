@@ -168,6 +168,7 @@ footer>*,#app>*,main>*{min-width:0}
 .form input,.form select,.form textarea{background:#0e0e0d;border:1px solid var(--line);color:var(--tx);padding:10px;border-radius:6px;font:inherit;font-size:15px;letter-spacing:0;text-transform:none}
 .form .go{background:var(--tx);color:#000;padding:11px;border-radius:6px;font-weight:600}
 .toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#2a2a28;padding:9px 16px;border-radius:8px;font-size:13px;z-index:80;opacity:0;transition:.25s;pointer-events:none}
+.toast.on.act{pointer-events:auto;cursor:pointer;z-index:10000;border:1px solid var(--line)}
 .toast.on{opacity:1}
 .sec{padding:16px 24px;border-bottom:1px solid var(--line)}
 .btn{padding:9px 12px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:#1c1c1b}
@@ -222,7 +223,7 @@ footer.exp{grid-template-columns:1fr}
 footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 .lvon{color:#ff6b61}.lvok{color:#7fc08a}
 .dn{background:var(--c,#777);color:#0e0e0d;border-radius:6px;height:22px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.cue{position:relative;display:grid;grid-template-columns:150px minmax(0,1fr) 46px 178px 220px 56px;gap:0 10px;align-items:center;height:34px;padding:0 6px 0 4px;border-top:1px solid var(--line);border-left:3px solid var(--c)}
+.cue{position:relative;display:grid;grid-template-columns:150px minmax(0,1fr) 46px 178px 220px 84px;gap:0 10px;align-items:center;height:34px;padding:0 6px 0 4px;border-top:1px solid var(--line);border-left:3px solid var(--c)}
 .cue .txt{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cfccc4;min-width:0}
 .cue .du{font-size:12px;color:var(--mut)}
 .cue .cd{font-size:12px;color:var(--mut);white-space:nowrap;text-align:right}
@@ -552,7 +553,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V1.91'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V1.96'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -586,7 +587,7 @@ const $=id=>document.getElementById(id);
 const fmt=(s,h)=>{s=Math.max(0,Math.floor(s));const m=Math.floor(s/60),ss=s%60;if(h||m>=60){const hh=Math.floor(m/60);return hh+':'+String(m%60).padStart(2,'0')+':'+String(ss).padStart(2,'0')}return m+':'+String(ss).padStart(2,'0')};
 const fmtp=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2000)}
+function toast(m,fn){const t=$('toast');t.textContent=m;t.classList.add('on');t.classList.toggle('act',!!fn);t.onclick=fn?()=>{fn();t.classList.remove('on','act')}:null;clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on','act'),fn?7000:2000)}
 
 /* ---- clock ---- */
 let t=0,playing=false,rate=1,last=0,audio=null,ltcEl=null,peaks=null,audioName='',ltcFile='';
@@ -646,7 +647,7 @@ function buildCues(i){
  const list=carryOf(i).concat(m.cues.map((c,k)=>({j:i,k,c})).filter(x=>enabled.has(x.c.d)));
  const enT2=Math.max(1,momEnd(i)-m.start);
  $('cues').innerHTML=list.length?list.map(({j,k,c})=>{const d=D[c.d]||D.notas,pm=S.moments[j],a=pm.start+c.o,e=c.e||0,rel=a-m.start,l=Math.max(0,Math.min(100,rel/enT2*100)),r_=Math.max(l,Math.min(100,(rel+e)/enT2*100)),du=e>0?(e<60?':'+String(Math.round(e)).padStart(2,'0'):fmt(e)):'';
-  return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><span class="dn">${esc(d.n)}</span><div class="txt" title="${esc(c.t)}">${c.key?'<span class="tag keytag" title="Importante">★</span>':''}${c.pd===1?'<span class="tag pdtag" title="Pendiente de confirmar">?</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${esc(c.t)}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400;font-size:11px">viene de ${esc(mTitle(pm))}</span>`:''}${c.cm&&c.cm.length?' 💬'+c.cm.length:''}${CLOUD&&c.refs&&c.refs.length?' 📎'+c.refs.length:''}</div><span class="du mono">${du}</span><div class="cd mono"></div><div class="gnt"><span class="gb pb" style="left:${l}%;width:${r_-l}%"><i></i></span></div><span class="bt">${c.pd===1?'<button class="cf" title="Confirmar">✓</button>':''}<button class="ed" title="Editar">✎</button></span></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
+  return `<div class="cue${c.pd===1?' pend':''}${c.key?' key':''}" style="--c:${d.c}" data-m="${j}" data-k="${k}"><span class="dn">${esc(d.n)}</span><div class="txt" title="${esc(c.t)}">${c.key?'<span class="tag keytag" title="Importante">★</span>':''}${c.pd===1?'<span class="tag pdtag" title="Pendiente de confirmar">?</span>':''}${c.mem?'<span class="tag xtag">MEM '+esc(c.mem)+'</span>':''}${esc(c.t)}${j!==i?`<span class="mono" style="color:var(--dim);margin-left:8px;font-weight:400;font-size:11px">viene de ${esc(mTitle(pm))}</span>`:''}${c.cm&&c.cm.length?' 💬'+c.cm.length:''}${CLOUD&&c.refs&&c.refs.length?' 📎'+c.refs.length:''}</div><span class="du mono">${du}</span><div class="cd mono"></div><div class="gnt"><span class="gb pb" style="left:${l}%;width:${r_-l}%"><i></i></span></div><span class="bt">${c.pd===1?'<button class="cf" title="Confirmar">✓</button>':''}<button class="ed" title="Editar">✎</button>${ME&&ME.role==='admin'?'<button class="ed rm" title="Borrar cue">✕</button>':''}</span></div>`}).join('')+'<div class="empty" id="cuesDone">Ya han pasado todos los cues de este tema.</div>':'<div class="empty">Sin cues en este momento para los departamentos seleccionados.</div>';
  const end=momEnd(i),last=i===S.moments.length-1;
  const ns=S.notes.filter(n=>n.t>=m.start&&(n.t<end||(last&&n.t<=end))&&(!n.d||enabled.has(n.d)));
  $('nbox').innerHTML=ns.length?`<details id="ndet"${NBO?' open':''}><summary>Notas y peticiones (${ns.length})</summary>`+ns.map(n=>`<div class="nt${n.done?' done':''}"><span class="ntk${n.k==='peticion'?' pt':''}">${NT[n.k]}</span>${n.d&&D[n.d]?`<span class="dn" style="--c:${D[n.d].c}">${esc(D[n.d].n)}</span>`:'<span></span>'}<span class="tx" title="${esc(n.x)}">${esc(n.x)}</span><span class="du">${fmt(Math.max(0,n.t-m.start))}</span><button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`).join('')+'</details>':'';
@@ -654,7 +655,7 @@ function buildCues(i){
  try{hydrateRefs($('cues'))}catch(e){}
 }
 $('eyebrow').addEventListener('click',e=>{if(e.target.id==='chipMood'){MB=null;buildMood();$('mMood').classList.add('open')}});
-$('stage').addEventListener('click',e=>{const cf=e.target.closest('.cf');if(cf){const el=cf.closest('.cue');if(!can('cues')){toast('No tienes permiso');return}const c=S.moments[+el.dataset.m].cues[+el.dataset.k];c.pd=2;c.pdBy=who();c.ed=who();c.eat=Date.now();dirty();toast('Cue confirmado');return}const b=e.target.closest('.ed');if(!b)return;
+$('stage').addEventListener('click',e=>{const cf=e.target.closest('.cf');if(cf){const el=cf.closest('.cue');if(!can('cues')){toast('No tienes permiso');return}const c=S.moments[+el.dataset.m].cues[+el.dataset.k];c.pd=2;c.pdBy=who();c.ed=who();c.eat=Date.now();dirty();toast('Cue confirmado');return}const rm=e.target.closest('.rm');if(rm){const el=rm.closest('.cue');if(!el||!ME||ME.role!=='admin')return;const m=S.moments[+el.dataset.m],c=m.cues[+el.dataset.k];if(!c||!confirm('¿Borrar este cue?\n'+String(c.t||'').slice(0,80)))return;const k=m.cues.indexOf(c);if(k>-1)m.cues.splice(k,1);dirty();toast('Cue borrado');return}const b=e.target.closest('.ed');if(!b)return;
  if(b.dataset.n!==undefined){openNote(S.notes[+b.dataset.n]);return}
  const el=b.closest('.cue');if(el){const m=S.moments[+el.dataset.m];openCue(m.cues[+el.dataset.k],m)}});
 function frame(now){
@@ -2168,7 +2169,7 @@ async function loadSess(){const L=$('sessList');if(!SB){L.innerHTML='<div class=
  const f=x=>new Date(x).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),now=Date.now();
  L.innerHTML=(data||[]).map(r=>{const ls=new Date(r.last_seen).getTime(),on=!r.ended_at&&now-ls<150000,out=r.ended_at||r.last_seen,mins=Math.max(0,Math.round((new Date(out)-new Date(r.started_at))/60000));
   return `<div class="trow" style="gap:10px;flex-wrap:wrap;align-items:baseline"><b style="min-width:110px">${esc(r.name)}</b><span class="mono">${f(r.started_at)}</span><span class="mono">→ ${on?'<b>conectado ahora</b>':f(out)}</span><span class="hint" style="margin:0">${on?'':mins+' min · '}${esc(r.device||'')}</span></div>`}).join('')||'<div class="hint">Aún no hay registros.</div>'}
-document.addEventListener('click',async e=>{if(e.target.id==='sessTabC')sessTab('c');else if(e.target.id==='sessTabX')sessTab('x');else if(e.target.id==='sessRef')sessTab(SESSTAB);else if(e.target.id==='sessClr'){const b=e.target;if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='¿Seguro?';setTimeout(()=>{b.dataset.arm='';b.textContent='Borrar historial'},3000);return}b.dataset.arm='';b.textContent='Borrar historial';if(SESSTAB==='c')await SB.from('sessions').delete().neq('id','00000000-0000-0000-0000-000000000000');else await SB.from('changes').delete().gte('id',0);sessTab(SESSTAB)}});
+document.addEventListener('click',async e=>{if(e.target.id==='sessTabC')sessTab('c');else if(e.target.id==='sessTabX')sessTab('x');else if(e.target.id==='sessRef')sessTab(SESSTAB);else if(e.target.id==='sessClr'){if(!SB||!confirm(SESSTAB==='c'?'¿Borrar el historial de conexiones?':'¿Borrar el historial de cambios?'))return;if(SESSTAB==='c')await SB.from('sessions').delete().neq('id','00000000-0000-0000-0000-000000000000');else await SB.from('changes').delete().gte('id',0);sessTab(SESSTAB)}});
 
 var SESSTAB='c',PREV=null;
 function sessTab(t){SESSTAB=t;$('sessTabC').style.fontWeight=t==='c'?'700':'400';$('sessTabX').style.fontWeight=t==='x'?'700':'400';$('sessHint').textContent=t==='c'?'Quién ha abierto la app y hasta cuándo (la salida es el último aviso de conexión, ±1 min).':'Cambios guardados por cada usuario, del más reciente al más antiguo.';$('sessClr').textContent='Borrar historial';t==='c'?loadSess():loadChanges()}
@@ -2193,6 +2194,8 @@ function diffS(a,b){const o=[],mm=x=>{const r={};(x.moments||[]).forEach(m=>r[m.
  return o}
 async function logChanges(){if(!SB||!ME||ME.guest||isRO(ME.role))return;try{const cur=JSON.stringify(S);if(PREV===null){PREV=cur;return}if(cur===PREV)return;const d=diffS(JSON.parse(PREV),S);PREV=cur;if(!d.length)return;
  await SB.from('changes').insert({name:ME.name,summary:d.slice(0,14).join('\n')+(d.length>14?'\n… y '+(d.length-14)+' más':'')})}catch(e){}}
+
+
 </script>
 </body>
 </html>
