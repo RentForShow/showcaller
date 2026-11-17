@@ -53,6 +53,13 @@ h1{font-size:clamp(22px,4.2vw,32px);font-weight:500;letter-spacing:-.8px;margin:
 #imgFull .win{position:relative;background:#000;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:zoom-out}
 #imgFullX{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:10px;background:#000b;border:1px solid #ffffff55;color:#fff;font-size:20px;z-index:2}
 #imgFull.on{display:flex}
+#pdfFull{position:fixed;inset:0;background:#000b;z-index:61;display:none;align-items:center;justify-content:center;padding:3vh 3vw}
+#pdfFull.on{display:flex}
+#pdfFull .win{background:#161615;border:1px solid var(--line);border-radius:12px;width:min(1100px,100%);height:100%;display:flex;flex-direction:column;overflow:hidden}
+#pdfFull .pb{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:14px}
+#pdfFull .pb b{font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pdfFull .pb a,#pdfFull .pb button{color:var(--mut);font-size:14px}
+#pdfFull iframe{flex:1;border:0;background:#fff;width:100%}
 #imgFull img{width:100%;height:100%;object-fit:contain;display:block}
 #cueImg.on{display:none!important}
 #cueImg img{width:100%;height:100%;max-height:100%;object-fit:contain;display:block}
@@ -412,6 +419,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
    <button id="gNow">Volver al ahora</button>
   </aside>
  <div id="cueImg"><img alt=""><button id="cueImgX" title="Ver a tamaño completo">⤢</button></div>
+<div id="pdfFull"><div class="win"><div class="pb"><b id="pdfName">PDF</b><a id="pdfTab" target="_blank" rel="noopener">Abrir en pestaña</a><button id="pdfX" title="Cerrar">✕</button></div><iframe id="pdfFrame" title="PDF"></iframe></div></div>
 <div id="imgFull"><div class="win"><button id="imgFullX" title="Cerrar">✕</button><img alt=""></div></div>
  </main>
  <footer>
@@ -591,7 +599,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.10'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.11'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1740,13 +1748,19 @@ let beeped=new Set(),lastT=0;
 
 var CI={f:null,pre:new Set()};
 function isImgRef(r){return r&&r.f&&(/^image\//.test(r.type||'')||/\.(png|jpe?g|gif|webp|avif|bmp)$/i.test(r.name||r.f))}
+var PDFU=null;
+async function showPdf(u,name){if(!u)return;$('pdfName').textContent=name||'PDF';$('pdfTab').href=u;$('pdfFull').classList.add('on');$('pdfFrame').src='about:blank';
+ try{const b=await (await fetch(u)).blob();PDFU=URL.createObjectURL(new Blob([b],{type:'application/pdf'}));$('pdfFrame').src=PDFU}catch(e){$('pdfFrame').src=u}}
+function closePdf(){$('pdfFull').classList.remove('on');$('pdfFrame').src='about:blank';if(PDFU){URL.revokeObjectURL(PDFU);PDFU=null}}
+$('pdfX').onclick=closePdf;$('pdfFull').addEventListener('click',e=>{if(e.target===$('pdfFull'))closePdf()});
 function showImg(u){if(!u)return;$('imgFull').querySelector('img').src=u;$('imgFull').classList.add('on')}
 document.addEventListener('click',e=>{const t=e.target;if(!t||t.closest('#imgFull'))return;
  if(t.tagName==='IMG'&&t.dataset&&t.dataset.f&&t.src){e.preventDefault();e.stopPropagation();showImg(t.src);return}
- const a=t.closest&&t.closest('a[data-open]');if(a&&/\.(png|jpe?g|gif|webp|avif|bmp)$/i.test(a.dataset.f||'')&&a.href&&!/#$/.test(a.href)){e.preventDefault();e.stopPropagation();showImg(a.href)}},true);
+ const a=t.closest&&t.closest('a[data-open]');if(a&&/\.(png|jpe?g|gif|webp|avif|bmp)$/i.test(a.dataset.f||'')&&a.href&&!/#$/.test(a.href)){e.preventDefault();e.stopPropagation();showImg(a.href)}
+ else if(a&&/\.pdf$/i.test(a.dataset.f||'')&&a.href&&!/#$/.test(a.href)){e.preventDefault();e.stopPropagation();showPdf(a.href,a.textContent.trim())}},true);
 $('cueImgX').onclick=()=>showImg($('cueImg').querySelector('img').src);
 $('imgFull').onclick=()=>$('imgFull').classList.remove('on');
-addEventListener('keydown',e=>{if(e.key==='Escape')$('imgFull').classList.remove('on')});
+addEventListener('keydown',e=>{if(e.key==='Escape'){$('imgFull').classList.remove('on');closePdf()}});
 function cueImgTick(){return; /* desactivado: la imagen de la cue ya no se abre sola */
  const box=$('cueImg');if(!box)return;let cur=null,curA=-1;
  if(CLOUD&&SB&&ME&&!ME.guest){for(const mo of S.moments)for(const c of mo.cues){if(!c.refs||!c.refs.length||!enabled.has(c.d))continue;const r=c.refs.find(isImgRef);if(!r)continue;
@@ -2251,14 +2265,14 @@ async function setlLoad(direct){const L=$('setlList');if(!SB||!CLOUD){L.innerHTM
  const{data,error}=await SB.storage.from('files').list('admin',{limit:100,sortBy:{column:'name',order:'desc'}});
  if(error){L.innerHTML='<div class="hint">No se pudo leer: '+esc(error.message)+' (¿has ejecutado supabase_setlist_admin.sql?)</div>';return}
  const fs=(data||[]).filter(x=>x.name&&x.name!=='.emptyFolderPlaceholder');
- if(direct){if(!fs.length){toast('Todavía no hay setlist subido (lápiz ✎ para subirlo)');return}if(fs.length===1){const u=await fileUrl('admin/'+fs[0].name);if(!u){toast('No se pudo abrir');return}if(/\.(png|jpe?g|gif|webp|heic|avif)$/i.test(fs[0].name))showImg(u);else window.open(u,'_blank');return}$('mSetl').classList.add('open')}
+ if(direct){if(!fs.length){toast('Todavía no hay setlist subido (lápiz ✎ para subirlo)');return}if(fs.length===1){const u=await fileUrl('admin/'+fs[0].name);if(!u){toast('No se pudo abrir');return}if(/\.(png|jpe?g|gif|webp|heic|avif)$/i.test(fs[0].name))showImg(u);else if(/\.pdf$/i.test(fs[0].name))showPdf(u,fs[0].name.replace(/^\d+-/,''));else window.open(u,'_blank');return}$('mSetl').classList.add('open')}
  $('setlUp').parentNode.style.display=SETLEDIT?'':'none';
  L.innerHTML=fs.map(x=>{const nm=x.name.replace(/^\d+-/,'');return `<div class="trow" style="gap:10px;align-items:center"><span style="flex:1;word-break:break-all">${esc(nm)}</span><button class="btn sm" data-sv="${esc(x.name)}">Ver</button>${SETLEDIT?`<button class="btn sm" data-sd="${esc(x.name)}">✕</button>`:''}</div>`}).join('')||'<div class="hint">Todavía no hay nada subido.</div>'}
 (()=>{const i=document.createElement('input');i.type='file';i.multiple=true;i.accept='image/*,application/pdf';i.style.display='none';document.body.appendChild(i);
  document.addEventListener('click',async e=>{
   if(e.target.id==='setlUp'){i.click();return}
   const v=e.target.closest('[data-sv]'),d=e.target.closest('[data-sd]');
-  if(v){const nm=v.dataset.sv,u=await fileUrl('admin/'+nm);if(!u){toast('No se pudo abrir');return}if(/\.(png|jpe?g|gif|webp|heic|avif)$/i.test(nm))showImg(u);else window.open(u,'_blank')}
+  if(v){const nm=v.dataset.sv,u=await fileUrl('admin/'+nm);if(!u){toast('No se pudo abrir');return}if(/\.(png|jpe?g|gif|webp|heic|avif)$/i.test(nm))showImg(u);else if(/\.pdf$/i.test(nm))showPdf(u,nm.replace(/^\d+-/,''));else window.open(u,'_blank')}
   else if(d){if(!confirm('¿Borrar este archivo?'))return;const{error}=await SB.storage.from('files').remove(['admin/'+d.dataset.sd]);if(error){toast('No se pudo borrar: '+error.message);return}setlLoad()}});
  i.addEventListener('change',async()=>{const fs=[...i.files];i.value='';if(!ME||ME.role!=='admin'||!SB)return;let ok=0;
   for(const f of fs){if(f.size>52428800){toast(f.name+' pesa más de 50 MB');continue}toast('Subiendo '+f.name+'…');
