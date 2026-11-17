@@ -167,6 +167,21 @@ footer>*,#app>*,main>*{min-width:0}
 .sub button:hover{color:var(--tx)}
 #tl{width:100%;display:block;touch-action:none;cursor:pointer}
 #mm{grid-column:1/-1;width:100%;display:block;touch-action:none;cursor:pointer}
+
+.pl-cols{display:flex;gap:10px;align-items:flex-start;min-width:min-content}
+.pl-col{flex:0 0 250px;background:#1a1917;border:1px solid var(--line);border-radius:10px;padding:8px;min-height:160px}
+.pl-col.over{border-color:#ece9e1}
+.pl-col h4{margin:0 0 6px;font-size:12px;font-weight:500;display:flex;justify-content:space-between;gap:6px;color:var(--mut)}
+.pl-col input{background:#242220;border:1px solid #3a3835;border-radius:6px;color:var(--tx);padding:4px 6px;font-size:12px;width:100%;margin-bottom:4px}
+.pl-chip{background:#242220;border:1px solid #3a3835;border-radius:6px;padding:6px 8px;margin-bottom:5px;font-size:12px;cursor:grab}
+.pl-chip .r1{display:flex;justify-content:space-between;gap:6px}
+.pl-chip .r1 em{font-style:normal;color:var(--mut);font-family:var(--mono)}
+.pl-chip .r2{display:flex;gap:6px;margin-top:5px;align-items:center}
+.pl-chip.done{border-color:#7a7872}.pl-chip.done .nm{text-decoration:line-through;opacity:.75}
+.pl-chip select{background:#161615;border:1px solid #3a3835;border-radius:5px;color:var(--tx);font-size:11px;padding:2px 4px;max-width:100px}
+.pl-chip button{font-size:11px;border:1px solid #5a5853;border-radius:5px;padding:2px 8px;color:var(--tx);text-transform:none;letter-spacing:0;font-weight:400;background:none;opacity:1}
+.pl-chip.done button.dn{background:#ece9e1;color:#161615;border-color:#ece9e1}
+.pl-chip.dragging{opacity:.4}
 .chatdd{position:fixed;z-index:60;display:none;flex-direction:column;width:min(340px,calc(100vw - 16px));background:#161615;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px #0009;overflow:hidden}
 .chatdd.open{display:flex}
 .modal{position:fixed;inset:0;background:#000b;z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
@@ -535,6 +550,10 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  <div class="tform"><button class="btn" id="sessRef">Actualizar</button> <button class="btn" id="sessClr">Borrar historial</button></div>
  <div id="sessList" style="overflow-y:auto;padding:0 24px 16px"></div>
 </div></div>
+<div class="modal" id="mPlan"><div class="mbox" style="width:min(1240px,100%);max-height:94vh">
+ <div class="mtop"><div><div class="eyebrow">Solo admin</div><h2>Planificador de días</h2></div><button data-close>✕</button></div>
+ <div id="planBody" style="overflow:auto;padding:8px 20px 20px"></div>
+</div></div>
 <div class="modal" id="mSetl"><div class="mbox" style="width:min(600px,100%)">
  <div class="mtop"><div><div class="eyebrow">Solo admin</div><h2>Setlist físico</h2></div><button data-close>✕</button></div>
  <div class="hint" style="padding:12px 24px 4px">Sube una foto o PDF del setlist en papel. Solo el admin puede verlo.</div>
@@ -599,7 +618,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.11'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.12'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -949,12 +968,13 @@ function buildDep(){$('ddDep').innerHTML=`<label class="all"><input type="checkb
 $('ddDep').addEventListener('change',e=>{if(e.target.id==='allDep'){enabled=e.target.checked?new Set(DEPTS.map(d=>d.id)):new Set()}else{e.target.checked?enabled.add(e.target.dataset.d):enabled.delete(e.target.dataset.d)}buildDep();updPanel(true);saveEnabled()});
 $('bDep').onclick=()=>{const o=$('ddDep').classList.contains('open');closeDD();if(!o){buildDep();openDD($('ddDep'),$('bDep'))}};
 $('bMenu').onclick=()=>{const o=$('ddMenu').classList.contains('open');closeDD();if(!o)openDD($('ddMenu'),$('bMenu'))};
-$('ddMenu').innerHTML=['Añadir momento aquí|moment','Temas y duraciones|times','Renombrar show y sala|name','Duración del show (sin audio)|dur','Exportar guion (copiar JSON)|exp','Importar guion (archivo JSON)|imp','Rellenar con eventos de prueba|fake','Borrar eventos de prueba|unfake','Restaurar setlist inicial|reset','Deshacer último cambio|undo','Preferencias (modo noche)|prefs','Audio del ensayo (partes y marcas)|reh','Enlace de solo lectura|share'].map(s=>{const[a,b]=s.split('|');return `<button class="it" data-a="${b}">${a}</button>`}).join('');
+$('ddMenu').innerHTML=['Añadir momento aquí|moment','Temas y duraciones|times','Renombrar show y sala|name','Duración del show (sin audio)|dur','Exportar guion (copiar JSON)|exp','Importar guion (archivo JSON)|imp','Rellenar con eventos de prueba|fake','Borrar eventos de prueba|unfake','Restaurar setlist inicial|reset','Deshacer último cambio|undo','Preferencias (modo noche)|prefs','Audio del ensayo (partes y marcas)|reh','Planificador de días|plan','Enlace de solo lectura|share'].map(s=>{const[a,b]=s.split('|');return `<button class="it" data-a="${b}">${a}</button>`}).join('');
 $('ddMenu').addEventListener('click',e=>{const a=e.target.dataset.a;if(!a)return;closeDD();
- if(['name','dur','exp','imp','reset','fake','unfake','share','reh'].includes(a)&&(!ME||ME.role!=='admin')){toast('Solo el administrador puede hacerlo');return}
+ if(['name','dur','exp','imp','reset','fake','unfake','share','reh','plan'].includes(a)&&(!ME||ME.role!=='admin')){toast('Solo el administrador puede hacerlo');return}
  if((a==='moment'||a==='times')&&!can('times')){toast('No tienes permiso para cambiar los temas');return}
  if(a==='prefs'){$('bSet').click();return}
  if(a==='reh'){openReh();return}
+ if(a==='plan'){buildPlan();$('mPlan').classList.add('open');return}
  if(a==='times'){buildTimes();$('mTimes').classList.add('open')}
  if(a==='moment')editor('Nuevo momento','Nombre del momento','',v=>{if(!v)return;S.moments.push({name:v,start:Math.floor(t),kind:'momento',cues:[]});sortM();save();lastPanelIdx=-1});
  if(a==='name')editor('Show','Nombre del show',S.name,v=>{if(v){S.name=v;head();save()}},()=>editor('Sala','Sala / venue',S.venue,v=>{S.venue=v;head();save()}));
@@ -1626,7 +1646,7 @@ function applyRole(){try{document.body.classList.toggle('adm',!!ME&&ME.role==='a
  const np=ME.role==='admin'?nPending():0;
  $('bUser').innerHTML='<b style="font-weight:500">'+esc(ME.name)+(np?' ('+np+')':'')+'</b>';
  $('ddUser').innerHTML=`<div class="hint" style="margin:0 0 6px">Sesión: <b>${esc(ME.name)}</b> · ${ME.role==='admin'?'ADMIN':ME.role==='viewer'?'SOLO LECTURA':ME.role==='reader'?'LECTOR':'EDITOR'}</div>`+'<div class="menucp"></div>'+(CLOUD?'<button class="it" data-u="pw">Cambiar mi contraseña</button>':'')+(ME.role==='admin'?`<button class="it" data-u="settings">Ajustes${np?' ('+np+' solicitud'+(np>1?'es':'')+')':''}</button>`:'')+'<button class="it" data-u="out">Cerrar sesión</button>';
- document.querySelectorAll('#ddMenu .it').forEach(b=>{const a=b.dataset.a;if(['name','dur','exp','imp','reset','fake','unfake','share','reh'].includes(a))b.style.display=ME.role==='admin'?'':'none';if(a==='moment'||a==='times')b.style.display=can('times')?'':'none';if(a==='copy')b.style.display=can('cues')?'':'none'});
+ document.querySelectorAll('#ddMenu .it').forEach(b=>{const a=b.dataset.a;if(['name','dur','exp','imp','reset','fake','unfake','share','reh','plan'].includes(a))b.style.display=ME.role==='admin'?'':'none';if(a==='moment'||a==='times')b.style.display=can('times')?'':'none';if(a==='copy')b.style.display=can('cues')?'':'none'});
  {const mc=$('ddUser').querySelector('.menucp');if(mc)mc.innerHTML=$('ddMenu').innerHTML+'<hr style="border:0;border-top:1px solid var(--line);margin:6px 0">'}
  restoreEnabled();
  try{updLookChip(S.moments[curIdx()])}catch(e){}
@@ -2288,6 +2308,32 @@ async function setlLoad(direct){const L=$('setlList');if(!SB||!CLOUD){L.innerHTM
  document.querySelector('header').addEventListener('mouseleave',hide);document.querySelector('header').addEventListener('mouseout',e=>{if(!e.relatedTarget||!e.relatedTarget.closest||!e.relatedTarget.closest('.nav button'))hide()});
  document.addEventListener('click',hide,true);
 })();
+
+/* planificador de días (solo admin) */
+function planData(){S.plan=S.plan||{days:[],asg:{},done:{}};S.plan.days=S.plan.days||[];S.plan.asg=S.plan.asg||{};S.plan.done=S.plan.done||{};return S.plan}
+function buildPlan(){const P=planData(),B=$('planBody'),ms=S.moments.map((m,i)=>({m,i})).filter(x=>!isTr(x.m));
+ const valid=new Set(P.days.map(d=>d.id));ms.forEach(({m})=>{if(P.asg[m.id]&&!valid.has(P.asg[m.id]))delete P.asg[m.id]});
+ const chip=({m,i})=>{const a=P.asg[m.id],dn=!!P.done[m.id];return `<div class="pl-chip${dn?' done':''}" draggable="true" data-pm="${esc(m.id)}"><div class="r1"><span class="nm">${esc(mTitle(m))}</span><em>${fmt(lenOf(i))}</em></div><div class="r2"><select data-psel="${esc(m.id)}"><option value="">Sin asignar</option>${P.days.map((d,k)=>`<option value="${d.id}"${a===d.id?' selected':''}>${esc(d.name||'Día '+(k+1))}</option>`).join('')}</select>${a?`<button class="dn" data-pdone="${esc(m.id)}">${dn?'✓ Hecho':'Marcar hecho'}</button>`:''}<button data-pgo="${i}" title="Ir al tema">▷</button></div></div>`};
+ const un=ms.filter(x=>!P.asg[x.m.id]);
+ let h=`<div class="pl-cols"><div class="pl-col" data-pday=""><h4><span>Sin asignar</span><span>${un.length} temas</span></h4>${un.map(chip).join('')||'<div class="hint" style="padding:6px">Todo asignado.</div>'}</div>`;
+ P.days.forEach((d,k)=>{const L=ms.filter(x=>P.asg[x.m.id]===d.id),tot=L.reduce((a,x)=>a+lenOf(x.i),0),dn=L.filter(x=>P.done[x.m.id]).length;
+  h+=`<div class="pl-col" data-pday="${d.id}"><h4><span>${dn}/${L.length} hechos</span><span>${fmt(tot)} <button data-pdel="${d.id}" title="Borrar día" style="color:var(--mut)">✕</button></span></h4><input data-pn="${d.id}" value="${esc(d.name||'')}" placeholder="Día ${k+1}"><input type="date" data-pd="${d.id}" value="${esc(d.date||'')}"><input data-pt="${d.id}" value="${esc(d.note||'')}" placeholder="Lugar o nota">${L.map(chip).join('')}</div>`});
+ h+=`<div class="pl-col" style="border-style:dashed;text-align:center"><button class="btn" data-padd="1">＋ Nuevo día</button></div></div>`;
+ B.innerHTML=h}
+(()=>{const B=()=>$('planBody');let drag=null;
+ const touch=()=>{dirty();buildPlan()};
+ document.addEventListener('click',e=>{const t=e.target;if(!t.closest||!t.closest('#planBody'))return;const P=planData();
+  if(t.dataset.padd){P.days.push({id:'d'+Date.now().toString(36),name:'',date:'',note:''});touch()}
+  else if(t.dataset.pdel){const d=P.days.find(x=>x.id===t.dataset.pdel);if(d&&confirm('¿Borrar este día? Sus temas pasan a «Sin asignar».')){P.days=P.days.filter(x=>x.id!==d.id);touch()}}
+  else if(t.dataset.pdone){P.done[t.dataset.pdone]=!P.done[t.dataset.pdone];if(!P.done[t.dataset.pdone])delete P.done[t.dataset.pdone];touch()}
+  else if(t.dataset.pgo!==undefined){const m=S.moments[+t.dataset.pgo];if(m){setT(m.start);$('mPlan').classList.remove('open')}}});
+ document.addEventListener('change',e=>{const t=e.target;if(!t.closest||!t.closest('#planBody'))return;const P=planData();
+  if(t.dataset.psel!==undefined){if(t.value)P.asg[t.dataset.psel]=t.value;else{delete P.asg[t.dataset.psel];delete P.done[t.dataset.psel]}touch()}
+  else{const k=t.dataset.pn?'name':t.dataset.pd?'date':t.dataset.pt?'note':null;if(k){const id=t.dataset.pn||t.dataset.pd||t.dataset.pt,d=P.days.find(x=>x.id===id);if(d){d[k]=t.value;dirty();buildPlan()}}}});
+ document.addEventListener('dragstart',e=>{const c=e.target.closest&&e.target.closest('.pl-chip');if(!c)return;drag=c.dataset.pm;c.classList.add('dragging');try{e.dataTransfer.setData('text/plain',drag)}catch(x){}});
+ document.addEventListener('dragend',e=>{drag=null;document.querySelectorAll('.pl-col.over,.pl-chip.dragging').forEach(x=>x.classList.remove('over','dragging'))});
+ document.addEventListener('dragover',e=>{const c=e.target.closest&&e.target.closest('.pl-col');if(c&&drag!==null&&c.dataset.pday!==undefined){e.preventDefault();document.querySelectorAll('.pl-col.over').forEach(x=>x.classList.remove('over'));c.classList.add('over')}});
+ document.addEventListener('drop',e=>{const c=e.target.closest&&e.target.closest('.pl-col');if(!c||drag===null||c.dataset.pday===undefined)return;e.preventDefault();const P=planData(),id=drag;drag=null;if(c.dataset.pday)P.asg[id]=c.dataset.pday;else{delete P.asg[id];delete P.done[id]}touch()})})();
 </script>
 </body>
 </html>
