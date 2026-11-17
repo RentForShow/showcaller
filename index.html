@@ -591,7 +591,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.09'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.10'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1599,7 +1599,7 @@ const isRO=r=>r==='viewer'||r==='reader';
 const presetP=r=>isRO(r)?{cues:0,notes:0,times:0,mood:0}:{cues:1,notes:1,times:1,mood:1};
 async function mkUser(name,u,pw,role){const salt=newSalt();return{u:u.trim().toLowerCase(),name:name.trim(),role,p:presetP(role),status:'active',salt,hash:await hashPw(pw,salt)}}
 let authMode='login';
-const can=k=>!!ME&&(ME.role==='admin'||!!(ME.p&&ME.p[k]));
+const can=k=>!!ME&&(ME.role==='admin'||(k!=='mood'&&!!(ME.p&&ME.p[k])));
 const nPending=()=>USERS.filter(x=>x.status==='pending').length;
 const nAdmins=()=>USERS.filter(x=>x.role==='admin'&&x.status!=='pending').length;
 function showAuth(m){
@@ -1664,7 +1664,7 @@ $('sBody').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(
  else if(k==='setl'){setlLoad();$('mSetl').classList.add('open')}
  else if(k==='sess'){sessTab('c');$('mSess').classList.add('open')}});
 /* usuarios y permisos */
-const PERMS=[['cues','Cues'],['notes','Notas y pendientes'],['times','Temas y tiempos'],['mood','Moodboard']];
+const PERMS=[['cues','Cues'],['notes','Notas y pendientes'],['times','Temas y tiempos']];
 function buildUsers(){
  if(CLOUD){cloudBuildUsers();return}
  const pend=USERS.map((x,i)=>({x,i})).filter(({x})=>x.status==='pending'),act=USERS.map((x,i)=>({x,i})).filter(({x})=>x.status!=='pending');
