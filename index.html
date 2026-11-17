@@ -100,9 +100,9 @@ body.cmp #bNight{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/200
 #bSetlE{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E");font-size:0}#bSetlE::before{width:16px;height:16px}
 body:not(.adm) #bOnline{display:none!important}
 body.cmp #bMenu{display:none}
-@keyframes emit{0%,100%{background:#ffffff;filter:drop-shadow(0 0 3px #ffffffaa)}50%{background:#6f6d68;filter:none}}
-body.cmp #bSync[data-em='1']::before{animation:emit 1.6s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){body.cmp #bSync[data-em='1']::before{animation:none}}
+@keyframes act{0%,100%{box-shadow:0 0 0 1.5px #fff;color:#fff;background:#ffffff1f}50%{box-shadow:0 0 0 1.5px #55534e;color:#77746d;background:transparent}}
+body.cmp #bSync[data-act='1']{animation:act 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){body.cmp #bSync[data-act='1']{animation:none;box-shadow:0 0 0 1.5px #fff;color:#fff}}
 body.cmp #bFs,body.cmp #bNight{order:90}
 body.cmp #bUser{order:99}
 .phead{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;font-size:11px;letter-spacing:.18em;color:var(--mut)}
@@ -586,7 +586,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.05'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.06'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1918,8 +1918,8 @@ function synApply(){const p=MST;if(!p||!FOLLOW||EMIT||!ME||ME.guest)return;const
   if(p.pl){if(Math.abs(t-tg)>.4)setT(tg);if(!playing)play()}
   else{if(playing)pause(1);if(Math.abs(t-tg)>.05)setT(tg)}}finally{RAPPLY=false}}
 function synUI(){const b=$('bSync');if(!SB||!ME||ME.guest){b.style.display='none';return}b.style.display='';
- if(ME.role==='admin'){b.textContent='';b.dataset.st=EMIT?'on':'idle';b.dataset.em=EMIT?'1':'';b.title=EMIT?'Emitiendo al equipo (pulsa para parar)':'Emitir al equipo'}
- else{const live=MLIVE&&Date.now()-MLIVE<5000;b.dataset.em='';b.textContent='';b.dataset.st=!live?'off':FOLLOW?'on':'free';b.title=!live?'Sin emisor':FOLLOW?'Siguiendo a '+(MBY||'admin'):'Libre (pulsa para seguir)'}
+ if(ME.role==='admin'){b.textContent='';b.dataset.st=EMIT?'on':'idle';b.dataset.act=EMIT?'1':'';b.title=EMIT?'Emitiendo al equipo (pulsa para parar)':'Emitir al equipo'}
+ else{const live=MLIVE&&Date.now()-MLIVE<5000;b.dataset.act=(live&&FOLLOW)?'1':'';b.textContent='';b.dataset.st=!live?'off':FOLLOW?'on':'free';b.title=!live?'Sin emisor':FOLLOW?'Siguiendo a '+(MBY||'admin'):'Libre (pulsa para seguir)'}
  b.classList.toggle('live',ME.role==='admin'?EMIT:!!(MLIVE&&Date.now()-MLIVE<5000&&FOLLOW))}
 function synStart(){if(!SB||!ME||ME.guest)return;try{if(SYN)SB.removeChannel(SYN)}catch(e){}
  SYN=SB.channel('sync-show',{config:{broadcast:{self:false}}});
