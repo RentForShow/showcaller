@@ -620,7 +620,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.18'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.19'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1324,7 +1324,7 @@ $('play').onclick=()=>playing?pause():play();
 $('prev').onclick=()=>{const i=curIdx();setT(t-S.moments[i].start>3?S.moments[i].start:S.moments[Math.max(0,i-1)].start)};
 $('nxt').onclick=()=>{const i=curIdx();if(i+1<S.moments.length)setT(S.moments[i+1].start)};
 const RATES=[1,2,4,8];$('rate').onclick=()=>{rate=RATES[(RATES.indexOf(rate)+1)%RATES.length];$('rate').textContent='⏱ x'+rate;if(audio)audio.playbackRate=rate;if(ltcEl)ltcEl.playbackRate=rate;if(playing)ltcStart()};
-addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();playing?pause():play()}if(e.code==='Enter'&&!e.repeat&&!document.querySelector('.modal.open')){e.preventDefault();if(playing){pause();setT(playFrom)}else if(Math.abs(t-playFrom)>0.05&&!remLock())setT(playFrom)}if(e.code==='ArrowRight')$('nxt').click();if(e.code==='ArrowLeft')$('prev').click()});
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();playing?pause():play()}if(e.code==='Enter'&&!e.repeat&&!document.querySelector('.modal.open')){e.preventDefault();if(playing){pause();setT(playFrom)}else play()}if(e.code==='ArrowRight')$('nxt').click();if(e.code==='ArrowLeft')$('prev').click()});
 /* audio */
 $('bAudio').onclick=()=>{buildAudioUI();$('mAudio').classList.add('open')};
 
