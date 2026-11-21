@@ -620,7 +620,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.22'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.23'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -2259,7 +2259,7 @@ function sessStart(){if(!SB||!ME||ME.guest||SESST)return;SB.from('sessions').ins
  SESST=setInterval(()=>{if(!document.hidden||true)SB.from('sessions').update({last_seen:new Date().toISOString()}).eq('id',SESSID).then(()=>{})},60000);
  const end=()=>{try{SB.from('sessions').update({ended_at:new Date().toISOString()}).eq('id',SESSID).then(()=>{})}catch(e){}};addEventListener('pagehide',end)}
 async function loadSess(){const L=$('sessList');if(!SB){L.innerHTML='<div class="hint">Solo disponible con la nube activa.</div>';return}L.innerHTML='<div class="hint">Cargando…</div>';
- const{data,error}=await SB.from('sessions').select('*').order('started_at',{ascending:false}).limit(200);
+ const{data,error}=await SB.from('sessions').select('*').neq('user_id',ME.id).order('started_at',{ascending:false}).limit(200);
  if(error){L.innerHTML='<div class="hint">No se pudo leer: '+esc(error.message)+' (¿has ejecutado supabase_actividad.sql?)</div>';return}
  const f=x=>new Date(x).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),now=Date.now();
  L.innerHTML=(data||[]).map(r=>{const ls=new Date(r.last_seen).getTime(),on=!r.ended_at&&now-ls<150000,out=r.ended_at||r.last_seen,mins=Math.max(0,Math.round((new Date(out)-new Date(r.started_at))/60000));
@@ -2267,7 +2267,7 @@ async function loadSess(){const L=$('sessList');if(!SB){L.innerHTML='<div class=
 document.addEventListener('click',async e=>{if(e.target.id==='sessTabC')sessTab('c');else if(e.target.id==='sessTabX')sessTab('x');else if(e.target.id==='sessRef')sessTab(SESSTAB);else if(e.target.id==='sessClr'){if(!SB||!confirm(SESSTAB==='c'?'¿Borrar el historial de conexiones?':'¿Borrar el historial de cambios?'))return;if(SESSTAB==='c')await SB.from('sessions').delete().neq('id','00000000-0000-0000-0000-000000000000');else await SB.from('changes').delete().gte('id',0);sessTab(SESSTAB)}});
 
 var SESSTAB='c',PREV=null;
-function sessTab(t){SESSTAB=t;$('sessTabC').style.fontWeight=t==='c'?'700':'400';$('sessTabX').style.fontWeight=t==='x'?'700':'400';$('sessHint').textContent=t==='c'?'Quién ha abierto la app y hasta cuándo (la salida es el último aviso de conexión, ±1 min).':'Cambios guardados por cada usuario, del más reciente al más antiguo.';$('sessClr').textContent='Borrar historial';t==='c'?loadSess():loadChanges()}
+function sessTab(t){SESSTAB=t;$('sessTabC').style.fontWeight=t==='c'?'700':'400';$('sessTabX').style.fontWeight=t==='x'?'700':'400';$('sessHint').textContent=t==='c'?'Quién ha abierto la app y hasta cuándo, sin contar tus conexiones (la salida es el último aviso, ±1 min).':'Cambios guardados por cada usuario, del más reciente al más antiguo.';$('sessClr').textContent='Borrar historial';t==='c'?loadSess():loadChanges()}
 async function loadChanges(){const L=$('sessList');if(!SB){L.innerHTML='<div class="hint">Solo disponible con la nube activa.</div>';return}L.innerHTML='<div class="hint">Cargando…</div>';
  const{data,error}=await SB.from('changes').select('*').order('at',{ascending:false}).limit(200);
  if(error){L.innerHTML='<div class="hint">No se pudo leer: '+esc(error.message)+' (¿has ejecutado supabase_actividad.sql?)</div>';return}
