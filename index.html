@@ -386,7 +386,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  #stage{padding:22px 28px 80px}
  .tc{font-size:clamp(44px,6vw,72px)!important}
 }
-.mgrp .mgb{display:none}.mgrp.open .mgb{display:block}.mgb .it{padding-left:12px}.mgh{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:inherit;font:inherit;text-transform:none;padding:9px 0;cursor:pointer;text-align:left}.mgh span{opacity:.6}.pl-un,#planBody{scrollbar-color:#444 transparent;scrollbar-width:thin}@media(max-width:700px){.pl-cols{grid-template-columns:minmax(0,1fr)}.pl-days{grid-template-columns:minmax(0,1fr)}.pl-un{position:static;max-height:36vh}.pl-chip .r2{flex-wrap:wrap}.pl-chip .r2 select{min-width:0;flex:1 1 90px}}</style>
+.mgrp .mgb{display:none}.mgrp.open .mgb{display:block}.mgb .it{padding-left:12px}.mgh{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:inherit;font:inherit;text-transform:none;padding:9px 0;cursor:pointer;text-align:left}.mgh span{opacity:.6}.pl-un,#planBody{scrollbar-color:#444 transparent;scrollbar-width:thin}@media(max-width:700px){.pl-cols{grid-template-columns:minmax(0,1fr)}.pl-days{grid-template-columns:minmax(0,1fr)}.pl-un{position:static;max-height:36vh}.pl-chip .r2{flex-wrap:wrap}.pl-chip .r2 select{min-width:0;flex:1 1 90px}}.blkh{display:flex;justify-content:space-between;padding:10px 12px 4px;margin-top:6px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}.pl-chip .bk{display:inline-block;margin:3px 0 0;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;opacity:.8}</style>
 </head>
 <body class="cmp">
 <div id="app">
@@ -620,7 +620,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.23'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.24'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -686,6 +686,9 @@ function applyChains(){
 function sortM(){S.moments.forEach(m=>{if(!m.id)m.id=uid()});S.moments.sort((a,b)=>a.start-b.start);applyChains();S.moments.forEach(m=>m.cues.sort((a,b)=>a.o-b.o));syncBlocks()}
 sortM();migrate();
 function curIdx(){let k=0;for(let i=0;i<S.moments.length;i++){if(S.moments[i].start<=t)k=i}return k}
+function blkOfM(m){return m.blk!==undefined?m.blk:blockOf(m.start)}
+function blkName(b){return ((S.blocks[b]||{}).name)||('Bloque '+(b+1))}
+function blkLen(b){let n=0;S.moments.forEach((m,i)=>{if(blkOfM(m)===b)n+=lenOf(i)});return n}
 function blockOf(sec){let b=0;for(let i=0;i<S.blocks.length;i++)if(S.blocks[i].start<=sec)b=i;return b}
 function momEnd(i){return i+1<S.moments.length?S.moments[i+1].start:dur()}
 
@@ -926,7 +929,7 @@ let panelOpen=false,live=false,lastPanelIdx=-1;
 function updPanel(force){
  const q=$('q').value.trim().toLowerCase(),ci=curIdx();
  if(!force&&lastPanelIdx===ci)return;lastPanelIdx=ci;
- let h='';const lastI=S.moments.length-1;
+ let h='',lastBk=-1;const lastI=S.moments.length-1;
  S.moments.forEach((m,i)=>{
   const end=momEnd(i);
   const items=[
@@ -934,6 +937,7 @@ function updPanel(force){
    ...S.notes.filter(n=>n.t>=m.start&&(n.t<end||(i===lastI&&n.t<=end))&&(!n.d||enabled.has(n.d))&&(!q||n.x.toLowerCase().includes(q)||NT[n.k].toLowerCase().includes(q))).map(n=>({r:n.t-m.start,n}))
   ].sort((a,b)=>a.r-b.r);
   if(q&&!items.length)return;
+  {const bk=blkOfM(m);if(bk!==lastBk){lastBk=bk;h+=`<div class="blkh"><span>${esc(blkName(bk))}</span><span class="mono">${fmt(blkLen(bk))}</span></div>`}}
   h+=`<div class="mh${i===ci?' cur':''}${noPk(m)?' nopk':''}" data-m="${i}"><span>${esc(mTitle(m))}${noPk(m)?'<em>sin pista</em>':''}${m.kind!=='momento'?`<small>${m.kind==='transicion'?'transición':m.kind}</small>`:''}</span><span class="at mono">${fmt(m.start,true)}</span></div>`;
   items.forEach(it=>{
    if(it.c){const c=it.c,d=D[c.d]||D.notas;h+=`<div class="gr${m.start+c.o<t?' past':''}" title="${esc(d.n)}${c.by?' · '+esc(byTxt(c)):''}" style="--c:${d.c}" data-s="${m.start+c.o}"><span class="rt mono">${fmtp(c.o)}</span><i class="dt"></i><span class="tx2">${c.pd===1?'[PENDIENTE] ':''}${esc(c.t)}</span><button class="ed" data-mi="${i}" data-ci="${m.cues.indexOf(c)}" title="Editar">✎</button></div>`}
@@ -2329,7 +2333,7 @@ async function setlLoad(direct){const L=$('setlList');if(!SB||!CLOUD){L.innerHTM
 function planData(){S.plan=S.plan||{days:[],asg:{},done:{}};S.plan.days=S.plan.days||[];S.plan.asg=S.plan.asg||{};S.plan.done=S.plan.done||{};return S.plan}
 function buildPlan(){const P=planData(),B=$('planBody'),ms=S.moments.map((m,i)=>({m,i})).filter(x=>!isTr(x.m));
  const valid=new Set(P.days.map(d=>d.id));ms.forEach(({m})=>{if(P.asg[m.id]&&!valid.has(P.asg[m.id]))delete P.asg[m.id]});
- const chip=({m,i})=>{const a=P.asg[m.id],dn=!!P.done[m.id];return `<div class="pl-chip${dn?' done':''}" draggable="true" data-pm="${esc(m.id)}"><div class="r1"><span class="nm">${esc(mTitle(m))}</span><em>${fmt(lenOf(i))}</em></div><div class="r2"><select data-psel="${esc(m.id)}"><option value="">Sin asignar</option>${P.days.map((d,k)=>`<option value="${d.id}"${a===d.id?' selected':''}>${esc(d.name||'Día '+(k+1))}</option>`).join('')}</select>${a?`<button class="dn" data-pdone="${esc(m.id)}">${dn?'✓ Hecho':'Hecho'}</button>`:''}<button data-pgo="${i}" title="Ir al tema">▷</button></div></div>`};
+ const chip=({m,i})=>{const a=P.asg[m.id],dn=!!P.done[m.id];return `<div class="pl-chip${dn?' done':''}" draggable="true" data-pm="${esc(m.id)}"><div class="r1"><span class="nm">${esc(mTitle(m))}</span><em>${fmt(lenOf(i))}</em></div><div class="bk">${esc(blkName(blkOfM(m)))}</div><div class="r2"><select data-psel="${esc(m.id)}"><option value="">Sin asignar</option>${P.days.map((d,k)=>`<option value="${d.id}"${a===d.id?' selected':''}>${esc(d.name||'Día '+(k+1))}</option>`).join('')}</select>${a?`<button class="dn" data-pdone="${esc(m.id)}">${dn?'✓ Hecho':'Hecho'}</button>`:''}<button data-pgo="${i}" title="Ir al tema">▷</button></div></div>`};
  const un=ms.filter(x=>!P.asg[x.m.id]);
  let h=`<div class="pl-cols"><div class="pl-col pl-un" data-pday=""><h4><span>Sin asignar</span><span>${un.length} temas</span></h4>${un.map(chip).join('')||'<div class="hint" style="padding:6px">Todo asignado.</div>'}</div><div class="pl-days">`;
  P.days.forEach((d,k)=>{const L=ms.filter(x=>P.asg[x.m.id]===d.id),tot=L.reduce((a,x)=>a+lenOf(x.i),0),dn=L.filter(x=>P.done[x.m.id]).length;
