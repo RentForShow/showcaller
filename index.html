@@ -620,7 +620,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.27'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.28'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1178,7 +1178,7 @@ function buildMM(){
  m.imgs=m.imgs||[];const cmo=can('mood');
  h+=sec('MOODBOARD DEL TEMA')+(m.imgs.length?`<div class="mimgs">${m.imgs.map((r,k)=>{const x=fileKind(r)==='img'?`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}">`:`<a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">📄 ${esc(r.name||'Archivo')}</a>`;return `<div class="mi">${x}${cmo?`<button data-mm="tmdel" data-k="${k}" title="Quitar">✕</button>`:''}</div>`}).join('')}</div>`:'<div class="hint" style="margin:0 0 8px">Sin imágenes de moodboard en este tema.</div>')+(cmo?(CLOUD?'<button class="btn sm" data-mm="tmup">＋ Fotos</button>':'<div class="hint">Subir fotos requiere la web conectada a Supabase.</div>'):'');
  {const tr=TRK[m.id];if(adm||tr)h+=sec('PISTA DE AUDIO')+(tr?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>🎵 ${esc(tr.name)}${tr.dur?' · '+fmt(tr.dur):''}</span>${adm?`${tr.dur&&Math.abs(tr.dur-lenOf(mmI))>=1?`<button class="btn sm" data-mm="trfit" title="El tema dura ${fmt(lenOf(mmI))}">Ajustar tema a ${fmt(tr.dur)}</button>`:''}<button class="btn sm" data-mm="trup">Cambiar</button><button class="btn sm" data-mm="trdel">Quitar</button>`:''}</div>`:`<button class="btn sm" data-mm="trup">＋ Cargar pista</button>`)+(adm?'<div class="hint" style="margin-top:6px">Suena sola al entrar en este tema y se precarga el anterior. Se sube a la nube y todo el equipo la recibe sola.</div>':'')}
- {const tr=TRK[m.id];if(adm||m.bpm){h+=sec('TEMPO (BPM)');if(m.bpm){h+=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b class="mono" style="font-size:26px">${bpmTxt(m.bpm)}</b><span>BPM</span>${m.bpmc?`<span class="tag">Confianza ${m.bpmc.toUpperCase()}</span>`:'<span class="tag">A MANO</span>'}</div>`+(adm?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sm" data-mm="bpmh">÷2 → ${bpmTxt(Math.round(m.bpm/2*10)/10)}</button><button class="btn sm" data-mm="bpmd">×2 → ${bpmTxt(Math.round(m.bpm*2*10)/10)}</button><button class="btn sm" data-mm="bpme">✎ A mano</button>${tr?'<button class="btn sm" data-mm="bpm">↻ Detectar otra vez</button>':''}<button class="btn sm" data-mm="bpmdel">Quitar</button></div>`:'')}else{h+=`<div style="display:flex;gap:8px;flex-wrap:wrap">${tr?'<button class="btn sm" data-mm="bpm">♩ Detectar BPM</button>':''}<button class="btn sm" data-mm="bpme">✎ Escribir a mano</button></div>${tr?'':'<div class="hint" style="margin-top:6px">Para detectarlo automáticamente, carga primero la pista de audio del tema.</div>'}`}h+='<div class="hint" id="bpmSt" style="margin-top:6px"></div>'}}
+ {const tr=TRK[m.id];if(adm||m.bpm){h+=sec('TEMPO (BPM)');if(m.bpm){h+=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b class="mono" style="font-size:26px">${bpmTxt(m.bpm)}</b><span>BPM</span>${m.bpmc?`<span class="tag">Confianza ${m.bpmc.toUpperCase()}</span>`:'<span class="tag">A MANO</span>'}</div>`+(adm?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sm" data-mm="bpmh">÷2 → ${bpmTxt(Math.round(m.bpm/2*10)/10)}</button><button class="btn sm" data-mm="bpmd">×2 → ${bpmTxt(Math.round(m.bpm*2*10)/10)}</button><button class="btn sm" data-mm="bpme">✎ A mano</button>${tr||rehOk(m)?'<button class="btn sm" data-mm="bpm">↻ Detectar otra vez</button>':''}<button class="btn sm" data-mm="bpmdel">Quitar</button></div>`:'')}else{h+=`<div style="display:flex;gap:8px;flex-wrap:wrap">${tr||rehOk(m)?'<button class="btn sm" data-mm="bpm">♩ Detectar BPM</button>':''}<button class="btn sm" data-mm="bpme">✎ Escribir a mano</button></div>${tr||rehOk(m)?(tr?'':'<div class="hint" style="margin-top:6px">Se analizará el trozo del audio de ensayo marcado para este tema.</div>'):'<div class="hint" style="margin-top:6px">Para detectarlo automáticamente, carga la pista del tema o marca su inicio y fin en el audio del ensayo.</div>'}`}h+='<div class="hint" id="bpmSt" style="margin-top:6px"></div>'}}
  if(m.reh&&m.reh.b>m.reh.a)h+=sec('AUDIO DE ENSAYO')+`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>Marcado: ${fmt(m.reh.b-m.reh.a)}</span>${Math.abs(m.reh.b-m.reh.a-lenOf(mmI))>=1&&can('times')?`<button class="btn sm" data-mm="rhfit">Ajustar tema a ${fmt(m.reh.b-m.reh.a)}</button>`:''}</div>`
  h+=sec('NOTAS')+`<textarea class="ti" id="mmNote" rows="3" ${cn?'':'readonly'} placeholder="${cn?'Notas del tema':''}" style="width:100%;resize:vertical">${esc(m.note||'')}</textarea>`;
  h+=sec('REFERENCIAS')+(m.refs.length?m.refs.map((r,k)=>{
@@ -1204,8 +1204,8 @@ $('mmBody').addEventListener('click',e=>{
  if((a==='trup'||a==='trdel')&&!adm){toast('Solo el administrador puede cargar audio');return}
  if(a.startsWith('bpm')){if(!adm){toast('Solo el administrador');return}
   const st=()=>$('bpmSt');
-  if(a==='bpm'){const tr=TRK[m.id];if(!tr||!tr.blob){toast('Este tema no tiene pista cargada');return}if(st())st().textContent='Analizando… 0 %';
-   bpmDetect(tr.blob,f=>{if(st())st().textContent='Analizando… '+Math.round(f*100)+' %'}).then(r=>{m.bpm=r.bpm;m.bpmc=r.conf;dirty();buildMM();toast(bpmTxt(r.bpm)+' BPM · confianza '+r.conf)}).catch(()=>{if(st())st().textContent='No se pudo detectar el tempo de esta pista.'});return}
+  if(a==='bpm'){const tr=TRK[m.id],useT=!!(tr&&tr.blob);if(!useT&&!rehOk(m)){toast('Este tema no tiene pista ni marcas de ensayo');return}if(st())st().textContent='Analizando… 0 %';
+   (useT?bpmDetect(tr.blob,f=>{if(st())st().textContent='Analizando… '+Math.round(f*100)+' %'}):bpmReh(m,f=>{if(st())st().textContent='Analizando… '+Math.round(f*100)+' %'})).then(r=>{m.bpm=r.bpm;m.bpmc=r.conf;dirty();buildMM();toast(bpmTxt(r.bpm)+' BPM · confianza '+r.conf)}).catch(()=>{if(st())st().textContent='No se pudo detectar el tempo de esta pista.'});return}
   if(a==='bpmh'&&m.bpm){m.bpm=Math.round(m.bpm/2*10)/10;dirty();buildMM();return}
   if(a==='bpmd'&&m.bpm){m.bpm=Math.round(m.bpm*2*10)/10;dirty();buildMM();return}
   if(a==='bpmdel'){delete m.bpm;delete m.bpmc;dirty();buildMM();return}
@@ -1922,10 +1922,12 @@ async function idbDel(id){try{const d=await idb();await new Promise((ok,ko)=>{co
 async function idbAll(){try{const d=await idb();return await new Promise((ok,ko)=>{const q=d.transaction('tracks').objectStore('tracks').getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)})}catch(e){return []}}
 
 // ---- BPM ----
+const rehOk=m=>!!(m&&!isTr(m)&&m.reh&&m.reh.b>m.reh.a&&S.rehearsal&&rehParts().length);
+async function bpmReh(m,prog){const off=rehOff(),P=rehParts(),i=rehPartAt(m.reh.a,off),p=P[i],u=RLOC[p.f]||await fileUrl(p.f);if(!u)throw new Error('sin audio');const bl=await (await fetch(u)).blob();return bpmDetect(bl,prog,{a:m.reh.a-off[i],b:Math.min(m.reh.b,off[i]+(p.dur||1e9))-off[i]})}
 const bpmTxt=v=>v%1?v.toFixed(1):String(v);
-async function bpmDetect(blob,prog){
+async function bpmDetect(blob,prog,r){
  pctx=pctx||new (window.AudioContext||window.webkitAudioContext)();
- const buf=await pctx.decodeAudioData(await blob.arrayBuffer()),ch=buf.getChannelData(0),sr=buf.sampleRate,hop=Math.max(64,Math.round(sr/172)),fps=sr/hop,N=Math.floor(ch.length/hop);
+ const buf=await pctx.decodeAudioData(await blob.arrayBuffer()),sr=buf.sampleRate,ch0=buf.getChannelData(0),ch=r?ch0.subarray(Math.max(0,Math.floor(r.a*sr)),Math.min(ch0.length,Math.floor(r.b*sr))):ch0,hop=Math.max(64,Math.round(sr/172)),fps=sr/hop,N=Math.floor(ch.length/hop);
  if(N<fps*8)throw new Error('corto');
  const L=new Float32Array(N);let y=0;const a=.1;
  for(let i=0;i<N;i++){let e=0;const o=i*hop;for(let j=0;j<hop;j++){const x=ch[o+j];y+=a*(x-y);e+=y*y}L[i]=Math.log(1+800*Math.sqrt(e/hop));if((i&4095)===0&&prog)prog(i/N*.6)}
