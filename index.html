@@ -620,7 +620,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.26'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.27'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -1935,6 +1935,7 @@ async function bpmDetect(blob,prog){
  let best=-1,bl=0,tot=0,cnt=0;
  for(let lag=lo;lag<=hi;lag++){const bpm=fps*60/lag,w=Math.exp(-.5*Math.pow(Math.log2(bpm/120)/1.2,2)),v=ac[lag]*w;tot+=ac[lag];cnt++;if(ac[lag]>ac[lag-1]&&ac[lag]>=ac[lag+1]&&v>best){best=v;bl=lag}}
  if(!bl)throw new Error('sin pulso');
+ {const h0=Math.round(bl/2);let hb=0;for(let l=h0-2;l<=h0+2;l++)if(l>=lo&&l<=hi&&ac[l]>ac[hb||l]-1e-9&&(!hb||ac[l]>ac[hb]))hb=l;if(hb&&fps*60/bl<90&&ac[hb]>=.45*ac[bl]&&fps*60/hb<=200)bl=hb}
  const y0=ac[bl-1],y1=ac[bl],y2=ac[bl+1],den=y0-2*y1+y2,off=den?.5*(y0-y2)/den:0,lag=bl+Math.max(-1,Math.min(1,off));
  let bpm=fps*60/lag;bpm=Math.round(bpm*10)/10;
  const mu=tot/cnt,ratio=ac[bl]/(Math.abs(mu)+.02),conf=ac[bl]>.12&&ratio>3?'alta':ac[bl]>.05?'media':'baja';
