@@ -386,7 +386,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  #stage{padding:22px 28px 80px}
  .tc{font-size:clamp(44px,6vw,72px)!important}
 }
-.mgrp .mgb{display:none}.mgrp.open .mgb{display:block}.mgb .it{padding-left:12px}.mgh{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:inherit;font:inherit;text-transform:none;padding:9px 0;cursor:pointer;text-align:left}.mgh span{opacity:.6}.pl-un,#planBody{scrollbar-color:#444 transparent;scrollbar-width:thin}@media(max-width:700px){.pl-cols{grid-template-columns:minmax(0,1fr)}.pl-days{grid-template-columns:minmax(0,1fr)}.pl-un{position:static;max-height:36vh}.pl-chip .r2{flex-wrap:wrap}.pl-chip .r2 select{min-width:0;flex:1 1 90px}}.blkh{display:flex;justify-content:space-between;padding:10px 12px 4px;margin-top:6px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}.pl-chip .bk{display:inline-block;margin:3px 0 0;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;opacity:.8}</style>
+.mgrp .mgb{display:none}.mgrp.open .mgb{display:block}.mgb .it{padding-left:12px}.mgh{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:inherit;font:inherit;text-transform:none;padding:9px 0;cursor:pointer;text-align:left}.mgh span{opacity:.6}.pl-un,#planBody{scrollbar-color:#444 transparent;scrollbar-width:thin}@media(max-width:700px){.pl-cols{grid-template-columns:minmax(0,1fr)}.pl-days{grid-template-columns:minmax(0,1fr)}.pl-un{position:static;max-height:36vh}.pl-chip .r2{flex-wrap:wrap}.pl-chip .r2 select{min-width:0;flex:1 1 90px}}.blkh{display:flex;justify-content:space-between;padding:10px 12px 4px;margin-top:6px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}.pl-chip .bk{display:inline-block;margin:3px 0 0;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;opacity:.8}.bpmt{border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:8px;opacity:.8}</style>
 </head>
 <body class="cmp">
 <div id="app">
@@ -620,7 +620,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.25'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.26'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -938,7 +938,7 @@ function updPanel(force){
   ].sort((a,b)=>a.r-b.r);
   if(q&&!items.length)return;
   {const bk=blkOfM(m);if(bk!==lastBk){lastBk=bk;h+=`<div class="blkh"><span>${esc(blkName(bk))}</span><span class="mono">${fmt(blkLen(bk))}</span></div>`}}
-  h+=`<div class="mh${i===ci?' cur':''}${noPk(m)?' nopk':''}" data-m="${i}"><span>${esc(mTitle(m))}${noPk(m)?'<em>sin pista</em>':''}${m.kind!=='momento'?`<small>${m.kind==='transicion'?'transición':m.kind}</small>`:''}</span><span class="at mono">${fmt(m.start,true)}</span></div>`;
+  h+=`<div class="mh${i===ci?' cur':''}${noPk(m)?' nopk':''}" data-m="${i}"><span>${esc(mTitle(m))}${noPk(m)?'<em>sin pista</em>':''}${m.kind!=='momento'?`<small>${m.kind==='transicion'?'transición':m.kind}</small>`:''}${m.bpm?`<small class="bpmt">${bpmTxt(m.bpm)} BPM</small>`:''}</span><span class="at mono">${fmt(m.start,true)}</span></div>`;
   items.forEach(it=>{
    if(it.c){const c=it.c,d=D[c.d]||D.notas;h+=`<div class="gr${m.start+c.o<t?' past':''}" title="${esc(d.n)}${c.by?' · '+esc(byTxt(c)):''}" style="--c:${d.c}" data-s="${m.start+c.o}"><span class="rt mono">${fmtp(c.o)}</span><i class="dt"></i><span class="tx2">${c.pd===1?'[PENDIENTE] ':''}${esc(c.t)}</span><button class="ed" data-mi="${i}" data-ci="${m.cues.indexOf(c)}" title="Editar">✎</button></div>`}
    else{const n=it.n;h+=`<div class="gr${n.t<t?' past':''}" style="--c:#ece9e1;font-style:italic" data-s="${n.t}"><span class="rt mono">${fmtp(it.r)}</span><i class="dt"></i><span class="tx2">${esc(n.x)}${n.done?' ✓':''}</span><span class="du">${NT[n.k]}</span><button class="ed" data-n="${S.notes.indexOf(n)}" title="Editar">✎</button></div>`}
@@ -1178,6 +1178,7 @@ function buildMM(){
  m.imgs=m.imgs||[];const cmo=can('mood');
  h+=sec('MOODBOARD DEL TEMA')+(m.imgs.length?`<div class="mimgs">${m.imgs.map((r,k)=>{const x=fileKind(r)==='img'?`<img data-f="${esc(r.f)}" alt="${esc(r.name||'')}" title="${esc(r.name||'')}">`:`<a data-f="${esc(r.f)}" data-open="1" href="#" style="display:block;padding:10px;background:#0e0e0d;border-radius:6px;color:var(--tx);word-break:break-all">📄 ${esc(r.name||'Archivo')}</a>`;return `<div class="mi">${x}${cmo?`<button data-mm="tmdel" data-k="${k}" title="Quitar">✕</button>`:''}</div>`}).join('')}</div>`:'<div class="hint" style="margin:0 0 8px">Sin imágenes de moodboard en este tema.</div>')+(cmo?(CLOUD?'<button class="btn sm" data-mm="tmup">＋ Fotos</button>':'<div class="hint">Subir fotos requiere la web conectada a Supabase.</div>'):'');
  {const tr=TRK[m.id];if(adm||tr)h+=sec('PISTA DE AUDIO')+(tr?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>🎵 ${esc(tr.name)}${tr.dur?' · '+fmt(tr.dur):''}</span>${adm?`${tr.dur&&Math.abs(tr.dur-lenOf(mmI))>=1?`<button class="btn sm" data-mm="trfit" title="El tema dura ${fmt(lenOf(mmI))}">Ajustar tema a ${fmt(tr.dur)}</button>`:''}<button class="btn sm" data-mm="trup">Cambiar</button><button class="btn sm" data-mm="trdel">Quitar</button>`:''}</div>`:`<button class="btn sm" data-mm="trup">＋ Cargar pista</button>`)+(adm?'<div class="hint" style="margin-top:6px">Suena sola al entrar en este tema y se precarga el anterior. Se sube a la nube y todo el equipo la recibe sola.</div>':'')}
+ {const tr=TRK[m.id];if(adm||m.bpm){h+=sec('TEMPO (BPM)');if(m.bpm){h+=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b class="mono" style="font-size:26px">${bpmTxt(m.bpm)}</b><span>BPM</span>${m.bpmc?`<span class="tag">Confianza ${m.bpmc.toUpperCase()}</span>`:'<span class="tag">A MANO</span>'}</div>`+(adm?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn sm" data-mm="bpmh">÷2 → ${bpmTxt(Math.round(m.bpm/2*10)/10)}</button><button class="btn sm" data-mm="bpmd">×2 → ${bpmTxt(Math.round(m.bpm*2*10)/10)}</button><button class="btn sm" data-mm="bpme">✎ A mano</button>${tr?'<button class="btn sm" data-mm="bpm">↻ Detectar otra vez</button>':''}<button class="btn sm" data-mm="bpmdel">Quitar</button></div>`:'')}else{h+=`<div style="display:flex;gap:8px;flex-wrap:wrap">${tr?'<button class="btn sm" data-mm="bpm">♩ Detectar BPM</button>':''}<button class="btn sm" data-mm="bpme">✎ Escribir a mano</button></div>${tr?'':'<div class="hint" style="margin-top:6px">Para detectarlo automáticamente, carga primero la pista de audio del tema.</div>'}`}h+='<div class="hint" id="bpmSt" style="margin-top:6px"></div>'}}
  if(m.reh&&m.reh.b>m.reh.a)h+=sec('AUDIO DE ENSAYO')+`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span>Marcado: ${fmt(m.reh.b-m.reh.a)}</span>${Math.abs(m.reh.b-m.reh.a-lenOf(mmI))>=1&&can('times')?`<button class="btn sm" data-mm="rhfit">Ajustar tema a ${fmt(m.reh.b-m.reh.a)}</button>`:''}</div>`
  h+=sec('NOTAS')+`<textarea class="ti" id="mmNote" rows="3" ${cn?'':'readonly'} placeholder="${cn?'Notas del tema':''}" style="width:100%;resize:vertical">${esc(m.note||'')}</textarea>`;
  h+=sec('REFERENCIAS')+(m.refs.length?m.refs.map((r,k)=>{
@@ -1201,6 +1202,15 @@ $('mmBody').addEventListener('click',e=>{
  if(a==='go'){setT(m.start);$('mMoment').classList.remove('open');return}
  if(a==='tmup'){$('tmPick').click();return}
  if((a==='trup'||a==='trdel')&&!adm){toast('Solo el administrador puede cargar audio');return}
+ if(a.startsWith('bpm')){if(!adm){toast('Solo el administrador');return}
+  const st=()=>$('bpmSt');
+  if(a==='bpm'){const tr=TRK[m.id];if(!tr||!tr.blob){toast('Este tema no tiene pista cargada');return}if(st())st().textContent='Analizando… 0 %';
+   bpmDetect(tr.blob,f=>{if(st())st().textContent='Analizando… '+Math.round(f*100)+' %'}).then(r=>{m.bpm=r.bpm;m.bpmc=r.conf;dirty();buildMM();toast(bpmTxt(r.bpm)+' BPM · confianza '+r.conf)}).catch(()=>{if(st())st().textContent='No se pudo detectar el tempo de esta pista.'});return}
+  if(a==='bpmh'&&m.bpm){m.bpm=Math.round(m.bpm/2*10)/10;dirty();buildMM();return}
+  if(a==='bpmd'&&m.bpm){m.bpm=Math.round(m.bpm*2*10)/10;dirty();buildMM();return}
+  if(a==='bpmdel'){delete m.bpm;delete m.bpmc;dirty();buildMM();return}
+  if(a==='bpme'){const v=parseFloat(String(prompt('BPM de este tema:',m.bpm||'')||'').replace(',','.'));if(v>=30&&v<=300){m.bpm=Math.round(v*10)/10;delete m.bpmc;dirty();buildMM()}return}
+  return}
  if(a==='trfit'){const tr=TRK[m.id];if(!tr||!tr.dur)return;if(!can('times')){toast('Sin permiso');return}const v=Math.max(1,Math.round(tr.dur)),delta=v-lenOf(mmI);for(let j=mmI+1;j<S.moments.length;j++)S.moments[j].start+=delta;if(!audio)S.duration=Math.max(30,Math.round(S.duration+delta));dirty();buildMM();toast('Tema ajustado a '+fmt(v));return}
  if(a==='rhfit'){if(fitReh(mmI)){dirty();buildMM();toast('Tema ajustado al ensayo')}return}
  if(a==='trup'){$('trPick').click();return}
@@ -1910,6 +1920,25 @@ function idb(){return new Promise((ok,ko)=>{try{const r=indexedDB.open('showcall
 async function idbPut(rec){try{const d=await idb();await new Promise((ok,ko)=>{const x=d.transaction('tracks','readwrite');x.objectStore('tracks').put(rec);x.oncomplete=ok;x.onerror=()=>ko(x.error)})}catch(e){}}
 async function idbDel(id){try{const d=await idb();await new Promise((ok,ko)=>{const x=d.transaction('tracks','readwrite');x.objectStore('tracks').delete(id);x.oncomplete=ok;x.onerror=()=>ko(x.error)})}catch(e){}}
 async function idbAll(){try{const d=await idb();return await new Promise((ok,ko)=>{const q=d.transaction('tracks').objectStore('tracks').getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)})}catch(e){return []}}
+
+// ---- BPM ----
+const bpmTxt=v=>v%1?v.toFixed(1):String(v);
+async function bpmDetect(blob,prog){
+ pctx=pctx||new (window.AudioContext||window.webkitAudioContext)();
+ const buf=await pctx.decodeAudioData(await blob.arrayBuffer()),ch=buf.getChannelData(0),sr=buf.sampleRate,hop=Math.max(64,Math.round(sr/172)),fps=sr/hop,N=Math.floor(ch.length/hop);
+ if(N<fps*8)throw new Error('corto');
+ const L=new Float32Array(N);let y=0;const a=.1;
+ for(let i=0;i<N;i++){let e=0;const o=i*hop;for(let j=0;j<hop;j++){const x=ch[o+j];y+=a*(x-y);e+=y*y}L[i]=Math.log(1+800*Math.sqrt(e/hop));if((i&4095)===0&&prog)prog(i/N*.6)}
+ const on=new Float32Array(N);let mean=0;for(let i=1;i<N;i++){const d=L[i]-L[i-1];on[i]=d>0?d:0;mean+=on[i]}mean/=N;for(let i=0;i<N;i++)on[i]-=mean;
+ const lo=Math.floor(fps*60/200),hi=Math.ceil(fps*60/60),ac=new Float32Array(hi+2);let c0=0;for(let i=0;i<N;i++)c0+=on[i]*on[i];
+ for(let lag=lo-1;lag<=hi+1;lag++){let sum=0;for(let i=lag;i<N;i++)sum+=on[i]*on[i-lag];ac[lag]=sum/(N-lag)/(c0/N||1);if((lag&7)===0&&prog)prog(.6+.4*(lag-lo)/(hi-lo))}
+ let best=-1,bl=0,tot=0,cnt=0;
+ for(let lag=lo;lag<=hi;lag++){const bpm=fps*60/lag,w=Math.exp(-.5*Math.pow(Math.log2(bpm/120)/1.2,2)),v=ac[lag]*w;tot+=ac[lag];cnt++;if(ac[lag]>ac[lag-1]&&ac[lag]>=ac[lag+1]&&v>best){best=v;bl=lag}}
+ if(!bl)throw new Error('sin pulso');
+ const y0=ac[bl-1],y1=ac[bl],y2=ac[bl+1],den=y0-2*y1+y2,off=den?.5*(y0-y2)/den:0,lag=bl+Math.max(-1,Math.min(1,off));
+ let bpm=fps*60/lag;bpm=Math.round(bpm*10)/10;
+ const mu=tot/cnt,ratio=ac[bl]/(Math.abs(mu)+.02),conf=ac[bl]>.12&&ratio>3?'alta':ac[bl]>.05?'media':'baja';
+ return{bpm,conf}}
 async function decodeTrack(tr){try{pctx=pctx||new (window.AudioContext||window.webkitAudioContext)();const buf=await Promise.race([pctx.decodeAudioData(await tr.blob.arrayBuffer()),new Promise((_,ko)=>setTimeout(()=>ko(new Error('timeout')),20000))]),ch=buf.getChannelData(0),n=Math.max(1,Math.ceil(buf.duration*10)),w=Math.max(1,Math.floor(ch.length/n)),pk=new Float32Array(n);let mx=0;
  for(let i=0;i<n;i++){let m=0;for(let j=0;j<w;j+=Math.max(1,w>>5))m=Math.max(m,Math.abs(ch[i*w+j]||0));pk[i]=m;mx=Math.max(mx,m)}for(let i=0;i<n;i++)pk[i]=Math.pow(pk[i]/(mx||1),.7);tr.pk=pk;tr.dur=buf.duration}catch(e){}}
 function rebuildPeaks(){if(audio)return;const ids=Object.keys(TRK),hasR=!!(S.rehearsal&&S.rehearsal.parts&&S.rehearsal.parts.length);if(!ids.length&&!hasR){genPeaks();return}
