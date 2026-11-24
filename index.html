@@ -620,7 +620,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.28'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.29'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -683,7 +683,7 @@ function applyChains(){
     m.cues.splice(m.cues.indexOf(c),1);c.o=abs-dest.start;dest.cues.push(c);moved=true}}
   if(!moved)break}
 }
-function sortM(){S.moments.forEach(m=>{if(!m.id)m.id=uid()});S.moments.sort((a,b)=>a.start-b.start);applyChains();S.moments.forEach(m=>m.cues.sort((a,b)=>a.o-b.o));syncBlocks()}
+function sortM(){S.moments.forEach(m=>{if(!m.id)m.id=uid()});S.moments.sort((a,b)=>a.start-b.start);{const L=S.moments[S.moments.length-1];if(L&&!audio&&L.start+30>S.duration)S.duration=Math.round(L.start+30)}applyChains();S.moments.forEach(m=>m.cues.sort((a,b)=>a.o-b.o));syncBlocks()}
 sortM();migrate();
 function curIdx(){let k=0;for(let i=0;i<S.moments.length;i++){if(S.moments[i].start<=t)k=i}return k}
 function blkOfM(m){return m.blk!==undefined?m.blk:blockOf(m.start)}
@@ -1247,12 +1247,12 @@ function buildTimes(){
 }
 function addAfter(i,tr){const len=tr?30:180,m=S.moments[i],st=m.start+lenOf(i);for(let j=i+1;j<S.moments.length;j++)S.moments[j].start+=len;S.moments.push({name:tr?'TRANSICIÓN':'NUEVO TEMA',start:st,kind:tr?'transicion':'momento',blk:m.blk,cues:[]});if(!audio)S.duration+=len;sortM();dirty();buildTimes()}
 function reorderM(i,j){const ms=S.moments;if(i===j||!ms[i]||!ms[j])return;
- const lens=ms.map((m,k)=>lenOf(k)),olds=ms.map(m=>m.start),idx=ms.map((_,k)=>k);const [x]=idx.splice(i,1);idx.splice(j,0,x);
+ const lens=ms.map((m,k)=>Math.max(1,lenOf(k))),olds=ms.map(m=>m.start),idx=ms.map((_,k)=>k);const [x]=idx.splice(i,1);idx.splice(j,0,x);
  let cur=ms[0].start;const ns=new Map();idx.forEach(k=>{ns.set(ms[k],cur);cur+=lens[k]});
  S.notes.forEach(n=>{const k=olds.findIndex((o,q)=>n.t>=o&&n.t<o+lens[q]);if(k>-1)n.t+=ns.get(ms[k])-olds[k]});
  const moved=ms[i],pos=idx.indexOf(i),nb=ms[idx[pos-1]]||ms[idx[pos+1]];
  ms.forEach(m=>m.start=ns.get(m));if(nb&&nb.blk!==undefined)moved.blk=nb.blk;
- sortM();dirty();buildTimes()}
+ if(!audio)S.duration=Math.max(S.duration,Math.round(cur));sortM();dirty();buildTimes()}
 function swapM(i,j){reorderM(i,j)}
 $('tList').addEventListener('change',e=>{
  const d=e.target.dataset;if(!canTimes()){buildTimes();return}
