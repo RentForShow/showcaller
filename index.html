@@ -386,7 +386,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
  #stage{padding:22px 28px 80px}
  .tc{font-size:clamp(44px,6vw,72px)!important}
 }
-.mgrp .mgb{display:none}.mgrp.open .mgb{display:block}.mgb .it{padding-left:12px}.mgh{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:inherit;font:inherit;text-transform:none;padding:9px 0;cursor:pointer;text-align:left}.mgh span{opacity:.6}.pl-un,#planBody{scrollbar-color:#444 transparent;scrollbar-width:thin}@media(max-width:700px){.pl-cols{grid-template-columns:minmax(0,1fr)}.pl-days{grid-template-columns:minmax(0,1fr)}.pl-un{position:static;max-height:36vh}.pl-chip .r2{flex-wrap:wrap}.pl-chip .r2 select{min-width:0;flex:1 1 90px}}.blkh{display:flex;justify-content:space-between;padding:10px 12px 4px;margin-top:6px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}.pl-chip .bk{display:inline-block;margin:3px 0 0;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;opacity:.8}.bpmt{border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:8px;opacity:.8}.pl-sum{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;font-size:13px}.pl-sum b{font-size:20px}.pl-sm2{opacity:.65}.pl-pb{flex:1 1 120px;height:6px;border-radius:3px;background:#2a2a28;overflow:hidden;min-width:80px}.pl-pb u{display:block;height:6px;background:#ece9e1}</style>
+.mgrp .mgb{display:none}.mgrp.open .mgb{display:block}.mgb .it{padding-left:12px}.mgh{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:inherit;font:inherit;text-transform:none;padding:9px 0;cursor:pointer;text-align:left}.mgh span{opacity:.6}.pl-un,#planBody{scrollbar-color:#444 transparent;scrollbar-width:thin}@media(max-width:700px){.pl-cols{grid-template-columns:minmax(0,1fr)}.pl-days{grid-template-columns:minmax(0,1fr)}.pl-un{position:static;max-height:36vh}.pl-chip .r2{flex-wrap:wrap}.pl-chip .r2 select{min-width:0;flex:1 1 90px}}.blkh{display:flex;justify-content:space-between;padding:10px 12px 4px;margin-top:6px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.7}.pl-chip .bk{display:inline-block;margin:3px 0 0;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;opacity:.8}.bpmt{border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:8px;opacity:.8}.pl-sum{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;font-size:13px}.pl-sum b{font-size:20px}.pl-sm2{opacity:.65}.pl-pb{flex:1 1 120px;height:6px;border-radius:3px;background:#2a2a28;overflow:hidden;min-width:80px}.pl-pb u{display:block;height:6px;background:#ece9e1}#maint{display:none;position:fixed;inset:0;z-index:99999;background:#0e0e0d;color:#ece9e1;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:inherit}#maint.on{display:flex}#maint h1{font-size:26px;font-weight:500;margin:0 0 10px}#maint p{margin:0;color:#8b8984;font-size:15px;line-height:1.5}#maint .mi{width:44px;height:44px;margin:0 auto 22px;border:2px solid #3a3936;border-top-color:#ece9e1;border-radius:50%;animation:mspin 1.2s linear infinite}@keyframes mspin{to{transform:rotate(360deg)}}</style>
 </head>
 <body class="cmp">
 <div id="app">
@@ -620,7 +620,7 @@ footer.exp .ctl{flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}
 /* ===== Supabase: rellena estas dos líneas (Project Settings → API). Si se dejan vacías, la app funciona en modo local. ===== */
 const CFG={url:'https://bbtftjvwzloehczgvjlp.supabase.co',key:'sb_publishable_QhVGIL0ZpKn0V3YdfWZgCQ_rVgY3xIy',domain:''};
 const CLOUD=!!(CFG.url&&CFG.key);
-const VERSION='V2.31'; // sube la versión en cada cambio: V1.1, V1.2…
+const VERSION='V2.32'; // sube la versión en cada cambio: V1.1, V1.2…
 const DEF_DEPTS=[
  {id:'show',n:'SHOW',c:'#ece9e1'},{id:'orq',n:'ORQUESTA',c:'#8fb6d9'},{id:'lx',n:'LX',c:'#e0b24f'},
  {id:'rea',n:'REALIZACIÓN',c:'#7aa7e0'},{id:'pan',n:'PANTALLA CENTRAL',c:'#6f95c9'},{id:'fx',n:'FX',c:'#d98a4e'},
@@ -2215,10 +2215,14 @@ async function cloudLogin(){
  await cloudEnter(data.user);
 }
 async function cloudProfile(id){const {data,error}=await SB.from('profiles').select('*').eq('id',id).maybeSingle();return error?null:data}
+var maintT=null;
+function showMaint(uid){try{clearInterval(chkTimer)}catch(e){}try{pause()}catch(e){}try{SB.removeAllChannels()}catch(e){}ME=null;document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));$('auth').style.display='none';$('maint').classList.add('on');
+ clearInterval(maintT);maintT=setInterval(async()=>{try{const pr=await cloudProfile(uid);if(pr&&pr.status==='active')location.reload()}catch(e){}},20000)}
 async function cloudEnter(user){
  let pr=await cloudProfile(user.id);
  if(!pr&&!navigator.onLine){try{const c=JSON.parse(localStorage.getItem('showcaller.profile'));if(c&&c.id===user.id){ME=c;$('auth').style.display='none';applyRole();toast('Sin conexión: trabajas con tu copia local');return}}catch(e){}}
  if(!pr){await SB.auth.signOut();showAuth('login');$('aErr').textContent='Este usuario no tiene perfil. Avisa al administrador.';return}
+ if(pr.status==='paused'){showMaint(pr.id);return}
  if(pr.status!=='active'){await SB.auth.signOut();showAuth('login');$('aErr').textContent='Tu acceso ha sido retirado.';return}
  ME={u:pr.email,id:pr.id,name:pr.name||pr.email,role:pr.role,p:pr.p||presetP(pr.role)};
  try{localStorage.setItem('showcaller.profile',JSON.stringify(ME))}catch(e){}
@@ -2255,6 +2259,7 @@ function cloudListen(){
  }).subscribe();
  clearInterval(chkTimer);chkTimer=setInterval(async()=>{
   const pr=await cloudProfile(ME.id);
+  if(pr&&pr.status==='paused'){showMaint(ME.id);return}
   if(!pr||pr.status!=='active'){clearInterval(chkTimer);await SB.auth.signOut();ME=null;pause();document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));showAuth('login');$('aErr').textContent='Tu acceso ha sido retirado.';return}
   if(pr.role!==ME.role||JSON.stringify(pr.p)!==JSON.stringify(ME.p)){ME.role=pr.role;ME.p=pr.p||presetP(pr.role);ME.name=pr.name||ME.name;applyRole()}
  },30000);
@@ -2266,14 +2271,14 @@ async function cloudBuildUsers(){
  const {data,error}=await SB.from('profiles').select('*').order('created_at');
  if(error){$('uList').innerHTML='<div class="hint" style="padding:14px 24px">No se pudo leer: '+esc(error.message)+'</div>';return}
  PROF=data;
- $('uList').innerHTML='<div class="hint" style="padding:12px 24px 0">Para <b>crear un usuario</b> o cambiar una contraseña: Supabase → Authentication → Users → Add user. Aparecerá aquí al momento.</div><div class="eyebrow" style="padding:14px 24px 4px">Usuarios</div>'+PROF.map((x,i)=>{const adm=x.role==='admin',p=x.p||presetP(x.role),ban=x.status==='banned',me=x.id===ME.id;
-  return `<div class="trow" style="flex-direction:column;align-items:stretch;gap:8px${ban?';opacity:.6':''}"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tx"><input class="ti" data-cname="${i}" value="${esc(x.name||'')}" placeholder="Nombre" style="width:150px" title="Nombre visible: cámbialo y pulsa fuera para guardar"> <span class="mono" style="color:var(--mut)">${esc(x.email||'')}</span>${ban?' <b>· SIN ACCESO</b>':''}</span><select class="ti" data-crole="${i}" ${ban?'disabled':''}><option value="admin" ${x.role==='admin'?'selected':''}>ADMIN</option><option value="editor" ${x.role==='editor'?'selected':''}>EDITOR</option><option value="viewer" ${x.role==='viewer'?'selected':''}>SOLO LECTURA</option><option value="reader" ${x.role==='reader'?'selected':''}>LECTOR (ve todo, sin audio)</option></select>${me?'':`<button class="btn sm" data-cban="${i}">${ban?'Readmitir':'Echar'}</button>`}</div><div class="perms">${PERMS.map(([k,l])=>`<label><input type="checkbox" data-cperm="${i}:${k}" ${adm||p[k]?'checked':''} ${adm||ban?'disabled':''}> ${l}</label>`).join('')}</div></div>`}).join('');
+ $('uList').innerHTML='<div class="hint" style="padding:12px 24px 0">Para <b>crear un usuario</b> o cambiar una contraseña: Supabase → Authentication → Users → Add user. Aparecerá aquí al momento.</div><div class="eyebrow" style="padding:14px 24px 4px">Usuarios</div>'+PROF.map((x,i)=>{const adm=x.role==='admin',p=x.p||presetP(x.role),ban=x.status==='banned',pau=x.status==='paused',me=x.id===ME.id;
+  return `<div class="trow" style="flex-direction:column;align-items:stretch;gap:8px${ban||pau?';opacity:.6':''}"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tx"><input class="ti" data-cname="${i}" value="${esc(x.name||'')}" placeholder="Nombre" style="width:150px" title="Nombre visible: cámbialo y pulsa fuera para guardar"> <span class="mono" style="color:var(--mut)">${esc(x.email||'')}</span>${ban?' <b>· SIN ACCESO</b>':''}${pau?' <b>· PAUSADO</b>':''}</span><select class="ti" data-crole="${i}" ${ban?'disabled':''}><option value="admin" ${x.role==='admin'?'selected':''}>ADMIN</option><option value="editor" ${x.role==='editor'?'selected':''}>EDITOR</option><option value="viewer" ${x.role==='viewer'?'selected':''}>SOLO LECTURA</option><option value="reader" ${x.role==='reader'?'selected':''}>LECTOR (ve todo, sin audio)</option></select>${me||ban?'':`<button class="btn sm" data-cpause="${i}">${pau?'▶ Reactivar':'⏸ Pausar'}</button>`}${me?'':`<button class="btn sm" data-cban="${i}">${ban?'Readmitir':'Echar'}</button>`}</div><div class="perms">${PERMS.map(([k,l])=>`<label><input type="checkbox" data-cperm="${i}:${k}" ${adm||p[k]?'checked':''} ${adm||ban?'disabled':''}> ${l}</label>`).join('')}</div></div>`}).join('');
 }
 async function cloudUpd(i,patch){const x=PROF[i];const {error}=await SB.from('profiles').update(patch).eq('id',x.id);if(error)toast('No se pudo: '+error.message);cloudBuildUsers()}
 $('uList').addEventListener('change',e=>{if(!CLOUD)return;if(e.target.dataset.cname!==undefined){const i=+e.target.dataset.cname,x=PROF[i],nn=e.target.value.trim();if(!nn){e.target.value=x.name||'';return}if(nn===x.name)return;const old=x.name;cloudUpd(i,{name:nn}).then(()=>{if(x.id===ME.id){ME.name=nn;try{localStorage.setItem('showcaller.profile',JSON.stringify(ME))}catch(z){}}try{renameStored([old],nn)}catch(z){}toast('Nombre cambiado a «'+nn+'»')});return}const d=e.target.dataset;
  if(d.crole!==undefined){const x=PROF[+d.crole];if(x.id===ME.id&&e.target.value!=='admin'){toast('No puedes quitarte el rol de admin a ti mismo');cloudBuildUsers();return}cloudUpd(+d.crole,{role:e.target.value,p:presetP(e.target.value)})}
  else if(d.cperm!==undefined){const [i,k]=d.cperm.split(':'),x=PROF[+i],p={...(x.p||presetP(x.role))};p[k]=e.target.checked?1:0;cloudUpd(+i,{p})}});
-$('uList').addEventListener('click',e=>{if(!CLOUD)return;const b=e.target.closest('button');if(!b||b.dataset.cban===undefined)return;const i=+b.dataset.cban,x=PROF[i];
+$('uList').addEventListener('click',e=>{if(!CLOUD)return;const b=e.target.closest('button');if(b&&b.dataset.cpause!==undefined){const i=+b.dataset.cpause,x=PROF[i];if(x.status==='paused'){cloudUpd(i,{status:'active'});toast(x.name+' reactivado');return}if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='¿Seguro?';setTimeout(()=>{b.dataset.arm='';b.textContent='⏸ Pausar'},3000);return}cloudUpd(i,{status:'paused'});toast(x.name+' pausado: verá «Web en mantenimiento»');return}if(!b||b.dataset.cban===undefined)return;const i=+b.dataset.cban,x=PROF[i];
  if(x.status==='banned'){cloudUpd(i,{status:'active'});toast(x.name+' readmitido');return}
  if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='¿Seguro?';setTimeout(()=>{b.dataset.arm='';b.textContent='Echar'},3000);return}
  cloudUpd(i,{status:'banned'});toast(x.name+' ya no tiene acceso')});
@@ -2388,5 +2393,5 @@ function buildPlan(){const P=planData(),B=$('planBody'),ms=S.moments.map((m,i)=>
  document.addEventListener('dragover',e=>{const c=e.target.closest&&e.target.closest('.pl-col');if(c&&drag!==null&&c.dataset.pday!==undefined){e.preventDefault();document.querySelectorAll('.pl-col.over').forEach(x=>x.classList.remove('over'));c.classList.add('over')}});
  document.addEventListener('drop',e=>{const c=e.target.closest&&e.target.closest('.pl-col');if(!c||drag===null||c.dataset.pday===undefined)return;e.preventDefault();const P=planData(),id=drag;drag=null;if(c.dataset.pday)P.asg[id]=c.dataset.pday;else{delete P.asg[id];delete P.done[id]}touch()})})();
 </script>
-</body>
+<div id="maint"><div><div class="mi"></div><h1>Web en mantenimiento</h1><p>Estamos realizando unas tareas de mantenimiento.<br>Volvemos en breve.</p></div></div></body>
 </html>
